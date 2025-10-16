@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">CarController</string>
+    <string name="driver_name">Driver name</string>
+    <string name="car_controller">Car controller</string>
+    <string name="confirm">Confirm</string>
+    <string name="statistics">Statistics</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.example.carcontroller;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.*;
 import android.view.*;
@@ -27,5 +28,11 @@ public class MainActivity extends AppCompatActivity {
         ((TextView)findViewById(R.id.inputName)).setText(driverName);
         Toast.makeText(this, "Driver introduced", Toast.LENGTH_LONG).show(); //I can add alert if new driver is added to the DB or if he already exists
         Log.d("Driver name", driverName);
+    }
+
+    public void launchActivityStatistics(View v){
+
+        Intent i = new Intent(this, StatisticsActivity.class);
+        startActivity(i);
     }
 }
