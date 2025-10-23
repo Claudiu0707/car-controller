@@ -4,6 +4,7 @@
     <string name="car_controller">Car controller</string>
     <string name="confirm">Confirm</string>
     <string name="statistics">Statistics</string>
+    <string name="discoverDevices">Discover</string>
     <string name="ON_OFF_Bluetooth">Bluetooth</string>
     <string name="title_activity_settings">Settings</string>
     <!-- Preference Titles -->
