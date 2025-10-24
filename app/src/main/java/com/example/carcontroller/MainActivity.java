@@ -1,5 +1,7 @@
 package com.example.carcontroller;
 
+import java.util.*;
+
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -38,7 +40,9 @@ public class MainActivity extends AppCompatActivity {
     ActivityResultLauncher<Intent> launchData = null;
     BluetoothManager myBluetoothManager = null;
     BluetoothAdapter myBluetoothAdapter = null;
-    ArrayAdapter<BluetoothDevice> devicesDiscovered;
+    ArrayList<BluetoothDevice> myBluetoothDevices = new ArrayList<>();
+    ListView lvNewDevices;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,9 +54,6 @@ public class MainActivity extends AppCompatActivity {
         if(myBluetoothManager != null)
             myBluetoothAdapter = myBluetoothManager.getAdapter();
 
-        // Register for broadcasts when a device is discovered
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(receiver, filter);
 
         launchData = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -87,9 +88,9 @@ public class MainActivity extends AppCompatActivity {
                     requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
                 }
                 if(device != null){
-                    String deviceName = device.getName();
-                    String deviceHardwareAddress = device.getAddress(); // MAC address
-                    devicesDiscovered.add(device);
+//                    String deviceName = device.getName();
+//                    String deviceHardwareAddress = device.getAddress(); // MAC address
+                    myBluetoothDevices.add(device);
                     Log.d("BluetoothOperations", "Device found");
                 }
             }
@@ -113,28 +114,31 @@ public class MainActivity extends AppCompatActivity {
             Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             launchData.launch(enableBTIntent);
         }
-        else{
+        else {
             Log.d("BluetoothOperations", "Bluetooth already enabled");
         }
     }
 
     public void startDiscoveryDevices(View v){
-        //Permissions again because Android thinks that I want to spy on ..... me
+        // Permissions again because Android thinks that I want to spy on ..... me
         if(checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)!=PackageManager.PERMISSION_GRANTED)
             requestPermissions(new String[]{Manifest.permission.BLUETOOTH_SCAN}, 1);
 
-        //Before device starts discovering other devices, check if it is not already discovering
-        //Immediately after checking (and maybe canceling) discovery-mode, start discovery
+        // Before device starts discovering other devices, check if it is not already discovering
+        // Immediately after checking (and maybe canceling) discovery-mode, start discovery
         if(myBluetoothAdapter.isDiscovering()){
             myBluetoothAdapter.cancelDiscovery();
             Log.d("BluetoothOperations", "Discovery was canceled");
         }
-        boolean bool = myBluetoothAdapter.startDiscovery();
+        myBluetoothAdapter.startDiscovery();
         Log.d("BluetoothOperations", "Discovery was started");
+
+        // Register for broadcasts when a device is discovered
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        registerReceiver(receiver, filter);
     }
     public void handleDriverNameText (View v){
-        String driverName;
-        driverName = ((EditText) findViewById(R.id.driverTextBoxID)).getText().toString();
+        String driverName = ((EditText) findViewById(R.id.driverTextBoxID)).getText().toString();
         ((TextView) findViewById(R.id.inputName)).setText(driverName);
         Toast.makeText(this, "Driver introduced", Toast.LENGTH_LONG).show(); //I can add alert if new driver is added to the DB or if he already exists
         Log.d("Driver name", driverName);
