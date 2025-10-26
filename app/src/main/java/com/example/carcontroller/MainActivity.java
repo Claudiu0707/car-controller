@@ -23,31 +23,41 @@ import androidx.appcompat.app.AppCompatActivity;
 *   Notes:
 *       - I implemented a bluetooth broadcast receiver
 *       - I think that method turn bluetooth on is almost done (no changes for now)
-*       - In onDestroy i ensure that I cancel any discovery in progress and unregister any receivers
-*
-*       - I should continue with saving the data of the discovered bluetooth devices (maybe using the  ArrayAdapter<BluetoothDevice> devicesDiscovered;)
 *       - Some links I found:
 *               - https://stackoverflow.com/questions/15120502/how-to-save-a-list-of-discoverable-bluetooth-devices-in-android
 *               - https://developer.android.com/develop/connectivity/bluetooth/find-bluetooth-devices
 *               - https://developer.android.com/develop/connectivity/bluetooth/connect-bluetooth-devices
 *
-*       - Also search how can you emulate other bluetooth devices
-*
 *       - Sometimes in future, I should better organize the code
+*       - Code organization and better comments are a must!!!
+*       - I tested on my phone and managed to create a listview to display discovered devices
+*
 */
 
 public class MainActivity extends AppCompatActivity {
     ActivityResultLauncher<Intent> launchData = null;
     BluetoothManager myBluetoothManager = null;
     BluetoothAdapter myBluetoothAdapter = null;
-    ArrayList<BluetoothDevice> myBluetoothDevices = new ArrayList<>();
-    ListView lvNewDevices;
+    ArrayList<BluetoothDevice> myBluetoothDevices = null;
+    ArrayList<String> myBluetoothDevicesNames = null;
+    ArrayAdapter<String> devicesAdapter = null;
+    ListView lvNewDevice;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        myBluetoothDevices = new ArrayList<>();
+        myBluetoothDevicesNames = new ArrayList<>();
+        devicesAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, myBluetoothDevicesNames);
+        lvNewDevice = findViewById(R.id.listView); //Create a ListView with ID lvNewDevices
+        lvNewDevice.setAdapter(devicesAdapter);
+
+        // Register for broadcasts when a device is discovered
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        registerReceiver(receiver, filter);
 
         // Create a new context to get access to bluetooth resources
         myBluetoothManager = getSystemService(BluetoothManager.class);
@@ -88,16 +98,20 @@ public class MainActivity extends AppCompatActivity {
                     requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
                 }
                 if(device != null){
-//                    String deviceName = device.getName();
-//                    String deviceHardwareAddress = device.getAddress(); // MAC address
                     myBluetoothDevices.add(device);
+                    String deviceInfo = (device.getName() != null) ? device.getName() : "Unknown";
+                    if (!myBluetoothDevicesNames.contains(deviceInfo)){
+                        myBluetoothDevicesNames.add(deviceInfo);
+                        devicesAdapter.notifyDataSetChanged();
+                    }
                     Log.d("BluetoothOperations", "Device found");
+                    //displayDevices();
                 }
             }
         }
     };
 
-    // Method is called to enable bluetooth (if not enabled already) and find available devices
+    // Method is called to enable bluetooth (if not enabled already)
     public void turnBluetooth(View v) {
         if (myBluetoothAdapter == null) {
             //Device doesn't support Bluetooth
@@ -133,9 +147,7 @@ public class MainActivity extends AppCompatActivity {
         myBluetoothAdapter.startDiscovery();
         Log.d("BluetoothOperations", "Discovery was started");
 
-        // Register for broadcasts when a device is discovered
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(receiver, filter);
+
     }
     public void handleDriverNameText (View v){
         String driverName = ((EditText) findViewById(R.id.driverTextBoxID)).getText().toString();
@@ -144,8 +156,21 @@ public class MainActivity extends AppCompatActivity {
         Log.d("Driver name", driverName);
     }
 
-    public void launchActivityStatistics (View v){
+    public void launchActivityStatistics(View v){
         Intent i = new Intent(this, StatisticsActivity.class);
         startActivity(i);
+    }
+
+    private void checkPermissions(int permissionCode){
+        if (permissionCode == 1){
+            if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)!= PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
+            }
+        }
+        if(permissionCode == 2){
+            if(checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)!=PackageManager.PERMISSION_GRANTED)
+                requestPermissions(new String[]{Manifest.permission.BLUETOOTH_SCAN}, 1);
+
+        }
     }
 }
