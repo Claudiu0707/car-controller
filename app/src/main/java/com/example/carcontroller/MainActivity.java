@@ -21,20 +21,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 /*
 *   Notes:
-*       - I implemented a bluetooth broadcast receiver
-*       - I think that method turn bluetooth on is almost done (no changes for now)
 *       - Some links I found:
 *               - https://stackoverflow.com/questions/15120502/how-to-save-a-list-of-discoverable-bluetooth-devices-in-android
 *               - https://developer.android.com/develop/connectivity/bluetooth/find-bluetooth-devices
 *               - https://developer.android.com/develop/connectivity/bluetooth/connect-bluetooth-devices
-*
-*       - Sometimes in future, I should better organize the code
-*       - Code organization and better comments are a must!!!
-*       - I tested on my phone and managed to create a listview to display discovered devices
-*
 */
 
 public class MainActivity extends AppCompatActivity {
+
+
     ActivityResultLauncher<Intent> launchData = null;
     BluetoothManager myBluetoothManager = null;
     BluetoothAdapter myBluetoothAdapter = null;
@@ -87,6 +82,8 @@ public class MainActivity extends AppCompatActivity {
         unregisterReceiver(receiver);
     }
 
+
+    // Create a receiver to collect data
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -98,14 +95,16 @@ public class MainActivity extends AppCompatActivity {
                     requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
                 }
                 if(device != null){
-                    myBluetoothDevices.add(device);
-                    String deviceInfo = (device.getName() != null) ? device.getName() : "Unknown";
-                    if (!myBluetoothDevicesNames.contains(deviceInfo)){
+                    // A device was found during the discovery
+                    // Check if we already found this device(we add it to our names list and devices list)
+                    // After we add it to the list, notify change (update list view)
+                    if(!myBluetoothDevices.contains(device)){
+                        String deviceInfo = (device.getName() != null) ? device.getName() : "Unknown";
+                        myBluetoothDevices.add(device);
                         myBluetoothDevicesNames.add(deviceInfo);
                         devicesAdapter.notifyDataSetChanged();
                     }
                     Log.d("BluetoothOperations", "Device found");
-                    //displayDevices();
                 }
             }
         }
