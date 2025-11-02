@@ -29,8 +29,6 @@ import androidx.core.app.ActivityCompat;
 */
 
 public class MainActivity extends AppCompatActivity {
-
-
     ActivityResultLauncher<Intent> launchData = null;
     BluetoothManager myBluetoothManager = null;
     BluetoothAdapter myBluetoothAdapter = null;
@@ -38,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> myBluetoothDevicesNames = null;
     ArrayAdapter<String> devicesAdapter = null;
     ListView lvNewDevice;
+    BluetoothDevice selectedDevice;
 
 
     @Override
@@ -71,19 +70,21 @@ public class MainActivity extends AppCompatActivity {
                 });
 
 
-        //Crashes the app but it detects the selections of the app
+        // Wait for user to select a bluetooth device to connect to
         lvNewDevice.setOnItemClickListener((parent, view, position, id) -> {
             String btDeviceName = lvNewDevice.getItemAtPosition(position).toString();
-            /*for(int i = 0; i <= myBluetoothDevices.size(); i++){
-                if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)!= PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
-                }
+            if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)!= PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
+            }
+            for(int i = 0; i < myBluetoothDevices.size(); i++){
                 if (Objects.equals(myBluetoothDevices.get(i).getName(), btDeviceName)){
-                    //((TextView) findViewById(R.id.textView2)).setText(myBluetoothDevices.get(i).getName());
-
+                    ((TextView) findViewById(R.id.textView2)).setText(myBluetoothDevices.get(i).getName());
+                    selectedDevice = myBluetoothDevices.get(i);
+                    ConnectThread newConnectThread = new ConnectThread(selectedDevice, myBluetoothManager, this);
                 }
-            }*/
+            }
         });
+
     }
 
     @Override
@@ -146,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
             Log.d("BluetoothOperations", "Bluetooth already enabled");
         }
     }
-
     public void startDiscoveryDevices(View v){
         // Permissions again because Android thinks that I want to spy on ..... me
         if(checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)!=PackageManager.PERMISSION_GRANTED)
@@ -163,35 +163,15 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
     public void handleDriverNameText (View v){
         String driverName = ((EditText) findViewById(R.id.driverTextBoxID)).getText().toString();
         ((TextView) findViewById(R.id.inputName)).setText(driverName);
         Toast.makeText(this, "Driver introduced", Toast.LENGTH_LONG).show(); //I can add alert if new driver is added to the DB or if he already exists
         Log.d("Driver name", driverName);
     }
-
     public void launchActivityStatistics(View v){
         Intent i = new Intent(this, StatisticsActivity.class);
         startActivity(i);
-    }
-
-
-    private void deleteLater(View v, String name, int i){
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
-            return;
-        }
-    }
-    private void checkPermissions(int permissionCode){
-        if (permissionCode == 1){
-            if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)!= PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
-            }
-        }
-        if(permissionCode == 2){
-            if(checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)!=PackageManager.PERMISSION_GRANTED)
-                requestPermissions(new String[]{Manifest.permission.BLUETOOTH_SCAN}, 1);
-
-        }
     }
 }
