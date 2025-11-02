@@ -18,6 +18,7 @@ import android.bluetooth.*;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 /*
 *   Notes:
@@ -59,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
         if(myBluetoothManager != null)
             myBluetoothAdapter = myBluetoothManager.getAdapter();
 
-
         launchData = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result ->{
@@ -69,6 +69,21 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("BluetoothOperations", "Bluetooth request denied");
                     }
                 });
+
+
+        //Crashes the app but it detects the selections of the app
+        lvNewDevice.setOnItemClickListener((parent, view, position, id) -> {
+            String btDeviceName = lvNewDevice.getItemAtPosition(position).toString();
+            /*for(int i = 0; i <= myBluetoothDevices.size(); i++){
+                if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)!= PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
+                }
+                if (Objects.equals(myBluetoothDevices.get(i).getName(), btDeviceName)){
+                    //((TextView) findViewById(R.id.textView2)).setText(myBluetoothDevices.get(i).getName());
+
+                }
+            }*/
+        });
     }
 
     @Override
@@ -83,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // Create a receiver to collect data
+    // Create a receiver to collect bluetooth devices data
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -160,6 +175,13 @@ public class MainActivity extends AppCompatActivity {
         startActivity(i);
     }
 
+
+    private void deleteLater(View v, String name, int i){
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
+            return;
+        }
+    }
     private void checkPermissions(int permissionCode){
         if (permissionCode == 1){
             if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)!= PackageManager.PERMISSION_GRANTED) {
