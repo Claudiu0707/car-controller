@@ -16,22 +16,18 @@ import java.util.UUID;
 public class ConnectThread extends Thread {
     private static final String TAG = "ConnectThread";
 
-    private final BluetoothSocket targetSocket;
-    private final BluetoothDevice targetDevice;
-    private final BluetoothManager bluetoothManager;
+    public final BluetoothSocket targetSocket;
     private final BluetoothAdapter bluetoothAdapter;
     private final Context context;
 
     public ConnectThread(BluetoothDevice device, BluetoothManager manager, Context cntx) {
-        targetDevice = device;
-        bluetoothManager = manager;
-        bluetoothAdapter = bluetoothManager.getAdapter();
+        bluetoothAdapter = manager.getAdapter();
         BluetoothSocket tmp = null;
         context = cntx;
 
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
             try {
-                tmp = targetDevice.createRfcommSocketToServiceRecord(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+                tmp = device.createRfcommSocketToServiceRecord(UUID.fromString("00000000-0000-0000-0000-000000000000"));
             } catch (IOException e) {
                 Log.e(TAG, "Socket's create() method failed", e);
             }

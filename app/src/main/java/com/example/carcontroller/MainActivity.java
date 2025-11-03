@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     ListView lvNewDevice;
     BluetoothDevice selectedDevice;
 
+    BluetoothService.ConnectThread communicationThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -172,6 +173,36 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void onBluetoothConnected(BluetoothSocket socket){
+        runOnUiThread(() -> {
+            Toast.makeText(this, "Bluetooth connected!", Toast.LENGTH_SHORT).show();
+            communicationThread = new BluetoothService.ConnectThread(socket);
+        });
+    }
+    public void sendDataStream(View v) {
+        if (communicationThread == null) {
+            Toast.makeText(this, "Not connected yet!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        byte[] data = sendData();
+        communicationThread.write(data);
+    }
+    public byte[] sendData(){
+        byte[] data = new byte[6];
+        data[0] = 'a';
+        data[1] = 'b';
+        data[2] = 'c';
+        data[3] = 'd';
+        data[4] = 'e';
+        data[5] = 'f';
+        /*String word = "bluetooth";
+        for(int i = 0; i < word.length(); i++){
+            data[i] = (byte) word.charAt(i);
+        }
+        Log.d("SentData", data.toString());*/
+        return data;
+    }
     public void handleDriverNameText (View v){
         String driverName = ((EditText) findViewById(R.id.driverTextBoxID)).getText().toString();
         ((TextView) findViewById(R.id.inputName)).setText(driverName);

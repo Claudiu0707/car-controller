@@ -77,7 +77,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginTop="92dp"
-        android:text="@string/title_activity_settings"
+        android:onClick="sendDataStream"
+        android:text="Send data"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
