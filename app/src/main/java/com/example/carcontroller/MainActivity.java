@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.ParcelUuid;
 import android.util.*;
 import android.view.*;
 import android.widget.*;
@@ -19,7 +18,6 @@ import android.bluetooth.*;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 
 /*
 *   Notes:
@@ -95,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
     }
 
     @Override

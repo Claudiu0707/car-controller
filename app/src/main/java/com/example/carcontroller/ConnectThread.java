@@ -13,7 +13,6 @@ import androidx.core.content.ContextCompat;
 
 import java.io.IOException;
 import java.util.UUID;
-
 public class ConnectThread extends Thread {
     private static final String TAG = "ConnectThread";
 
