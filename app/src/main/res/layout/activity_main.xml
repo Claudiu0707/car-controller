@@ -83,13 +83,12 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/bluetoothButton"
+        android:id="@+id/bluetoothToggleButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
+        android:layout_marginStart="28dp"
         android:layout_marginTop="164dp"
-        android:onClick="turnBluetooth"
-        android:text="@string/ON_OFF_Bluetooth"
+        android:text="@string/bluetoothButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -99,19 +98,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginTop="224dp"
-        android:onClick="startDiscoveryDevices"
         android:text="@string/discoverDevices"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <ListView
-        android:id="@+id/listView"
-        android:layout_width="342dp"
-        android:layout_height="374dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.486" />
 
     <TextView
         android:id="@+id/textView2"
@@ -125,4 +114,16 @@
         app:layout_constraintTop_toBottomOf="@+id/inputName"
         app:layout_constraintVertical_bias="0.492" />
 
+    <ListView
+        android:id="@+id/lvNewDevices"
+        android:layout_width="335dp"
+        android:layout_height="314dp"
+        android:layout_below="@id/discoverButton"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.914"
+        tools:ignore="MissingConstraints" />
 </androidx.constraintlayout.widget.ConstraintLayout>
