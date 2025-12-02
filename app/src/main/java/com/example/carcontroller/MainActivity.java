@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelUuid;
 import android.util.*;
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity{
 
     ArrayList<BluetoothDevice> mBTDevices, pairedDevicesList;
     ListView lvNewDevice, lvPairedDevice;
-    BluetoothService.ConnectThread communicationThread;
+    private ConnectThread activeConnectThread = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +62,7 @@ public class MainActivity extends AppCompatActivity{
                 Log.d(TAG, "Device doesn't support bluetooth.");
             }
         }
+
 
         // ---------------- BUTTON ONCLICK LISTENERS ----------------
         bluetoothToggleButton.setOnClickListener(new View.OnClickListener() {
@@ -117,16 +119,21 @@ public class MainActivity extends AppCompatActivity{
 
                 BluetoothDevice device = pairedDevicesList.get(position);
 
-                Log.i("BT", "Device: " + device.getAddress() +
-                        " bondState=" + device.getBondState());
+                // Check bond state
+                Log.d(TAG, "Device bond state: " + device.getBondState());
 
-                ParcelUuid[] uuids = device.getUuids();
-                Log.i("BT", "UUIDS: " + Arrays.toString(uuids));
+                // If bond is not solid, try to repair
+                if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
+                    Log.w(TAG, "Device not properly bonded, attempting to bond...");
+                    device.createBond();
+                    Toast.makeText(MainActivity.this, "Pairing device...", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-                // connect(device)
-                ConnectThread connectThread = new ConnectThread(device, mBluetoothManager, MainActivity.this);
-                connectThread.start();
-
+                if (device.getBondState() == BluetoothDevice.BOND_BONDED){
+                    activeConnectThread = new ConnectThread(device, mBluetoothManager, MainActivity.this);
+                    activeConnectThread.start();
+                }
             }
         });
     }
@@ -235,8 +242,6 @@ public class MainActivity extends AppCompatActivity{
         }
     };
 
-
-
     @Override
     protected void onDestroy(){
         Log.d(TAG, "onDestroy: called");
@@ -322,40 +327,6 @@ public class MainActivity extends AppCompatActivity{
         registerReceiver(mBroadcastReceiver2, discoverDevicesIntent);
 
     }
-
-
-
-
-    public void onBluetoothConnected(BluetoothSocket socket){
-        runOnUiThread(() -> {
-            Toast.makeText(this, "Bluetooth connected!", Toast.LENGTH_SHORT).show();
-            communicationThread = new BluetoothService.ConnectThread(socket);
-        });
-    }
-    public void sendDataStream(View v) {
-        if (communicationThread == null) {
-            Toast.makeText(this, "Not connected yet!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        byte[] data = sendData();
-        communicationThread.write(data);
-    }
-    public byte[] sendData(){
-        byte[] data = new byte[6];
-        data[0] = 'a';
-        data[1] = 'b';
-        data[2] = 'c';
-        data[3] = 'd';
-        data[4] = 'e';
-        data[5] = 'f';
-        /*String word = "bluetooth";
-        for(int i = 0; i < word.length(); i++){
-            data[i] = (byte) word.charAt(i);
-        }
-        Log.d("SentData", data.toString());*/
-        return data;
-    }
     public void handleDriverNameText (View v){
         String driverName = ((EditText) findViewById(R.id.driverTextBoxID)).getText().toString();
         ((TextView) findViewById(R.id.inputName)).setText(driverName);
@@ -368,4 +339,45 @@ public class MainActivity extends AppCompatActivity{
     }
 
 
+    private static final int PERMISSION_REQUEST_CODE = 100;
+
+ /*   private void requestAllPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // Android 12+
+            String[] permissions = {
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_SCAN
+            };
+            requestPermissions(permissions, PERMISSION_REQUEST_CODE);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Android 6-11
+            String[] permissions = {
+                    Manifest.permission.ACCESS_FINE_LOCATION
+            };
+            requestPermissions(permissions, PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            boolean allGranted = true;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
+                }
+            }
+
+            if (allGranted) {
+                Log.d(TAG, "All permissions granted!");
+                Toast.makeText(this, "Permissions granted", Toast.LENGTH_SHORT).show();
+            } else {
+                Log.e(TAG, "Some permissions denied!");
+                Toast.makeText(this, "Bluetooth permissions required!", Toast.LENGTH_LONG).show();
+            }
+        }
+    }*/
 }
