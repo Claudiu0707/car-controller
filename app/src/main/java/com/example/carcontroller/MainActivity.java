@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.ParcelUuid;
 import android.util.*;
 import android.view.*;
 import android.widget.*;
@@ -26,13 +27,14 @@ import androidx.core.app.ActivityCompat;
 *               - https://developer.android.com/develop/connectivity/bluetooth/connect-bluetooth-devices
 */
 
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener{
+public class MainActivity extends AppCompatActivity{
     private static final String TAG = "MainActivityTag";
     BluetoothManager mBluetoothManager = null;
     BluetoothAdapter mBluetoothAdapter = null;
-    DeviceListAdapter mDeviceListAdapter;
-    ArrayList<BluetoothDevice> mBTDevices;
-    ListView lvNewDevice;
+    DeviceListAdapter mDeviceListAdapter, mPairedListAdapter;
+
+    ArrayList<BluetoothDevice> mBTDevices, pairedDevicesList;
+    ListView lvNewDevice, lvPairedDevice;
     BluetoothService.ConnectThread communicationThread;
 
     @Override
@@ -45,7 +47,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Button discoverButton = (Button) findViewById(R.id.discoverButton);
 
         lvNewDevice = (ListView) findViewById(R.id.lvNewDevices);
+        lvPairedDevice = (ListView) findViewById(R.id.lvPairedDevices);
+
         mBTDevices = new ArrayList<>();
+        pairedDevicesList = new ArrayList<>();
 
         // Create a new context to get access to bluetooth resources
         mBluetoothManager = getSystemService(BluetoothManager.class);
@@ -73,13 +78,57 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         });
 
-
-
         // Broadcasts when a bond state changes (i.e. pairing)
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         registerReceiver(mBroadcastReceiver3, filter);
 
-        lvNewDevice.setOnItemClickListener(MainActivity.this);
+        lvNewDevice.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if(checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)!=PackageManager.PERMISSION_GRANTED)
+                    requestPermissions(new String[]{Manifest.permission.BLUETOOTH_SCAN}, 1);
+                mBluetoothAdapter.cancelDiscovery();
+
+                Log.d(TAG, "onItemClick: User clicked a device.");
+                String deviceName = mBTDevices.get(position).getName();
+                String deviceAddress = mBTDevices.get(position).getAddress();
+
+                Log.d(TAG, "onItemClick: deviceName = " + deviceName);
+                Log.d(TAG, "onItemClick: deviceAddress = " + deviceAddress);
+
+                mBTDevices.get(position).createBond();
+            }
+        });
+
+        lvPairedDevice.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if(checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)!=PackageManager.PERMISSION_GRANTED)
+                    requestPermissions(new String[]{Manifest.permission.BLUETOOTH_SCAN}, 1);
+                mBluetoothAdapter.cancelDiscovery();
+
+                Log.d(TAG, "onItemClick: User clicked a device.");
+
+                String deviceName = pairedDevicesList.get(position).getName();
+                String deviceAddress = pairedDevicesList.get(position).getAddress();
+
+                Log.d(TAG, "onItemClick: deviceName = " + deviceName);
+                Log.d(TAG, "onItemClick: deviceAddress = " + deviceAddress);
+
+                BluetoothDevice device = pairedDevicesList.get(position);
+
+                Log.i("BT", "Device: " + device.getAddress() +
+                        " bondState=" + device.getBondState());
+
+                ParcelUuid[] uuids = device.getUuids();
+                Log.i("BT", "UUIDS: " + Arrays.toString(uuids));
+
+                // connect(device)
+                ConnectThread connectThread = new ConnectThread(device, mBluetoothManager, MainActivity.this);
+                connectThread.start();
+
+            }
+        });
     }
 
 
@@ -186,21 +235,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
     };
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if(checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)!=PackageManager.PERMISSION_GRANTED)
-            requestPermissions(new String[]{Manifest.permission.BLUETOOTH_SCAN}, 1);
-        mBluetoothAdapter.cancelDiscovery();
 
-        Log.d(TAG, "onItemClick: User clicked a device.");
-        String deviceName = mBTDevices.get(position).getName();
-        String deviceAddress = mBTDevices.get(position).getAddress();
-
-        Log.d(TAG, "onItemClick: deviceName = " + deviceName);
-        Log.d(TAG, "onItemClick: deviceAddress = " + deviceAddress);
-
-        mBTDevices.get(position).createBond();
-    }
 
     @Override
     protected void onDestroy(){
@@ -254,6 +289,25 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if(checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)!=PackageManager.PERMISSION_GRANTED)
             requestPermissions(new String[]{Manifest.permission.BLUETOOTH_SCAN}, 1);
 
+        // Query paired devices to check if desired device is already known
+        // TODO: check if I can move all of this in a broadcast receiver | Or at least how can I improve this
+        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+
+        if (!pairedDevices.isEmpty()) {
+            for(BluetoothDevice device : pairedDevices) {
+                String deviceName = (device.getName() != null) ? device.getName() : "Unknown";
+                String deviceAddress = (device.getAddress() != null) ? device.getAddress() : "Unknown";
+                Log.d(TAG, "discoverBT: PAIRED - " + deviceName + " : " + deviceAddress);
+
+                pairedDevicesList.add(device);
+            }
+        }
+
+        mPairedListAdapter = new DeviceListAdapter((Context) this, R.layout.device_adapter_view, pairedDevicesList);
+        lvPairedDevice.setAdapter(mPairedListAdapter);
+        mPairedListAdapter.notifyDataSetChanged();
+
+
         // Before device starts discovering other devices, check if it is not already discovering
         // Immediately after checking (and maybe canceling) discovery-mode, start discovery
         if (mBluetoothAdapter.isDiscovering()){
@@ -266,6 +320,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(mBroadcastReceiver2, discoverDevicesIntent);
+
     }
 
 
