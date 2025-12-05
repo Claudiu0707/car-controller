@@ -111,7 +111,7 @@ public class ConnectThread extends Thread {
             return null;
         }
     }
-
+/*
     public void cancel() {
         if (targetSocket != null) {
             try {
@@ -121,5 +121,5 @@ public class ConnectThread extends Thread {
                 Log.e(TAG, "Error closing socket", e);
             }
         }
-    }
+    }*/
 }

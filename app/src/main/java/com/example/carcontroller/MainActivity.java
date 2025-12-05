@@ -123,12 +123,12 @@ public class MainActivity extends AppCompatActivity{
                 Log.d(TAG, "Device bond state: " + device.getBondState());
 
                 // If bond is not solid, try to repair
-                if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
+               /* if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
                     Log.w(TAG, "Device not properly bonded, attempting to bond...");
                     device.createBond();
                     Toast.makeText(MainActivity.this, "Pairing device...", Toast.LENGTH_SHORT).show();
                     return;
-                }
+                }*/
 
                 if (device.getBondState() == BluetoothDevice.BOND_BONDED){
                     activeConnectThread = new ConnectThread(device, mBluetoothManager, MainActivity.this);
@@ -235,7 +235,6 @@ public class MainActivity extends AppCompatActivity{
                 // Device is breaking a bond
                 if (device.getBondState() == BluetoothDevice.BOND_NONE){
                     Log.d(TAG, "onReceive: BOND = NONE.");
-
                 }
             }
 
