@@ -1,55 +1,97 @@
 package com.example.carcontroller;
 
 import android.bluetooth.BluetoothSocket;
+import android.os.Bundle;
+import android.os.Message;
 import android.util.Log;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.logging.Handler;
+
+import android.os.Handler;
 
 public class BluetoothService {
-    private static final String TAG = "BluetoothService";
+    private static final String TAG = "BluetoothServiceTAG";
     private Handler handler;
 
-    private interface MessageConstants{
+    private interface MessageConstants {
         public static final int MESSAGE_READ = 0;
         public static final int MESSAGE_WRITE = 1;
         public static final int MESSAGE_TOAST = 2;
     }
 
-     static class ConnectThread extends Thread{
-        private final BluetoothSocket mySocket;
-        private final OutputStream myOutStream;
-        private byte[] myBuffer;
+    private class ConnectedThread extends Thread {
+        private final BluetoothSocket mmSocket;
+        private final InputStream mmInStream;
+        private final OutputStream mmOutStream;
+        private byte[] mmBuffer;
 
-        public ConnectThread(BluetoothSocket socket){
-            mySocket = socket;
+        public ConnectedThread (BluetoothSocket socket) {
+            mmSocket = socket;
+            InputStream tmpIn = null;
             OutputStream tmpOut = null;
 
             try {
-                tmpOut = socket.getOutputStream();
-            } catch(IOException e){
-                Log.e(TAG, "Error occurred when creating output stream", e);
+                tmpIn = socket.getInputStream();
+            } catch (IOException e) {
+                Log.e(TAG, "Error occurred when creating input stream.");
             }
-            myOutStream = tmpOut;
+
+            try {
+                tmpOut = socket.getOutputStream();
+            } catch (IOException e) {
+                Log.e(TAG, "Error occurred when creating output stream.");
+            }
+
+            mmInStream = tmpIn;
+            mmOutStream = tmpOut;
         }
 
-        public void write(byte[] bytes){
+        public void run () {
+            mmBuffer = new byte[1024];
+            int numBytes;
+
+            while (true) {
+                try {
+                    numBytes = mmInStream.read(mmBuffer);
+
+                    // Notify UI activity
+                    Message readMsg = handler.obtainMessage(
+                            MessageConstants.MESSAGE_READ, numBytes, -1, mmBuffer);
+                    readMsg.sendToTarget();
+                } catch (IOException e) {
+                    Log.d(TAG, "Input stream was disconnected", e);
+                    break;
+                }
+            }
+        }
+
+        public void write (byte[] bytes) {
             try {
-                myOutStream.write(bytes);
+                mmOutStream.write(bytes);
+
+                // Notify UI activity
+                Message writtenMsg = handler.obtainMessage(
+                        MessageConstants.MESSAGE_WRITE, -1, -1, mmBuffer);
+                writtenMsg.sendToTarget();
             } catch (IOException e){
                 Log.e(TAG, "Error occurred when sending data", e);
 
+                Message writeErrorMsg = handler.obtainMessage(MessageConstants.MESSAGE_TOAST);
+                Bundle bundle = new Bundle();
+                bundle.putString("toast", "Couldn't send data to the other device");
+                writeErrorMsg.setData(bundle);
+                handler.sendMessage(writeErrorMsg);
             }
         }
 
         public void cancel(){
             try{
-                mySocket.close();
+                mmSocket.close();
             } catch (IOException e){
-                Log.e(TAG, "Could not close the connect socket", e);
+                Log.e(TAG, "Could not close the connect socket.");
             }
         }
     }
-
 }

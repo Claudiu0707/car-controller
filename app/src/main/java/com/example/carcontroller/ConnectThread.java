@@ -12,114 +12,60 @@ import android.util.Log;
 import androidx.core.content.ContextCompat;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.UUID;
-
 public class ConnectThread extends Thread {
-    private static final String TAG = "ConnectThread";
-    private static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    private static final String TAG = "ConnectThreadTAG";
 
-    public BluetoothSocket targetSocket = null;
+    public final BluetoothSocket targetSocket;
     private final BluetoothAdapter bluetoothAdapter;
     private final Context context;
-    private final BluetoothDevice device;
 
     public ConnectThread(BluetoothDevice device, BluetoothManager manager, Context cntx) {
-        this.device = device;
-        this.bluetoothAdapter = manager.getAdapter();
-        this.context = cntx;
+        bluetoothAdapter = manager.getAdapter();
+        BluetoothSocket tmp = null;
+        context = cntx;
+
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+            try {
+                tmp = device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
+            } catch (IOException e) {
+                Log.e(TAG, "Socket's create() method failed", e);
+            }
+        } else {
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission");
+        }
+        targetSocket = tmp;
     }
 
     @Override
     public void run() {
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT)
-                != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
             Log.e(TAG, "Missing BLUETOOTH_CONNECT permission");
             return;
         }
 
-        Log.d(TAG, "Starting connection to: " + device.getAddress());
         bluetoothAdapter.cancelDiscovery();
 
-        // Wait for discovery to stop
         try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // Try Method 1: Insecure
-        targetSocket = tryInsecureConnection();
-        if (targetSocket != null && targetSocket.isConnected()) {
-            Log.i(TAG, "Connected via insecure method");
-            return;
-        }
-
-        // Try Method 2: Reflection
-        targetSocket = tryReflectionConnection();
-        if (targetSocket != null && targetSocket.isConnected()) {
-            Log.i(TAG, "Connected via reflection method");
-            return;
-        }
-
-        // Try Method 3: Secure
-        targetSocket = trySecureConnection();
-        if (targetSocket != null && targetSocket.isConnected()) {
-            Log.i(TAG, "Connected via secure method");
-            return;
-        }
-
-        Log.e(TAG, "All connection methods failed");
-    }
-
-    private BluetoothSocket tryInsecureConnection() {
-        Log.d(TAG, "Trying insecure connection...");
-        try {
-            BluetoothSocket socket = device.createInsecureRfcommSocketToServiceRecord(SPP_UUID);
-            socket.connect();
-            Log.i(TAG, "Insecure connection succeeded");
-            return socket;
+            targetSocket.connect();
+            Log.i(TAG, "Connection successful!");
         } catch (IOException e) {
-            Log.w(TAG, "Insecure failed: " + e.getMessage());
-            return null;
-        }
-    }
-
-    private BluetoothSocket tryReflectionConnection() {
-        Log.d(TAG, "Trying reflection connection...");
-        try {
-            Method m = device.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
-            BluetoothSocket socket = (BluetoothSocket) m.invoke(device, 1);
-            socket.connect();
-            Log.i(TAG, "Reflection connection succeeded");
-            return socket;
-        } catch (Exception e) {
-            Log.w(TAG, "Reflection failed: " + e.getMessage());
-            return null;
-        }
-    }
-
-    private BluetoothSocket trySecureConnection() {
-        Log.d(TAG, "Trying secure connection...");
-        try {
-            BluetoothSocket socket = device.createRfcommSocketToServiceRecord(SPP_UUID);
-            socket.connect();
-            Log.i(TAG, "Secure connection succeeded");
-            return socket;
-        } catch (IOException e) {
-            Log.w(TAG, "Secure failed: " + e.getMessage());
-            return null;
-        }
-    }
-/*
-    public void cancel() {
-        if (targetSocket != null) {
+            Log.e(TAG, "Could not connect; closing socket", e);
             try {
                 targetSocket.close();
-                Log.d(TAG, "Socket closed");
-            } catch (IOException e) {
-                Log.e(TAG, "Error closing socket", e);
+            } catch (IOException e2) {
+                Log.e(TAG, "Could not close the client socket", e2);
             }
         }
-    }*/
+    }
+
+    public void cancel() {
+        try {
+            targetSocket.close();
+        } catch (IOException e) {
+            Log.e(TAG, "Could not close the client socket", e);
+        }
+    }
 }

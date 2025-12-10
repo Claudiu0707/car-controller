@@ -28,8 +28,14 @@ import androidx.core.app.ActivityCompat;
 *               - https://developer.android.com/develop/connectivity/bluetooth/connect-bluetooth-devices
 */
 
+
+/*
+*   TODO: Implement the bluetooth service
+*   TODO: Refactor code to free MainActivity
+*   TODO: Create new UI interface for app
+*/
 public class MainActivity extends AppCompatActivity{
-    private static final String TAG = "MainActivityTag";
+    private static final String TAG = "MainActivityTAG";
     BluetoothManager mBluetoothManager = null;
     BluetoothAdapter mBluetoothAdapter = null;
     DeviceListAdapter mDeviceListAdapter, mPairedListAdapter;
@@ -191,7 +197,8 @@ public class MainActivity extends AppCompatActivity{
                             requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
                         }
 
-                        mBTDevices.add(device);
+                        if (device.getName() != null)
+                            mBTDevices.add(device);
 
                         String deviceName = (device.getName() != null) ? device.getName() : "Unknown";
                         String deviceAddress = (device.getAddress() != null) ? device.getAddress() : "Unknown";
