@@ -40,9 +40,14 @@ public class MainActivity extends AppCompatActivity{
     BluetoothAdapter mBluetoothAdapter = null;
     DeviceListAdapter mDeviceListAdapter, mPairedListAdapter;
 
+
     ArrayList<BluetoothDevice> mBTDevices, pairedDevicesList;
     ListView lvNewDevice, lvPairedDevice;
     private ConnectThread activeConnectThread = null;
+
+    private boolean receiver1Registred = false;
+    private boolean receiver2Registred = false;
+    private boolean receiver3Registred = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,6 +147,7 @@ public class MainActivity extends AppCompatActivity{
                 }
             }
         });
+
     }
 
 
@@ -153,6 +159,7 @@ public class MainActivity extends AppCompatActivity{
     private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            receiver1Registred = true;
             final String action = intent.getAction();
             Log.d(TAG, "onReceive: ACTION FOUND.");
 
@@ -184,6 +191,7 @@ public class MainActivity extends AppCompatActivity{
     private final BroadcastReceiver mBroadcastReceiver2 = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            receiver2Registred = true;
             final String action = intent.getAction();
             Log.d(TAG, "onReceive: ACTION FOUND.");
 
@@ -218,6 +226,7 @@ public class MainActivity extends AppCompatActivity{
     private final BroadcastReceiver mBroadcastReceiver3 = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            receiver3Registred = true;
             final String action = intent.getAction();
             Log.d(TAG, "onReceive: ACTION FOUND.");
 
@@ -254,15 +263,16 @@ public class MainActivity extends AppCompatActivity{
         super.onDestroy();
 
         // Stop receivers
-        unregisterReceiver(mBroadcastReceiver1);
-        unregisterReceiver(mBroadcastReceiver2);
-        unregisterReceiver(mBroadcastReceiver3);
+        if (receiver1Registred) unregisterReceiver(mBroadcastReceiver1);
+        if (receiver2Registred) unregisterReceiver(mBroadcastReceiver2);
+        if (receiver3Registred) unregisterReceiver(mBroadcastReceiver3);
 
-        //F***ing permissions
         if(checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)!=PackageManager.PERMISSION_GRANTED)
             requestPermissions(new String[]{Manifest.permission.BLUETOOTH_SCAN}, 1);
         mBluetoothAdapter.cancelDiscovery();
     }
+
+    
 
     public void enableDisableBT(){
         Log.d(TAG, "enableDisableBT: called");
