@@ -17,8 +17,13 @@ import android.view.*;
 import android.widget.*;
 
 import android.bluetooth.*;
+
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 /*
 *   Notes:
@@ -30,8 +35,8 @@ import androidx.core.app.ActivityCompat;
 
 
 /*
-*   TODO: Implement the bluetooth service
 *   TODO: Refactor code to free MainActivity
+*   TODO: Implement the bluetooth service
 *   TODO: Create new UI interface for app
 */
 public class MainActivity extends AppCompatActivity{
@@ -51,12 +56,21 @@ public class MainActivity extends AppCompatActivity{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
 
         // Buttons initialization
         Button bluetoothToggleButton = (Button) findViewById(R.id.bluetoothToggleButton);
         Button discoverButton = (Button) findViewById(R.id.discoverButton);
+        Button bluetoothButton = (Button) findViewById(R.id.bluetoothButton);
 
         lvNewDevice = (ListView) findViewById(R.id.lvNewDevices);
         lvPairedDevice = (ListView) findViewById(R.id.lvPairedDevices);
@@ -79,17 +93,25 @@ public class MainActivity extends AppCompatActivity{
         bluetoothToggleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick: toggle bluetooth.");
+                Log.d(TAG, "onClick: bluetoothToggleButton");
                 enableDisableBT();
             }
         });
         discoverButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick: discover devices.");
+                Log.d(TAG, "onClick: discoverButton");
                 discoverBT();
             }
         });
+        bluetoothButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick: bluetooth");
+                launchActivityBluetooth();
+            }
+        });
+
 
         // Broadcasts when a bond state changes (i.e. pairing)
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
@@ -132,14 +154,6 @@ public class MainActivity extends AppCompatActivity{
 
                 // Check bond state
                 Log.d(TAG, "Device bond state: " + device.getBondState());
-
-                // If bond is not solid, try to repair
-               /* if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
-                    Log.w(TAG, "Device not properly bonded, attempting to bond...");
-                    device.createBond();
-                    Toast.makeText(MainActivity.this, "Pairing device...", Toast.LENGTH_SHORT).show();
-                    return;
-                }*/
 
                 if (device.getBondState() == BluetoothDevice.BOND_BONDED){
                     activeConnectThread = new ConnectThread(device, mBluetoothManager, MainActivity.this);
@@ -354,6 +368,10 @@ public class MainActivity extends AppCompatActivity{
         startActivity(i);
     }
 
+    public void launchActivityBluetooth(){
+        Intent intent = new Intent(this, BluetoothManagerActivity.class);
+        startActivity(intent);
+    }
 
     private static final int PERMISSION_REQUEST_CODE = 100;
 
