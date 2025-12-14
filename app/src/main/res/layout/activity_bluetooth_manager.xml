@@ -7,46 +7,25 @@
     android:layout_height="match_parent"
     tools:context=".BluetoothManagerActivity">
 
-    <Button
-        android:id="@+id/bluetoothToggleButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="72dp"
-        android:text="@string/bluetoothButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/discoverButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="132dp"
-        android:text="@string/discoverDevices"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <ListView
         android:id="@+id/lvNewDevices"
         android:layout_width="336dp"
-        android:layout_height="181dp"
-        android:layout_below="@id/discoverButton"
+        android:layout_height="120dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lvPairedDevices"
-        app:layout_constraintVertical_bias="1.0"
+        app:layout_constraintVertical_bias="0.837"
         tools:ignore="MissingConstraints" />
 
     <ListView
         android:id="@+id/lvPairedDevices"
-        android:layout_width="334dp"
-        android:layout_height="189dp"
-        android:layout_below="@id/discoverButton"
+        android:layout_width="336dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="64dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.994"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -62,27 +41,93 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.044" />
 
-   <!-- <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/bluetoothToggleSwitch"
+    <Button
+        android:id="@+id/refreshDevicesButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Bluetooth"
+        android:text="Refresh"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.031"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.33"
+        app:layout_constraintStart_toEndOf="@+id/backButton"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.533" />
+        app:layout_constraintVertical_bias="0.044"
+        app:rippleColor="#C7B1B1" />
 
-    <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/discoverToggleSwitch"
+    <ToggleButton
+        android:id="@+id/discoverToggleButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Discover"
+        android:layout_marginStart="20dp"
+        android:text="@string/discoverDevices"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/lvNewDevices"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/bluetoothToggleButton"
+        app:layout_constraintVertical_bias="0.096" />
+
+    <ToggleButton
+        android:id="@+id/bluetoothToggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginBottom="232dp"
+        android:text="@string/discoverDevices"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/lvNewDevices"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/backButton" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
+        android:text="Paired devices"
+        app:layout_constraintBottom_toTopOf="@+id/lvPairedDevices"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.03"
+        app:layout_constraintHorizontal_bias="0.81"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.688" />-->
+        app:layout_constraintVertical_bias="0.355" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
+        android:text="New devices"
+        app:layout_constraintBottom_toTopOf="@+id/lvNewDevices"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.81"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lvPairedDevices" />
+
+    <!-- <androidx.appcompat.widget.SwitchCompat
+         android:id="@+id/bluetoothToggleSwitch"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:text="Bluetooth"
+         app:layout_constraintBottom_toBottomOf="parent"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintHorizontal_bias="0.031"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintTop_toTopOf="parent"
+         app:layout_constraintVertical_bias="0.533" />
+
+     <androidx.appcompat.widget.SwitchCompat
+         android:id="@+id/discoverToggleSwitch"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:text="Discover"
+         app:layout_constraintBottom_toBottomOf="parent"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintHorizontal_bias="0.03"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintTop_toTopOf="parent"
+         app:layout_constraintVertical_bias="0.688" />-->
 </androidx.constraintlayout.widget.ConstraintLayout>

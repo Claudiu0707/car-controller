@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Switch;
+import android.widget.ToggleButton;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,8 +29,6 @@ import java.util.Set;
 
 // TODO: Implement the bluetooth service
 /*
-* TODO:
-
 - Create a new activity containing all BT operations - DONE
 - Bluetooth Button -> Enable Bluetooth - Toggle - IDK
 - Discover Devices Button -> Discover Devices Toggle - IDK
@@ -71,11 +70,11 @@ public class BluetoothManagerActivity extends AppCompatActivity {
 
 
         // Buttons initialization
-        Button bluetoothToggleButton =  findViewById(R.id.bluetoothToggleButton);
-        Button discoverButton =  findViewById(R.id.discoverButton);
-        Button backButton =  findViewById(R.id.backButton);
-        /*SwitchCompat bluetoothToggleSwitch = findViewById(R.id.bluetoothToggleSwitch);
-        SwitchCompat discoverToggleSwitch = findViewById(R.id.discoverToggleSwitch);*/
+        Button backButton = findViewById(R.id.backButton);
+        Button refreshDevicesButton = findViewById(R.id.refreshDevicesButton);
+
+        ToggleButton bluetoothToggleButton = findViewById(R.id.bluetoothToggleButton);
+        ToggleButton discoverToggleButton = findViewById(R.id.discoverToggleButton);
 
         lvNewDevice = findViewById(R.id.lvNewDevices);
         lvPairedDevice = findViewById(R.id.lvPairedDevices);
@@ -98,22 +97,25 @@ public class BluetoothManagerActivity extends AppCompatActivity {
             Log.d(TAG, "onClick: backButton");
             launchActivityMain();
         });
+        refreshDevicesButton.setOnClickListener(v -> {
+            Log.d(TAG, "onClick: refreshDevicesButton");
+            refreshPairedDevices();
+        });
+
         bluetoothToggleButton.setOnClickListener(v -> {
             Log.d(TAG, "onClick: bluetoothToggleButton");
-            enableDisableBT();
+            toggleBluetooth();
         });
-        discoverButton.setOnClickListener(v -> {
-            Log.d(TAG, "onClick: discoverButton");
-            discoverBT();
+        discoverToggleButton.setOnClickListener(v -> {
+            Log.d(TAG, "onClick: discoverToggleButton");
+            discoverToggle();
+            if (discoverToggleButton.isChecked()) {
+                lvNewDevice.setVisibility(View.VISIBLE);
+            }
+            else {
+                lvNewDevice.setVisibility(View.GONE);
+            }
         });
-        /*bluetoothToggleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            enableDisableBT();
-            setViewStatus(lvNewDevice);
-        });
-        discoverToggleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            discoverBT();
-            setViewStatus(lvPairedDevice);
-        });*/
 
         // Broadcasts when a bond state changes (i.e. pairing)
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
@@ -176,7 +178,7 @@ public class BluetoothManagerActivity extends AppCompatActivity {
     // -------------------------------- BROADCAST RECEIVERS --------------------------------
 
     // mBroadcastReceiver1 - Bluetooth toggle operations
-    // Executed by: enableDisableBT() method
+    // Executed by: toggleBluetooth() method
     private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -208,7 +210,7 @@ public class BluetoothManagerActivity extends AppCompatActivity {
     };
 
     // mBroadcastReceiver2 - List devices that are not yet paired
-    // Executed by: discoverBT() method
+    // Executed by: discoverToggle() method
     private final BroadcastReceiver mBroadcastReceiver2 = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -220,24 +222,21 @@ public class BluetoothManagerActivity extends AppCompatActivity {
             if (action.equals(BluetoothDevice.ACTION_FOUND)){
                 // Discovery has found a device. Get the bluetooth device object info from the Intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice.class);
-                if (device != null){
-                    if (!mBTDevices.contains(device)){
-                        if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)!= PackageManager.PERMISSION_GRANTED) {
-                            requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
-                        }
-
-                        if (device.getName() != null)
-                            mBTDevices.add(device);
-
-                        String deviceName = (device.getName() != null) ? device.getName() : "Unknown";
-                        String deviceAddress = (device.getAddress() != null) ? device.getAddress() : "Unknown";
-                        Log.d(TAG, "onReceive: " + deviceName + " : " + deviceAddress);
-
-                        mDeviceListAdapter = new DeviceListAdapter(context, R.layout.device_adapter_view, mBTDevices);
-                        lvNewDevice.setAdapter(mDeviceListAdapter);
-                        mDeviceListAdapter.notifyDataSetChanged();
+                if (device != null && !mBTDevices.contains(device)){
+                    if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)!= PackageManager.PERMISSION_GRANTED) {
+                        requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
                     }
 
+                    if (device.getName() != null)
+                        mBTDevices.add(device);
+
+                    String deviceName = (device.getName() != null) ? device.getName() : "Unknown";
+                    String deviceAddress = (device.getAddress() != null) ? device.getAddress() : "Unknown";
+                    Log.d(TAG, "onReceive: " + deviceName + " : " + deviceAddress);
+
+                    mDeviceListAdapter = new DeviceListAdapter(context, R.layout.device_adapter_view, mBTDevices);
+                    lvNewDevice.setAdapter(mDeviceListAdapter);
+                    mDeviceListAdapter.notifyDataSetChanged();
                 }
             }
         }
@@ -278,10 +277,10 @@ public class BluetoothManagerActivity extends AppCompatActivity {
         }
     };
 
-    public void enableDisableBT(){
-        Log.d(TAG, "enableDisableBT: called");
+    public void toggleBluetooth(){
+        Log.d(TAG, "toggleBluetooth: called");
         if (mBluetoothAdapter == null){
-            Log.d(TAG, "enableDisableBT: Device does not have bluetooth capabilities.");
+            Log.d(TAG, "toggleBluetooth: Device does not have bluetooth capabilities.");
         }
         // Check if bluetooth device is enabled and request permissions if not already given
         if (!mBluetoothAdapter.isEnabled()){
@@ -298,7 +297,7 @@ public class BluetoothManagerActivity extends AppCompatActivity {
             IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
             registerReceiver(mBroadcastReceiver1, BTIntent);
         }
-        if (mBluetoothAdapter.isEnabled()){
+        else if (mBluetoothAdapter.isEnabled()){
             // TODO: Look for alternatives to disable()
             // mBluetoothAdapter.disable();
 
@@ -307,22 +306,21 @@ public class BluetoothManagerActivity extends AppCompatActivity {
             registerReceiver(mBroadcastReceiver1, BTIntent);
         }
     }
-
-    public void discoverBT(){
-        Log.d(TAG, "discoverBT: Called.");
+    private void refreshPairedDevices(){
+        Log.d(TAG, "refreshDiscovery: called");
 
         if(checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)!=PackageManager.PERMISSION_GRANTED)
-            requestPermissions(new String[]{Manifest.permission.BLUETOOTH_SCAN}, 1);
+            requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
 
-        // Query paired devices to check if desired device is already known
-        // TODO: check if I can move all of this in a broadcast receiver | Or at least how can I improve this
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
 
+        // TODO: Move device querying to a broadcast receiver and set it as an intent?
+        // Query paired devices to check if desired device is already known
         if (!pairedDevices.isEmpty()) {
             for(BluetoothDevice device : pairedDevices) {
                 String deviceName = (device.getName() != null) ? device.getName() : "Unknown";
                 String deviceAddress = (device.getAddress() != null) ? device.getAddress() : "Unknown";
-                Log.d(TAG, "discoverBT: PAIRED - " + deviceName + " : " + deviceAddress);
+                Log.d(TAG, "discoverToggle: PAIRED - " + deviceName + " : " + deviceAddress);
 
                 pairedDevicesList.add(device);
             }
@@ -332,22 +330,32 @@ public class BluetoothManagerActivity extends AppCompatActivity {
         lvPairedDevice.setAdapter(mPairedListAdapter);
         mPairedListAdapter.notifyDataSetChanged();
 
-
-        // Before device starts discovering other devices, check if it is not already discovering
-        // Immediately after checking (and maybe canceling) discovery-mode, start discovery
-        if (mBluetoothAdapter.isDiscovering()){
-            mBluetoothAdapter.cancelDiscovery();
-            Log.d(TAG, "discoverBT: Discovery was canceled.");
-        }
-
-        mBluetoothAdapter.startDiscovery();
-        Log.d(TAG, "discoverBT: Discovery was started.");
-
+        // TODO: Move to a separate option?
         IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(mBroadcastReceiver2, discoverDevicesIntent);
 
     }
 
+    public void discoverToggle(){
+        Log.d(TAG, "discoverToggle: Called.");
+
+        if(checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)!=PackageManager.PERMISSION_GRANTED)
+            requestPermissions(new String[]{Manifest.permission.BLUETOOTH_SCAN}, 1);
+
+        // Before device starts discovering other devices, check if it is not already discovering
+        // Immediately after checking (and maybe canceling) discovery-mode, start discovery
+        if (mBluetoothAdapter.isDiscovering()){
+            mBluetoothAdapter.cancelDiscovery();
+            Log.d(TAG, "discoverToggle: Discovery was canceled.");
+        } else {
+            mBluetoothAdapter.startDiscovery();
+            refreshPairedDevices();
+            //refreshPairedDevices();
+            Log.d(TAG, "discoverToggle: Discovery was started.");
+        }
+    }
+    
+    
 
     private void setViewStatus(View view){
         view.setEnabled(!view.isEnabled());
