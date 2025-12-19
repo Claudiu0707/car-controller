@@ -21,6 +21,17 @@ public class BluetoothService {
         public static final int MESSAGE_TOAST = 2;
     }
 
+    ConnectedThread connectedThread;
+
+    public void initializeStream (BluetoothSocket socket) {
+        connectedThread = new ConnectedThread(socket);
+        connectedThread.start();
+    }
+
+    public void write (String message) {
+        connectedThread.write(message.getBytes());
+    }
+
     private class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
@@ -57,9 +68,9 @@ public class BluetoothService {
                     numBytes = mmInStream.read(mmBuffer);
 
                     // Notify UI activity
-                    Message readMsg = handler.obtainMessage(
-                            MessageConstants.MESSAGE_READ, numBytes, -1, mmBuffer);
-                    readMsg.sendToTarget();
+                    // Message readMsg = handler.obtainMessage(
+                    //        MessageConstants.MESSAGE_READ, numBytes, -1, mmBuffer);
+                    // readMsg.sendToTarget();
                 } catch (IOException e) {
                     Log.d(TAG, "Input stream was disconnected", e);
                     break;
@@ -72,17 +83,16 @@ public class BluetoothService {
                 mmOutStream.write(bytes);
 
                 // Notify UI activity
-                Message writtenMsg = handler.obtainMessage(
-                        MessageConstants.MESSAGE_WRITE, -1, -1, mmBuffer);
-                writtenMsg.sendToTarget();
+                // Message writtenMsg = handler.obtainMessage(MessageConstants.MESSAGE_WRITE, -1, -1, mmBuffer);
+                // writtenMsg.sendToTarget();
             } catch (IOException e){
                 Log.e(TAG, "Error occurred when sending data", e);
 
-                Message writeErrorMsg = handler.obtainMessage(MessageConstants.MESSAGE_TOAST);
-                Bundle bundle = new Bundle();
-                bundle.putString("toast", "Couldn't send data to the other device");
-                writeErrorMsg.setData(bundle);
-                handler.sendMessage(writeErrorMsg);
+                // Message writeErrorMsg = handler.obtainMessage(MessageConstants.MESSAGE_TOAST);
+                // Bundle bundle = new Bundle();
+                // bundle.putString("toast", "Couldn't send data to the other device");
+                // writeErrorMsg.setData(bundle);
+                // handler.sendMessage(writeErrorMsg);
             }
         }
 

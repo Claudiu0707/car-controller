@@ -36,7 +36,6 @@ import java.util.Set;
 // TODO: In other classes, get instance of this objects
 public class BluetoothManagerActivity extends AppCompatActivity {
     private static final String TAG = "BluetoothManagerActivityTAG";
-
     BluetoothManager mBluetoothManager = null;
     BluetoothAdapter mBluetoothAdapter = null;
     DeviceListAdapter mDeviceListAdapter, mPairedListAdapter;

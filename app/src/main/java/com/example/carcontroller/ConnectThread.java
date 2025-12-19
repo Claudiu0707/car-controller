@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 
@@ -18,18 +19,22 @@ import java.util.UUID;
 public class ConnectThread extends Thread {
     private static final String TAG = "ConnectThreadTAG";
 
+    private final BluetoothDevice deviceToConnect;
     public final BluetoothSocket targetSocket;
     private final BluetoothAdapter bluetoothAdapter;
+    // Create an instance of DevicesConnected which will store all devices connected
+    DevicesConnected devicesConnected = DevicesConnected.getInstance();
     private final Context context;
 
     public ConnectThread(BluetoothDevice device, BluetoothManager manager, Context cntx) {
-        bluetoothAdapter = manager.getAdapter();
+        this.bluetoothAdapter = manager.getAdapter();
+        this.deviceToConnect = device;
+        this.context = cntx;
         BluetoothSocket tmp = null;
-        context = cntx;
 
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
             try {
-                tmp = device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
+                tmp = deviceToConnect.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
             } catch (IOException e) {
                 Log.e(TAG, "Socket's create() method failed", e);
             }
@@ -50,6 +55,9 @@ public class ConnectThread extends Thread {
 
         try {
             targetSocket.connect();
+            // Toast.makeText(BluetoothManagerActivity.class, "Connected to " + deviceToConnect.getName(), Toast.LENGTH_LONG).show();
+            devicesConnected.addDevice(deviceToConnect); // Add the device
+            devicesConnected.addConnection(deviceToConnect, targetSocket); // Add the socket
             Log.i(TAG, "Connection successful!");
         } catch (IOException e) {
             Log.e(TAG, "Could not connect; closing socket", e);
