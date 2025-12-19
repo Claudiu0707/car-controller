@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +38,6 @@ public class DevicesConnected implements DevicesConnectedStore {
 
     @Override
     public BluetoothSocket getSocket (BluetoothDevice device) {
-        // Get the socket based on the MAC address
         return socketMap.get(device.getAddress());
     }
 }

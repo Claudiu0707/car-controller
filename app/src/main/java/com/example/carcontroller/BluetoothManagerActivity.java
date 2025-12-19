@@ -27,13 +27,6 @@ import androidx.core.view.WindowInsetsCompat;
 import java.util.ArrayList;
 import java.util.Set;
 
-// TODO: Implement the bluetooth service
-// TODO: Create a list to hold all active sockets => for each socket create a bluetooth service
-// TODO: activeSockets => Must be accessible from BluetoothManager and from
-
-// TODO: Create a class that implements a storage for bluetooth devices + getInstance of it
-// TODO: Here, create an instance of it to add devices when connected
-// TODO: In other classes, get instance of this objects
 public class BluetoothManagerActivity extends AppCompatActivity {
     private static final String TAG = "BluetoothManagerActivityTAG";
     BluetoothManager mBluetoothManager = null;
@@ -41,7 +34,7 @@ public class BluetoothManagerActivity extends AppCompatActivity {
     DeviceListAdapter mDeviceListAdapter, mPairedListAdapter;
 
 
-    ArrayList<BluetoothDevice> mBTDevices, pairedDevicesList;
+    ArrayList<BluetoothDevice> mBTDevicesList, mPairedDevicesList;
     ListView lvNewDevice, lvPairedDevice;
     private ConnectThread activeConnectThread = null;
 
@@ -59,7 +52,6 @@ public class BluetoothManagerActivity extends AppCompatActivity {
     @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_bluetooth_manager);
@@ -70,7 +62,10 @@ public class BluetoothManagerActivity extends AppCompatActivity {
         });
 
 
-        // Buttons initialization
+        mBTDevicesList = new ArrayList<>();
+        mPairedDevicesList = new ArrayList<>();
+
+        // ---------------- BUTTONS INITIALIZATION ----------------
         backButton = findViewById(R.id.backButton);
         refreshDevicesButton = findViewById(R.id.refreshDevicesButton);
 
@@ -79,23 +74,20 @@ public class BluetoothManagerActivity extends AppCompatActivity {
 
         lvNewDevice = findViewById(R.id.lvNewDevices);
         lvPairedDevice = findViewById(R.id.lvPairedDevices);
+        // ---------------------------------------------------------
 
-        mBTDevices = new ArrayList<>();
-        pairedDevicesList = new ArrayList<>();
 
-        // Create a new context to get access to bluetooth resources
         mBluetoothManager = getSystemService(BluetoothManager.class);
         if(mBluetoothManager != null){
             mBluetoothAdapter = mBluetoothManager.getAdapter();
             if (mBluetoothAdapter == null){
-                // Device doesn't support bluetooth
                 Log.d(TAG, "Device doesn't support bluetooth.");
             }
         }
 
-        // Initialize views when activity is started
+        // Initialize bt related UI elements
         setBluetoothViewStatus();
-        setDiscoveryViewStatus(mBluetoothAdapter.isDiscovering());
+        setDiscoveryViewStatus(false);
 
 
         // ---------------- BUTTON ONCLICK LISTENERS ----------------
@@ -120,50 +112,44 @@ public class BluetoothManagerActivity extends AppCompatActivity {
             if (!mBluetoothAdapter.isEnabled())
                 discoverToggleButton.setChecked(false);
         });
-        // discoverToggleButton.setEnabled(mBluetoothAdapter.isEnabled());
 
         // Broadcasts when a bond state changes (i.e. pairing)
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         registerReceiver(mBroadcastReceiver3, filter);
 
+        // -------------------------------- LIST VIEWS LISTENERS --------------------------------
         lvNewDevice.setOnItemClickListener((parent, view, position, id) -> {
-            if(checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)!=PackageManager.PERMISSION_GRANTED)
-                requestPermissions(new String[]{Manifest.permission.BLUETOOTH_SCAN}, 1);
             mBluetoothAdapter.cancelDiscovery();
 
             Log.d(TAG, "onItemClick: User clicked a device.");
-            String deviceName = mBTDevices.get(position).getName();
-            String deviceAddress = mBTDevices.get(position).getAddress();
+            String deviceName = mBTDevicesList.get(position).getName();
+            String deviceAddress = mBTDevicesList.get(position).getAddress();
 
             Log.d(TAG, "onItemClick: deviceName = " + deviceName);
             Log.d(TAG, "onItemClick: deviceAddress = " + deviceAddress);
 
-            mBTDevices.get(position).createBond();
+            mBTDevicesList.get(position).createBond();
         });
 
         lvPairedDevice.setOnItemClickListener((parent, view, position, id) -> {
-            if(checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)!=PackageManager.PERMISSION_GRANTED)
-                requestPermissions(new String[]{Manifest.permission.BLUETOOTH_SCAN}, 1);
             mBluetoothAdapter.cancelDiscovery();
 
             Log.d(TAG, "onItemClick: User clicked a device.");
 
-            String deviceName = pairedDevicesList.get(position).getName();
-            String deviceAddress = pairedDevicesList.get(position).getAddress();
+            String deviceName = mPairedDevicesList.get(position).getName();
+            String deviceAddress = mPairedDevicesList.get(position).getAddress();
 
             Log.d(TAG, "onItemClick: deviceName = " + deviceName);
             Log.d(TAG, "onItemClick: deviceAddress = " + deviceAddress);
 
-            BluetoothDevice device = pairedDevicesList.get(position);
+            BluetoothDevice device = mPairedDevicesList.get(position);
 
-            // Check bond state
             Log.d(TAG, "Device bond state: " + device.getBondState());
 
-            if (device.getBondState() == BluetoothDevice.BOND_BONDED){
-                activeConnectThread = new ConnectThread(device, mBluetoothManager, BluetoothManagerActivity.this);
-                activeConnectThread.start();
-            }
+            activeConnectThread = new ConnectThread(device, mBluetoothManager, this);
+            activeConnectThread.start();
         });
+        // --------------------------------------------------------------------------------------
     }
     @Override
     protected void onDestroy(){
@@ -185,8 +171,7 @@ public class BluetoothManagerActivity extends AppCompatActivity {
             // Log.d(TAG, "onReceive: ACTION FOUND.");
 
             // Looks for changes in bluetooth operations
-            assert action != null;
-            if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)){
+            if (action != null && action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
                 final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
 
                 switch(state){
@@ -215,24 +200,24 @@ public class BluetoothManagerActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             receiver2Registered = true;
             final String action = intent.getAction();
-            // Log.d(TAG, "onReceive: ACTION FOUND.");
-            assert action != null;
-            if (action.equals(BluetoothDevice.ACTION_FOUND)){
+            // Log.d(TAG, "onReceive: ACTION FOUND.");\
+
+            if (action != null && action.equals(BluetoothDevice.ACTION_FOUND)) {
                 // Discovery has found a device. Get the bluetooth device object info from the Intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice.class);
-                if (device != null && !mBTDevices.contains(device)){
+                if (device != null && !mBTDevicesList.contains(device)) {
                     if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)!= PackageManager.PERMISSION_GRANTED) {
                         requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
                     }
 
                     if (device.getName() != null)
-                        mBTDevices.add(device);
+                        mBTDevicesList.add(device);
 
                     String deviceName = (device.getName() != null) ? device.getName() : "Unknown";
                     String deviceAddress = (device.getAddress() != null) ? device.getAddress() : "Unknown";
                     // Log.d(TAG, "onReceive: " + deviceName + " : " + deviceAddress);
 
-                    mDeviceListAdapter = new DeviceListAdapter(context, R.layout.device_adapter_view, mBTDevices);
+                    mDeviceListAdapter = new DeviceListAdapter(context, R.layout.device_adapter_view, mBTDevicesList);
                     lvNewDevice.setAdapter(mDeviceListAdapter);
                     mDeviceListAdapter.notifyDataSetChanged();
                 }
@@ -242,32 +227,26 @@ public class BluetoothManagerActivity extends AppCompatActivity {
 
     // mBroadcastReceiver3 - Detects bond state changes (Pairing status changes)
     private final BroadcastReceiver mBroadcastReceiver3 = new BroadcastReceiver() {
+        @SuppressLint("MissingPermission")
         @Override
         public void onReceive(Context context, Intent intent) {
             receiver3Registered = true;
             final String action = intent.getAction();
             // Log.d(TAG, "onReceive: ACTION FOUND.");
 
-            assert action != null;
-            if (action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)){
+            if (action != null && action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice.class);
 
-                if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)!= PackageManager.PERMISSION_GRANTED){
-                    requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
-                }
-
-                assert device != null;
-                // Device is already bonded
-                if (device.getBondState() == BluetoothDevice.BOND_BONDED){
-                    Log.d(TAG, "onReceive: BOND = BONDED.");
-                }
-                // Device is creating a bond
-                if (device.getBondState() == BluetoothDevice.BOND_BONDING){
-                    Log.d(TAG, "onReceive: BOND = BONDING.");
-                }
-                // Device is breaking a bond
-                if (device.getBondState() == BluetoothDevice.BOND_NONE){
-                    Log.d(TAG, "onReceive: BOND = NONE.");
+                if (device != null) {
+                    if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
+                        Log.d(TAG, "onReceive: BOND = BONDED.");
+                    }
+                    if (device.getBondState() == BluetoothDevice.BOND_BONDING) {
+                        Log.d(TAG, "onReceive: BOND = BONDING.");
+                    }
+                    if (device.getBondState() == BluetoothDevice.BOND_NONE) {
+                        Log.d(TAG, "onReceive: BOND = NONE.");
+                    }
                 }
             }
         }
@@ -318,11 +297,11 @@ public class BluetoothManagerActivity extends AppCompatActivity {
                 String deviceAddress = (device.getAddress() != null) ? device.getAddress() : "Unknown";
                 // Log.d(TAG, "discoverToggle: PAIRED - " + deviceName + " : " + deviceAddress);
 
-                pairedDevicesList.add(device);
+                mPairedDevicesList.add(device);
             }
         }
 
-        mPairedListAdapter = new DeviceListAdapter(this, R.layout.device_adapter_view, pairedDevicesList);
+        mPairedListAdapter = new DeviceListAdapter(this, R.layout.device_adapter_view, mPairedDevicesList);
         lvPairedDevice.setAdapter(mPairedListAdapter);
         mPairedListAdapter.notifyDataSetChanged();
     }
@@ -351,11 +330,9 @@ public class BluetoothManagerActivity extends AppCompatActivity {
             Toast.makeText(this, warning, Toast.LENGTH_LONG).show();
         }
     }
-    
-    
+
     private void setBluetoothViewStatus() {
         Log.i(TAG, "setBluetoothViewStatus: called");
-        // Checks for current BT states and update the views accordingly (for lvPairedDevice related views)
         if (mBluetoothAdapter.getState() == BluetoothAdapter.STATE_ON){
             bluetoothToggleButton.setChecked(true);
             lvPairedDevice.setVisibility(View.VISIBLE);
@@ -392,14 +369,11 @@ public class BluetoothManagerActivity extends AppCompatActivity {
 
         if (mBluetoothAdapter.isDiscovering())
             mBluetoothAdapter.cancelDiscovery();
-
     }
 
     private void launchActivityMain(){
         disableBluetoothProcessesOnExit();
-
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
-
 }

@@ -7,24 +7,24 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.UUID;
 public class ConnectThread extends Thread {
     private static final String TAG = "ConnectThreadTAG";
 
     private final BluetoothDevice deviceToConnect;
-    public final BluetoothSocket targetSocket;
+    private final BluetoothSocket targetSocket;
     private final BluetoothAdapter bluetoothAdapter;
-    // Create an instance of DevicesConnected which will store all devices connected
-    DevicesConnected devicesConnected = DevicesConnected.getInstance();
     private final Context context;
+
+    DevicesConnected devicesConnected = DevicesConnected.getInstance();
 
     public ConnectThread(BluetoothDevice device, BluetoothManager manager, Context cntx) {
         this.bluetoothAdapter = manager.getAdapter();
@@ -50,14 +50,18 @@ public class ConnectThread extends Thread {
             Log.e(TAG, "Missing BLUETOOTH_CONNECT permission");
             return;
         }
-
         bluetoothAdapter.cancelDiscovery();
 
         try {
             targetSocket.connect();
-            // Toast.makeText(BluetoothManagerActivity.class, "Connected to " + deviceToConnect.getName(), Toast.LENGTH_LONG).show();
-            devicesConnected.addDevice(deviceToConnect); // Add the device
-            devicesConnected.addConnection(deviceToConnect, targetSocket); // Add the socket
+            new Handler(Looper.getMainLooper()).post(() ->
+                    Toast.makeText(context,
+                            "Connected to " + deviceToConnect.getName(),
+                            Toast.LENGTH_LONG).show()
+            );
+
+            devicesConnected.addDevice(deviceToConnect);
+            devicesConnected.addConnection(deviceToConnect, targetSocket);
             Log.i(TAG, "Connection successful!");
         } catch (IOException e) {
             Log.e(TAG, "Could not connect; closing socket", e);
