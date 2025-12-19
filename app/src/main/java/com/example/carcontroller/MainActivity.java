@@ -1,3 +1,9 @@
+/**
+ * @Author Muresan Claudiu
+ *
+ * */
+
+
 package com.example.carcontroller;
 
 import android.content.Intent;
@@ -14,6 +20,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 // TODO: Create new UI interface for app
+
+
 public class MainActivity extends AppCompatActivity{
     private static final String TAG = "MainActivityTAG";
     @Override

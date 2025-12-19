@@ -9,21 +9,21 @@
 
     <ListView
         android:id="@+id/lvNewDevices"
-        android:layout_width="336dp"
-        android:layout_height="120dp"
+        android:layout_width="338dp"
+        android:layout_height="150dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lvPairedDevices"
-        app:layout_constraintVertical_bias="0.837"
+        app:layout_constraintVertical_bias="1.0"
         tools:ignore="MissingConstraints" />
 
     <ListView
         android:id="@+id/lvPairedDevices"
-        android:layout_width="336dp"
-        android:layout_height="120dp"
-        android:layout_marginTop="64dp"
+        android:layout_width="334dp"
+        android:layout_height="130dp"
+        android:layout_marginTop="28dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -89,10 +89,10 @@
         android:text="Paired devices"
         app:layout_constraintBottom_toTopOf="@+id/lvPairedDevices"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.81"
+        app:layout_constraintHorizontal_bias="0.812"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.355" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/textView4"
@@ -103,9 +103,10 @@
         android:text="New devices"
         app:layout_constraintBottom_toTopOf="@+id/lvNewDevices"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.81"
+        app:layout_constraintHorizontal_bias="0.815"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lvPairedDevices" />
+        app:layout_constraintTop_toBottomOf="@+id/lvPairedDevices"
+        app:layout_constraintVertical_bias="0.687" />
 
     <!-- <androidx.appcompat.widget.SwitchCompat
          android:id="@+id/bluetoothToggleSwitch"
