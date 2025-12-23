@@ -23,9 +23,6 @@ import androidx.core.view.WindowInsetsCompat;
 
 import java.util.List;
 
-// TODO: Create new UI interface for app
-
-
 public class MainActivity extends AppCompatActivity{
     private static final String TAG = "MainActivityTAG";
 
@@ -57,21 +54,9 @@ public class MainActivity extends AppCompatActivity{
         sendDataBUtton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick (View view) {
-                sendData();
+                // sendData();
             }
         });
-    }
-
-    public void sendData () {
-        List<BluetoothDevice> deviceList = devicesConnected.getDevices();
-        BluetoothService service = new BluetoothService();
-        BluetoothDevice device;
-        if (!deviceList.isEmpty()) {
-            device = deviceList.get(0);
-            BluetoothSocket socket = devicesConnected.getSocket(device);
-            service.initializeStream(socket);
-            service.write("hello");
-        }
     }
 
     public void handleDriverNameText (View v){
@@ -79,11 +64,6 @@ public class MainActivity extends AppCompatActivity{
         ((TextView) findViewById(R.id.inputName)).setText(driverName);
         Toast.makeText(this, "Driver introduced", Toast.LENGTH_LONG).show();
         Log.d("Driver name", driverName);
-    }
-
-    public void launchActivityStatistics(View v){
-        Intent i = new Intent(this, StatisticsActivity.class);
-        startActivity(i);
     }
 
     public void launchActivityBluetooth(){

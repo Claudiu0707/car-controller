@@ -57,10 +57,9 @@ public class ConnectThread extends Thread {
             new Handler(Looper.getMainLooper()).post(() ->
                     Toast.makeText(context,
                             "Connected to " + deviceToConnect.getName(),
-                            Toast.LENGTH_LONG).show()
+                            Toast.LENGTH_SHORT).show()
             );
 
-            devicesConnected.addDevice(deviceToConnect);
             devicesConnected.addConnection(deviceToConnect, targetSocket);
             Log.i(TAG, "Connection successful!");
         } catch (IOException e) {

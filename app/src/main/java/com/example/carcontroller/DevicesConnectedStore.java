@@ -11,6 +11,7 @@ public interface DevicesConnectedStore {
 
     void addConnection (BluetoothDevice device, BluetoothSocket socket);
 
+    void disconnectAllDevices ();
     List<BluetoothDevice> getDevices ();
 
     BluetoothSocket getSocket (BluetoothDevice device);

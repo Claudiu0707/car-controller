@@ -1,5 +1,6 @@
 package com.example.carcontroller;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -22,6 +23,7 @@ public class DeviceListAdapter extends ArrayAdapter<BluetoothDevice> {
         mViewResourceID = tvResourceID;
     }
 
+    @SuppressLint("MissingPermission")
     public View getView(int position, View convertView, ViewGroup parent) {
         convertView = mLayoutInflater.inflate(mViewResourceID, null);
 

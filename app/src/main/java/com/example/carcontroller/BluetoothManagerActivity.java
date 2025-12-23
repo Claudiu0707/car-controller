@@ -34,12 +34,19 @@ public class BluetoothManagerActivity extends AppCompatActivity {
     DeviceListAdapter mDeviceListAdapter, mPairedListAdapter;
 
 
-    ArrayList<BluetoothDevice> mBTDevicesList, mPairedDevicesList;
+    ArrayList<BluetoothDevice> mBTDevicesList, mPairedDevicesList, mSelectedDevicesList;
     ListView lvNewDevice, lvPairedDevice;
-    private ConnectThread activeConnectThread = null;
+
+
+    // The followings are assumed:
+    // First thread corresponds to car, the other correspond to the checkpoints (in order: CP1, CP2, CP3)
+    ArrayList<ConnectThread> connectThreads = new ArrayList<>();
+
 
     Button backButton = null;
     Button refreshDevicesButton = null;
+    Button startConnectionSequenceButton = null;
+    Button resetConnectionSequenceButton = null;
 
     ToggleButton bluetoothToggleButton = null;
     ToggleButton discoverToggleButton = null;
@@ -48,6 +55,7 @@ public class BluetoothManagerActivity extends AppCompatActivity {
     private boolean receiver2Registered = false;
     private boolean receiver3Registered = false;
 
+    private int selectedDeviceCount = 0;
 
     @SuppressLint("MissingPermission")
     @Override
@@ -64,10 +72,13 @@ public class BluetoothManagerActivity extends AppCompatActivity {
 
         mBTDevicesList = new ArrayList<>();
         mPairedDevicesList = new ArrayList<>();
+        mSelectedDevicesList = new ArrayList<>();
 
         // ---------------- BUTTONS INITIALIZATION ----------------
-        backButton = findViewById(R.id.backButton);
+        backButton = findViewById(R.id.backButton1);
         refreshDevicesButton = findViewById(R.id.refreshDevicesButton);
+        startConnectionSequenceButton = findViewById(R.id.startConnectionSequenceButton);
+        resetConnectionSequenceButton = findViewById(R.id.resetConnectionSequenceButton);
 
         bluetoothToggleButton = findViewById(R.id.bluetoothToggleButton);
         discoverToggleButton = findViewById(R.id.discoverToggleButton);
@@ -98,6 +109,14 @@ public class BluetoothManagerActivity extends AppCompatActivity {
         refreshDevicesButton.setOnClickListener(v -> {
             Log.d(TAG, "onClick: refreshDevicesButton");
             refreshPairedDevices();
+        });
+        startConnectionSequenceButton.setOnClickListener(v -> {
+            Log.d(TAG, "onClick: startConnectionSequenceButton");
+            startConnectionSequence();
+        });
+        resetConnectionSequenceButton.setOnClickListener(v -> {
+            Log.d(TAG, "onClick: resetConnectionSequenceButton");
+            resetConnectionSequence();
         });
 
         bluetoothToggleButton.setOnClickListener(v -> {
@@ -146,8 +165,21 @@ public class BluetoothManagerActivity extends AppCompatActivity {
 
             Log.d(TAG, "Device bond state: " + device.getBondState());
 
-            activeConnectThread = new ConnectThread(device, mBluetoothManager, this);
-            activeConnectThread.start();
+            // Paired devices are selected for connection sequence
+            if (!mSelectedDevicesList.contains(device) && selectedDeviceCount < 4) {
+                mSelectedDevicesList.add(device);
+                selectedDeviceCount++;
+                String message = "Device " + device.getName() + " selected";
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+            } else {
+                String message;
+                if (mSelectedDevicesList.contains(device)) {
+                    message = "Device " + device.getName() + " already selected!";
+                } else {
+                    message = "Cannot select device!";
+                }
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+            }
         });
         // --------------------------------------------------------------------------------------
     }
@@ -200,7 +232,7 @@ public class BluetoothManagerActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             receiver2Registered = true;
             final String action = intent.getAction();
-            // Log.d(TAG, "onReceive: ACTION FOUND.");\
+            // Log.d(TAG, "onReceive: ACTION FOUND.");
 
             if (action != null && action.equals(BluetoothDevice.ACTION_FOUND)) {
                 // Discovery has found a device. Get the bluetooth device object info from the Intent
@@ -282,6 +314,26 @@ public class BluetoothManagerActivity extends AppCompatActivity {
             registerReceiver(mBroadcastReceiver1, BTIntent);
         }
     }
+
+    private void startConnectionSequence () {
+        if (selectedDeviceCount >= 1) {
+            for (BluetoothDevice device : mSelectedDevicesList) {
+                int index = mSelectedDevicesList.indexOf(device);
+                ConnectThread thread = new ConnectThread(device, mBluetoothManager, this);
+                connectThreads.add(thread);
+                connectThreads.get(index).start();
+            }
+        } else {
+            resetConnectionSequence();
+            Toast.makeText(this, "No device selected!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void resetConnectionSequence () {
+        mSelectedDevicesList.clear();
+        selectedDeviceCount = 0;
+        Toast.makeText(this, "Selected devices reset!", Toast.LENGTH_SHORT).show();
+    }
     private void refreshPairedDevices(){
         Log.i(TAG, "refreshPairedDevices: called");
 
@@ -305,7 +357,6 @@ public class BluetoothManagerActivity extends AppCompatActivity {
         lvPairedDevice.setAdapter(mPairedListAdapter);
         mPairedListAdapter.notifyDataSetChanged();
     }
-
 
     public void discoverToggle(){
         Log.d(TAG, "discoverToggle: Called.");
@@ -344,6 +395,7 @@ public class BluetoothManagerActivity extends AppCompatActivity {
             findViewById(R.id.textView3).setVisibility(View.GONE);
         }
     }
+
 
     @SuppressLint("MissingPermission")
     private void setDiscoveryViewStatus(Boolean activate){

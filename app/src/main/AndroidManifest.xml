@@ -24,22 +24,17 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.CarController">
+        android:theme="@style/Theme.CarController"
+        android:screenOrientation="landscape">
         <activity
-            android:name=".MainActivity2"
+            android:name=".DriverModeActivity"
             android:exported="false" />
         <activity
             android:name=".BluetoothManagerActivity"
-            android:exported="false"
-            android:screenOrientation="landscape" />
-        <activity
-            android:name=".StatisticsActivity"
-            android:exported="false"
-            android:screenOrientation="landscape" />
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
-            android:exported="true"
-            android:screenOrientation="landscape">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
