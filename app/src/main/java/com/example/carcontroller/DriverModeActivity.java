@@ -23,8 +23,9 @@ public class DriverModeActivity extends AppCompatActivity {
     BluetoothDevice carDevice = null;
 
     Button backButton;
-
     Button forwardButton, reverseButton, steerLeftButton, steerRightButton;
+
+    boolean isForward = false, isReverse = false, isLeft = false, isRight = false;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -38,15 +39,6 @@ public class DriverModeActivity extends AppCompatActivity {
             return insets;
         });
 
-        if (!devicesConnected.getDevices().isEmpty()) {
-            carDevice = devicesConnected.getDevices().get(0);
-        }
-
-        List<BluetoothDevice> deviceList = devicesConnected.getDevices();
-        BluetoothService service = new BluetoothService();
-        BluetoothSocket socket = devicesConnected.getSocket(carDevice);
-        service.initializeStream(socket);
-
         // Buttons initialization
         backButton = (Button) findViewById(R.id.backButton2);
 
@@ -58,48 +50,87 @@ public class DriverModeActivity extends AppCompatActivity {
         backButton.setOnClickListener(v -> {
             launchActivityMain();
         });
-        forwardButton.setOnTouchListener((view, motionEvent) -> {
-            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                service.write("D1");
-                return true;
-            } else if (motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
-                service.write("D0");
-                return true;
-            }
-            return false;
-        });
-        reverseButton.setOnTouchListener((view, motionEvent) -> {
-            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                service.write("D2");
-                return true;
-            } else if (motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
-                service.write("D0");
-                return true;
-            }
-            return false;
-        });
-        steerLeftButton.setOnTouchListener((view, motionEvent) -> {
-            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                service.write("D3");
-                return true;
-            } else if (motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
-                service.write("D0");
-                return true;
-            }
-            return false;
-        });
-        steerRightButton.setOnTouchListener((view, motionEvent) -> {
-            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                service.write("D4");
-                return true;
-            } else if (motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
-                service.write("D0");
-                return true;
-            }
-            return false;
-        });
+
+
+        if (!devicesConnected.getDevices().isEmpty()) {
+            carDevice = devicesConnected.getDevices().get(0);
+            List<BluetoothDevice> deviceList = devicesConnected.getDevices();
+            BluetoothService service = new BluetoothService();
+            BluetoothSocket socket = devicesConnected.getSocket(carDevice);
+            service.initializeStream(socket);
+
+            forwardButton.setOnTouchListener((view, motionEvent) -> {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    isForward = true;
+                    sendDriveCommand(service);
+                    return true;
+                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
+                    isForward = false;
+                    sendDriveCommand(service);
+                    return true;
+                }
+                return false;
+            });
+            reverseButton.setOnTouchListener((view, motionEvent) -> {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    isReverse = true;
+                    sendDriveCommand(service);
+                    return true;
+                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
+                    isReverse = false;
+                    sendDriveCommand(service);
+                    return true;
+                }
+                return false;
+            });
+            steerLeftButton.setOnTouchListener((view, motionEvent) -> {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    isLeft = true;
+                    sendDriveCommand(service);
+                    return true;
+                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
+                    isLeft = false;
+                    sendDriveCommand(service);
+                    return true;
+                }
+                return false;
+            });
+            steerRightButton.setOnTouchListener((view, motionEvent) -> {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    isRight = true;
+                    sendDriveCommand(service);
+                    return true;
+                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
+                    isRight = false;
+                    sendDriveCommand(service);
+                    return true;
+                }
+                return false;
+            });
+        }
     }
 
+    private void sendDriveCommand (BluetoothService service) {
+        if (isForward && isLeft) {
+            service.write("D5");
+        } else if (isForward && isRight) {
+            service.write("D6");
+        } else if (isReverse && isLeft) {
+            service.write("D7");
+        } else if (isReverse && isRight) {
+            service.write("D8");
+        } else if (isForward) {
+            service.write("D1");
+        } else if (isReverse) {
+            service.write("D2");
+        } else if (isLeft) {
+            service.write("D3");
+        } else if (isRight) {
+            service.write("D4");
+        } else {
+            service.write("D0");
+        }
+    }
     private void launchActivityMain () {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
