@@ -11,8 +11,6 @@ import android.os.Bundle;
 import android.util.*;
 import android.view.*;
 import android.widget.*;
-
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -20,10 +18,10 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 
-
 public class MainActivity extends AppCompatActivity{
     private static final String TAG = "MainActivityTAG";
-    Button bluetoothButton, driverButton;
+    Button settingsButton, driverButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -38,17 +36,17 @@ public class MainActivity extends AppCompatActivity{
 
 
         // Buttons initialization
-        bluetoothButton = (Button) findViewById(R.id.bluetoothButton);
-        driverButton = (Button) findViewById(R.id.driverButton);
+        driverButton = (Button) findViewById(R.id.driverButtonID);
+        settingsButton = (Button) findViewById(R.id.settingsButtonID);
 
         // ---------------- BUTTON ONCLICK LISTENERS ----------------
-        bluetoothButton.setOnClickListener(v -> {
-            Log.d(TAG, "onClick: bluetooth");
-            launchActivityBluetooth();
-        });
         driverButton.setOnClickListener(v -> {
             Log.d(TAG, "onClick: driverMode");
             launchActivityDriverMode();
+        });
+        settingsButton.setOnClickListener(v -> {
+            Log.d(TAG, "onClick: settings");
+            launchActivitySettings();
         });
     }
 
@@ -59,14 +57,13 @@ public class MainActivity extends AppCompatActivity{
         Log.d("Driver name", driverName);
     }
 
-    public void launchActivityBluetooth () {
-        Intent intent = new Intent(this, BluetoothManagerActivity.class);
-        startActivity(intent);
-    }
-
-    public void launchActivityDriverMode () {
+    private void launchActivityDriverMode () {
         Intent intent = new Intent(this, DriverModeActivity.class);
         startActivity(intent);
     }
 
+    private void launchActivitySettings () {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
+    }
 }

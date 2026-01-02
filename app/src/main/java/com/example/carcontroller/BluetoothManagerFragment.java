@@ -11,87 +11,74 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+
+import androidx.fragment.app.Fragment;
+
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
 import java.util.ArrayList;
 import java.util.Set;
 
-public class BluetoothManagerActivity extends AppCompatActivity {
-    private static final String TAG = "BluetoothManagerActivityTAG";
+public class BluetoothManagerFragment extends Fragment {
+    private static final String TAG = "BluetoothManagerFragmentTAG";
+    private View view;
+    private Context context;
     BluetoothManager mBluetoothManager = null;
     BluetoothAdapter mBluetoothAdapter = null;
     DeviceListAdapter mDeviceListAdapter, mPairedListAdapter;
 
-
     ArrayList<BluetoothDevice> mBTDevicesList, mPairedDevicesList, mSelectedDevicesList;
     ListView lvNewDevice, lvPairedDevice;
-
 
     // The followings are assumed:
     // First thread corresponds to car, the other correspond to the checkpoints (in order: CP1, CP2, CP3)
     ArrayList<ConnectThread> connectThreads = new ArrayList<>();
+    private Button backButton = null, refreshDevicesButton = null, startConnectionSequenceButton = null, resetConnectionSequenceButton = null;
+    private ToggleButton bluetoothToggleButton = null, discoverToggleButton = null;
 
-
-    Button backButton = null;
-    Button refreshDevicesButton = null;
-    Button startConnectionSequenceButton = null;
-    Button resetConnectionSequenceButton = null;
-
-    ToggleButton bluetoothToggleButton = null;
-    ToggleButton discoverToggleButton = null;
-
-    private boolean receiver1Registered = false;
-    private boolean receiver2Registered = false;
-    private boolean receiver3Registered = false;
-
+    private boolean receiver1Registered = false, receiver2Registered = false, receiver3Registered = false;
     private int selectedDeviceCount = 0;
 
     @SuppressLint("MissingPermission")
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_bluetooth_manager);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+    public View onCreateView (LayoutInflater inflater, ViewGroup container,
+                              Bundle savedInstanceState) {
 
+
+        // Inflate the layout for this fragment
+        view = inflater.inflate(R.layout.fragment_bluetooth_manager, container, false);
+        context = requireContext();
+
+        requestAllBluetoothPermissions();
 
         mBTDevicesList = new ArrayList<>();
         mPairedDevicesList = new ArrayList<>();
         mSelectedDevicesList = new ArrayList<>();
 
-        // ---------------- BUTTONS INITIALIZATION ----------------
-        backButton = findViewById(R.id.backButton1);
-        refreshDevicesButton = findViewById(R.id.refreshDevicesButton);
-        startConnectionSequenceButton = findViewById(R.id.startConnectionSequenceButton);
-        resetConnectionSequenceButton = findViewById(R.id.resetConnectionSequenceButton);
+        // Buttons initialization
+        backButton = view.findViewById(R.id.backButtonID);
+        refreshDevicesButton = view.findViewById(R.id.refreshDevicesButtonID);
+        startConnectionSequenceButton = view.findViewById(R.id.startConnectionSequenceButtonID);
+        resetConnectionSequenceButton = view.findViewById(R.id.resetConnectionSequenceButtonID);
 
-        bluetoothToggleButton = findViewById(R.id.bluetoothToggleButton);
-        discoverToggleButton = findViewById(R.id.discoverToggleButton);
+        bluetoothToggleButton = view.findViewById(R.id.bluetoothToggleButtonID);
+        discoverToggleButton = view.findViewById(R.id.discoverToggleButtonID);
 
-        lvNewDevice = findViewById(R.id.lvNewDevices);
-        lvPairedDevice = findViewById(R.id.lvPairedDevices);
+        lvNewDevice = view.findViewById(R.id.lvNewDevicesID);
+        lvPairedDevice = view.findViewById(R.id.lvPairedDevicesID);
         // ---------------------------------------------------------
 
-
-        mBluetoothManager = getSystemService(BluetoothManager.class);
-        if(mBluetoothManager != null){
+        mBluetoothManager = (BluetoothManager) requireContext().getSystemService(Context.BLUETOOTH_SERVICE);
+        if (mBluetoothManager != null) {
             mBluetoothAdapter = mBluetoothManager.getAdapter();
-            if (mBluetoothAdapter == null){
+            if (mBluetoothAdapter == null) {
                 Log.d(TAG, "Device doesn't support bluetooth.");
             }
         }
@@ -100,11 +87,9 @@ public class BluetoothManagerActivity extends AppCompatActivity {
         setBluetoothViewStatus();
         setDiscoveryViewStatus(false);
 
-
         // ---------------- BUTTON ONCLICK LISTENERS ----------------
         backButton.setOnClickListener(v -> {
-            Log.d(TAG, "onClick: backButton");
-            launchActivityMain();
+            close();
         });
         refreshDevicesButton.setOnClickListener(v -> {
             Log.d(TAG, "onClick: refreshDevicesButton");
@@ -124,7 +109,6 @@ public class BluetoothManagerActivity extends AppCompatActivity {
             toggleBluetooth();
             setBluetoothViewStatus();
         });
-
         discoverToggleButton.setOnClickListener(v -> {
             Log.d(TAG, "onClick: discoverToggleButton");
             discoverToggle();
@@ -134,7 +118,7 @@ public class BluetoothManagerActivity extends AppCompatActivity {
 
         // Broadcasts when a bond state changes (i.e. pairing)
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        registerReceiver(mBroadcastReceiver3, filter);
+        context.registerReceiver(mBroadcastReceiver3, filter);
 
         // -------------------------------- LIST VIEWS LISTENERS --------------------------------
         lvNewDevice.setOnItemClickListener((parent, view, position, id) -> {
@@ -170,7 +154,7 @@ public class BluetoothManagerActivity extends AppCompatActivity {
                 mSelectedDevicesList.add(device);
                 selectedDeviceCount++;
                 String message = "Device " + device.getName() + " selected";
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             } else {
                 String message;
                 if (mSelectedDevicesList.contains(device)) {
@@ -178,17 +162,17 @@ public class BluetoothManagerActivity extends AppCompatActivity {
                 } else {
                     message = "Cannot select device!";
                 }
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             }
         });
         // --------------------------------------------------------------------------------------
+        return view;
     }
-    @Override
-    protected void onDestroy(){
-        Log.i(TAG, "onDestroy: called");
-        disableBluetoothProcessesOnExit();
-        super.onDestroy();
 
+    @Override
+    public void onDestroyView () {
+        super.onDestroyView();
+        disableBluetoothProcessesOnExit();
     }
 
     // -------------------------------- BROADCAST RECEIVERS --------------------------------
@@ -197,7 +181,7 @@ public class BluetoothManagerActivity extends AppCompatActivity {
     // Executed by: toggleBluetooth() method
     private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive (Context context, Intent intent) {
             receiver1Registered = true;
             final String action = intent.getAction();
             // Log.d(TAG, "onReceive: ACTION FOUND.");
@@ -206,7 +190,7 @@ public class BluetoothManagerActivity extends AppCompatActivity {
             if (action != null && action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
                 final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
 
-                switch(state){
+                switch (state) {
                     case BluetoothAdapter.STATE_OFF:
                         Log.d(TAG, "onReceive: STATE OFF");
                         break;
@@ -229,7 +213,7 @@ public class BluetoothManagerActivity extends AppCompatActivity {
     // Executed by: discoverToggle() method
     private final BroadcastReceiver mBroadcastReceiver2 = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive (Context context, Intent intent) {
             receiver2Registered = true;
             final String action = intent.getAction();
             // Log.d(TAG, "onReceive: ACTION FOUND.");
@@ -238,7 +222,7 @@ public class BluetoothManagerActivity extends AppCompatActivity {
                 // Discovery has found a device. Get the bluetooth device object info from the Intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice.class);
                 if (device != null && !mBTDevicesList.contains(device)) {
-                    if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)!= PackageManager.PERMISSION_GRANTED) {
+                    if (context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                         requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
                     }
 
@@ -261,7 +245,7 @@ public class BluetoothManagerActivity extends AppCompatActivity {
     private final BroadcastReceiver mBroadcastReceiver3 = new BroadcastReceiver() {
         @SuppressLint("MissingPermission")
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive (Context context, Intent intent) {
             receiver3Registered = true;
             final String action = intent.getAction();
             // Log.d(TAG, "onReceive: ACTION FOUND.");
@@ -284,14 +268,14 @@ public class BluetoothManagerActivity extends AppCompatActivity {
         }
     };
 
-    public void toggleBluetooth(){
+    public void toggleBluetooth () {
         Log.i(TAG, "toggleBluetooth: called");
-        if (mBluetoothAdapter == null){
+        if (mBluetoothAdapter == null) {
             Log.d(TAG, "toggleBluetooth: Device does not have bluetooth capabilities.");
         }
         // Check if bluetooth device is enabled and request permissions if not already given
-        if (!mBluetoothAdapter.isEnabled()){
-            if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)!= PackageManager.PERMISSION_GRANTED){
+        if (!mBluetoothAdapter.isEnabled()) {
+            if (context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
                 return;
             }
@@ -302,16 +286,15 @@ public class BluetoothManagerActivity extends AppCompatActivity {
 
             // Looks for state changes in bluetooth status
             IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-            registerReceiver(mBroadcastReceiver1, BTIntent);
-        }
-        else if (mBluetoothAdapter.isEnabled()){
+            context.registerReceiver(mBroadcastReceiver1, BTIntent);
+        } else if (mBluetoothAdapter.isEnabled()) {
             // TODO: Look for alternatives to disable()
             // NOTE: This doesn't do anything useful if alternative is not found
             // mBluetoothAdapter.disable();
 
             // Looks for state changes in bluetooth status
             IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-            registerReceiver(mBroadcastReceiver1, BTIntent);
+            context.registerReceiver(mBroadcastReceiver1, BTIntent);
         }
     }
 
@@ -319,32 +302,33 @@ public class BluetoothManagerActivity extends AppCompatActivity {
         if (selectedDeviceCount >= 1) {
             for (BluetoothDevice device : mSelectedDevicesList) {
                 int index = mSelectedDevicesList.indexOf(device);
-                ConnectThread thread = new ConnectThread(device, mBluetoothManager, this);
+                ConnectThread thread = new ConnectThread(device, mBluetoothManager, context);
                 connectThreads.add(thread);
                 connectThreads.get(index).start();
             }
         } else {
             resetConnectionSequence();
-            Toast.makeText(this, "No device selected!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "No device selected!", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void resetConnectionSequence () {
         mSelectedDevicesList.clear();
         selectedDeviceCount = 0;
-        Toast.makeText(this, "Selected devices reset!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "Selected devices reset!", Toast.LENGTH_SHORT).show();
     }
-    private void refreshPairedDevices(){
+
+    private void refreshPairedDevices () {
         Log.i(TAG, "refreshPairedDevices: called");
 
-        if(checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)!=PackageManager.PERMISSION_GRANTED)
+        if (context.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED)
             requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
 
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
 
         // Query paired devices to check if desired device is already known
         if (!pairedDevices.isEmpty()) {
-            for(BluetoothDevice device : pairedDevices) {
+            for (BluetoothDevice device : pairedDevices) {
                 String deviceName = (device.getName() != null) ? device.getName() : "Unknown";
                 String deviceAddress = (device.getAddress() != null) ? device.getAddress() : "Unknown";
                 // Log.d(TAG, "discoverToggle: PAIRED - " + deviceName + " : " + deviceAddress);
@@ -353,15 +337,15 @@ public class BluetoothManagerActivity extends AppCompatActivity {
             }
         }
 
-        mPairedListAdapter = new DeviceListAdapter(this, R.layout.device_adapter_view, mPairedDevicesList);
+        mPairedListAdapter = new DeviceListAdapter(context, R.layout.device_adapter_view, mPairedDevicesList);
         lvPairedDevice.setAdapter(mPairedListAdapter);
         mPairedListAdapter.notifyDataSetChanged();
     }
 
-    public void discoverToggle(){
+    public void discoverToggle () {
         Log.d(TAG, "discoverToggle: Called.");
         if (mBluetoothAdapter.isEnabled()) {
-            if (checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED)
+            if (context.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED)
                 requestPermissions(new String[]{Manifest.permission.BLUETOOTH_SCAN}, 1);
 
             if (mBluetoothAdapter.isDiscovering()) {
@@ -375,57 +359,94 @@ public class BluetoothManagerActivity extends AppCompatActivity {
             }
 
             IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-            registerReceiver(mBroadcastReceiver2, discoverDevicesIntent);
+            context.registerReceiver(mBroadcastReceiver2, discoverDevicesIntent);
         } else {
             final String warning = "Bluetooth not enabled!";
-            Toast.makeText(this, warning, Toast.LENGTH_LONG).show();
+            Toast.makeText(context, warning, Toast.LENGTH_LONG).show();
         }
     }
 
-    private void setBluetoothViewStatus() {
+    private void setBluetoothViewStatus () {
         Log.i(TAG, "setBluetoothViewStatus: called");
-        if (mBluetoothAdapter.getState() == BluetoothAdapter.STATE_ON){
+        if (mBluetoothAdapter.getState() == BluetoothAdapter.STATE_ON) {
             bluetoothToggleButton.setChecked(true);
             lvPairedDevice.setVisibility(View.VISIBLE);
-            findViewById(R.id.textView3).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.pairedDevicesTextID).setVisibility(View.VISIBLE);
             refreshPairedDevices();
         } else {
             // bluetoothToggleButton.setChecked(false);
             lvPairedDevice.setVisibility(View.GONE);
-            findViewById(R.id.textView3).setVisibility(View.GONE);
+            view.findViewById(R.id.pairedDevicesTextID).setVisibility(View.GONE);
         }
     }
 
 
     @SuppressLint("MissingPermission")
-    private void setDiscoveryViewStatus(Boolean activate){
+    private void setDiscoveryViewStatus (Boolean activate) {
         Log.i(TAG, "setDiscoveryViewStatus: called");
-        if (activate){
+        if (activate) {
             discoverToggleButton.setChecked(true);
             lvNewDevice.setVisibility(View.VISIBLE);
-            findViewById(R.id.textView4).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.newDevicesTextID).setVisibility(View.VISIBLE);
         } else {
             discoverToggleButton.setChecked(false);
             lvNewDevice.setVisibility(View.GONE);
-            findViewById(R.id.textView4).setVisibility(View.GONE);
+            view.findViewById(R.id.newDevicesTextID).setVisibility(View.GONE);
         }
     }
 
     @SuppressLint("MissingPermission")
-    private void disableBluetoothProcessesOnExit(){
+    private void disableBluetoothProcessesOnExit () {
         Log.i(TAG, "disableBluetoothProcessesOnExit: called");
 
-        if (receiver1Registered) unregisterReceiver(mBroadcastReceiver1);
-        if (receiver2Registered) unregisterReceiver(mBroadcastReceiver2);
-        if (receiver3Registered) unregisterReceiver(mBroadcastReceiver3);
+        if (receiver1Registered) context.unregisterReceiver(mBroadcastReceiver1);
+        if (receiver2Registered) context.unregisterReceiver(mBroadcastReceiver2);
+        if (receiver3Registered) context.unregisterReceiver(mBroadcastReceiver3);
 
         if (mBluetoothAdapter.isDiscovering())
             mBluetoothAdapter.cancelDiscovery();
     }
 
-    private void launchActivityMain(){
-        disableBluetoothProcessesOnExit();
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
+
+    private void open (Fragment fragment) {
+        requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.settings_container_id, fragment).addToBackStack(null).commit();
     }
+
+    private void close () {
+        requireActivity().getSupportFragmentManager().popBackStack();
+    }
+
+    private static final int REQUEST_BLUETOOTH_PERMISSIONS = 200;
+
+    private void requestAllBluetoothPermissions () {
+        // Build a list of permissions depending on Android version
+        ArrayList<String> permissions = new ArrayList<>();
+
+        // Android 12+ requires these
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
+            permissions.add(Manifest.permission.BLUETOOTH_SCAN);
+            permissions.add(Manifest.permission.BLUETOOTH_ADVERTISE);
+        } else {
+            // Pre-Android 12, you may still need location for discovery
+            permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+
+        // Filter out already granted permissions
+        ArrayList<String> permissionsToRequest = new ArrayList<>();
+        for (String permission : permissions) {
+            if (context.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add(permission);
+            }
+        }
+
+        // Request any missing permissions
+        if (!permissionsToRequest.isEmpty()) {
+            requestPermissions(
+                    permissionsToRequest.toArray(new String[0]),
+                    REQUEST_BLUETOOTH_PERMISSIONS
+            );
+        }
+    }
+
 }

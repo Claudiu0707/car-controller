@@ -3,7 +3,6 @@ package com.example.carcontroller;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.widget.Button;
@@ -21,11 +20,8 @@ public class DriverModeActivity extends AppCompatActivity {
     private static final String TAG = "DriverModeActivityTAG";
     DevicesConnected devicesConnected = DevicesConnected.getInstance();
     BluetoothDevice carDevice = null;
-
-    Button backButton;
-    Button forwardButton, reverseButton, steerLeftButton, steerRightButton;
-
-    boolean isForward = false, isReverse = false, isLeft = false, isRight = false;
+    private Button backButton, forwardButton, reverseButton, steerLeftButton, steerRightButton;
+    private boolean isForward = false, isReverse = false, isLeft = false, isRight = false;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -40,7 +36,7 @@ public class DriverModeActivity extends AppCompatActivity {
         });
 
         // Buttons initialization
-        backButton = (Button) findViewById(R.id.backButton2);
+        backButton = (Button) findViewById(R.id.backButtonID);
 
         forwardButton = (Button) findViewById(R.id.forwardButton);
         reverseButton = (Button) findViewById(R.id.reverseButton);
@@ -48,10 +44,10 @@ public class DriverModeActivity extends AppCompatActivity {
         steerRightButton = (Button) findViewById(R.id.steerRightButton);
         // ---------------- BUTTON ONCLICK LISTENERS ----------------
         backButton.setOnClickListener(v -> {
-            launchActivityMain();
+            finish();
         });
 
-
+        // TODO: Clean this snippet of code
         if (!devicesConnected.getDevices().isEmpty()) {
             carDevice = devicesConnected.getDevices().get(0);
             List<BluetoothDevice> deviceList = devicesConnected.getDevices();
@@ -111,28 +107,26 @@ public class DriverModeActivity extends AppCompatActivity {
     }
 
     private void sendDriveCommand (BluetoothService service) {
+        Commands command;
         if (isForward && isLeft) {
-            service.write("D5");
+            command = Commands.FORWARDLEFT;
         } else if (isForward && isRight) {
-            service.write("D6");
+            command = Commands.FORWARDRIGHT;
         } else if (isReverse && isLeft) {
-            service.write("D7");
+            command = Commands.REVERSLEFT;
         } else if (isReverse && isRight) {
-            service.write("D8");
+            command = Commands.REVERSERIGHT;
         } else if (isForward) {
-            service.write("D1");
+            command = Commands.FORWARD;
         } else if (isReverse) {
-            service.write("D2");
+            command = Commands.REVERSE;
         } else if (isLeft) {
-            service.write("D3");
+            command = Commands.LEFT;
         } else if (isRight) {
-            service.write("D4");
+            command = Commands.RIGHT;
         } else {
-            service.write("D0");
+            command = Commands.STOP;
         }
-    }
-    private void launchActivityMain () {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
+        service.write(command.getCommand());
     }
 }

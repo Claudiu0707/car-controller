@@ -1,7 +1,11 @@
 <component name="ProjectDictionaryState">
   <dictionary name="project">
     <words>
+      <w>forwardleft</w>
+      <w>forwardright</w>
       <w>muresan</w>
+      <w>reverseright</w>
+      <w>reversleft</w>
     </words>
   </dictionary>
 </component>
