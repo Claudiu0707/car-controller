@@ -75,6 +75,7 @@ public class BluetoothManagerFragment extends Fragment {
         lvPairedDevice = view.findViewById(R.id.lvPairedDevicesID);
         // ---------------------------------------------------------
 
+
         mBluetoothManager = (BluetoothManager) requireContext().getSystemService(Context.BLUETOOTH_SERVICE);
         if (mBluetoothManager != null) {
             mBluetoothAdapter = mBluetoothManager.getAdapter();
