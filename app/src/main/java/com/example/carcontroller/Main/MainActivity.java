@@ -4,7 +4,7 @@
  * */
 
 
-package com.example.carcontroller;
+package com.example.carcontroller.Main;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,9 +17,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.carcontroller.Bluetooth.DevicesConnected;
+import com.example.carcontroller.R;
+import com.example.carcontroller.Settings.SettingsActivity;
 
 public class MainActivity extends AppCompatActivity{
     private static final String TAG = "MainActivityTAG";
+    DevicesConnected devicesConnected = DevicesConnected.getInstance();
     Button settingsButton, driverButton;
 
     @Override

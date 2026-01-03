@@ -1,4 +1,4 @@
-package com.example.carcontroller;
+package com.example.carcontroller.Bluetooth;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -22,6 +22,8 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import com.example.carcontroller.R;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -417,19 +419,15 @@ public class BluetoothManagerFragment extends Fragment {
         requireActivity().getSupportFragmentManager().popBackStack();
     }
 
-    private static final int REQUEST_BLUETOOTH_PERMISSIONS = 200;
-
     private void requestAllBluetoothPermissions () {
-        // Build a list of permissions depending on Android version
         ArrayList<String> permissions = new ArrayList<>();
 
-        // Android 12+ requires these
+        // Android 12+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
             permissions.add(Manifest.permission.BLUETOOTH_SCAN);
             permissions.add(Manifest.permission.BLUETOOTH_ADVERTISE);
         } else {
-            // Pre-Android 12, you may still need location for discovery
             permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
         }
 
@@ -439,14 +437,6 @@ public class BluetoothManagerFragment extends Fragment {
             if (context.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
                 permissionsToRequest.add(permission);
             }
-        }
-
-        // Request any missing permissions
-        if (!permissionsToRequest.isEmpty()) {
-            requestPermissions(
-                    permissionsToRequest.toArray(new String[0]),
-                    REQUEST_BLUETOOTH_PERMISSIONS
-            );
         }
     }
 

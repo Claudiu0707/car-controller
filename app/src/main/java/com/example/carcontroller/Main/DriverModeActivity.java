@@ -1,4 +1,4 @@
-package com.example.carcontroller;
+package com.example.carcontroller.Main;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
@@ -12,6 +12,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.example.carcontroller.Bluetooth.BluetoothService;
+import com.example.carcontroller.Bluetooth.DevicesConnected;
+import com.example.carcontroller.R;
 
 import java.util.List;
 

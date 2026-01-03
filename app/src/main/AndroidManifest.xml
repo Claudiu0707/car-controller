@@ -27,13 +27,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CarController">
         <activity
-            android:name=".SettingsActivity"
+            android:name=".Settings.SettingsActivity"
             android:exported="false" />
         <activity
-            android:name=".DriverModeActivity"
+            android:name=".Main.DriverModeActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".Main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

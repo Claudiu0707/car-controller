@@ -1,4 +1,4 @@
-package com.example.carcontroller;
+package com.example.carcontroller.Bluetooth;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;

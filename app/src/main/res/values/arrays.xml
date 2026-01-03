@@ -9,4 +9,9 @@
         <item>reply</item>
         <item>reply_all</item>
     </string-array>
+    <string-array name="modes_options_list">
+        <item>Setup Mode</item>
+        <item>Driver Mode</item>
+        <item>Line Follower Mode</item>
+    </string-array>
 </resources>
