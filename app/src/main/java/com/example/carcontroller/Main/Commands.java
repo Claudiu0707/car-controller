@@ -18,10 +18,14 @@ public enum Commands {
     FORWARDLEFT("D5"),
     FORWARDRIGHT("D6"),
     REVERSLEFT("D7"),
-    REVERSERIGHT("D8");
+    REVERSERIGHT("D8"),
 
     // Line Follower commands
-
+    WAITFOR1("W1"),
+    WAITFOR2("W2"),
+    WAITFOR3("W3"),
+    WAITFOR4("W4"),
+    WAITFOR5("W5");
     private final String command;
 
     Commands (String command) {
