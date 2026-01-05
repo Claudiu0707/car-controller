@@ -6,26 +6,60 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class BluetoothService {
     private static final String TAG = "BluetoothServiceTAG";
 
-    ConnectedThread connectedThread;
+    private static BluetoothService instance;
 
-    public void initializeStream (BluetoothSocket socket) {
-        connectedThread = new ConnectedThread(socket);
-        connectedThread.start();
+    public static synchronized BluetoothService getInstance () {
+        if (instance == null) {
+            instance = new BluetoothService();
+        }
+        return instance;
     }
 
-    public void write (String message) {
-        connectedThread.write(message.getBytes());
+    private final Map<String, ConnectedThread> connections = new HashMap<>();
+    private final Map<String, BlockingQueue<byte[]>> readQueues = new HashMap<>();
+
+    public void initializeStream (String deviceAddress, BluetoothSocket socket) {
+        readQueues.put(deviceAddress, new LinkedBlockingQueue<>());
+
+        ConnectedThread thread = new ConnectedThread(socket);
+        connections.put(deviceAddress, thread);
+        thread.start();
     }
+
+    public void write (String deviceAddress, String message) {
+        ConnectedThread thread = connections.get(deviceAddress);
+        if (thread != null) {
+            thread.write(message.getBytes());
+        } else {
+            Log.e(TAG, "Write failed: device " + deviceAddress);
+        }
+    }
+
+    public String read (String deviceAddress) {
+        BlockingQueue<byte[]> queue = readQueues.get(deviceAddress);
+        if (queue != null) {
+            byte[] data = queue.poll(); // returns null if no data available
+            if (data != null) {
+                return new String(data);
+            }
+        }
+        return null;
+    }
+
 
     private class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
-        private byte[] mmBuffer;
 
         public ConnectedThread (BluetoothSocket socket) {
             mmSocket = socket;
@@ -49,17 +83,17 @@ public class BluetoothService {
         }
 
         public void run () {
-            mmBuffer = new byte[1024];
-            int numBytes;
-
-            while (true) {
-                try {
-                    numBytes = mmInStream.read(mmBuffer);
-                } catch (IOException e) {
-                    Log.d(TAG, "Input stream was disconnected", e);
-                    break;
-                }
-            }
+//            byte[] mmBuffer = new byte[1024];
+//            int numBytes;
+//
+//            while (true) {
+//                try {
+//                    numBytes = mmInStream.read(mmBuffer);
+//                } catch (IOException e) {
+//                    Log.d(TAG, "Input stream was disconnected", e);
+//                    break;
+//                }
+//            }
         }
 
         public void write (byte[] bytes) {

@@ -9,6 +9,7 @@
       <w>reverseright</w>
       <w>reversleft</w>
       <w>setupmode</w>
+      <w>waitfor</w>
     </words>
   </dictionary>
 </component>

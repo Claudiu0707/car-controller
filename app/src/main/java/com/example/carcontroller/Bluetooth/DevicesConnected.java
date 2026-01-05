@@ -11,51 +11,60 @@ import java.util.List;
 import java.util.Map;
 
 public class DevicesConnected implements DevicesConnectedStore {
-    private final String TAG = "DevicesConnectedTAG";
+    private static final String TAG = "DevicesConnectedTAG";
     private static DevicesConnected instance;
-    private final List<BluetoothDevice> devicesList = new ArrayList<>();
+
+    private final Map<String, BluetoothDevice> deviceMap = new HashMap<>();
     private final Map<String, BluetoothSocket> socketMap = new HashMap<>();
 
     private DevicesConnected () {
     }
 
-    public synchronized static DevicesConnected getInstance () {
+    public static synchronized DevicesConnected getInstance () {
         if (instance == null) instance = new DevicesConnected();
         return instance;
     }
 
     @Override
-    public void addDevice (BluetoothDevice device) {
-        if (!devicesList.contains(device)) devicesList.add(device);
+    public synchronized void addConnection (BluetoothDevice device, BluetoothSocket socket) {
+        String address = device.getAddress();
+        deviceMap.put(address, device);
+        socketMap.put(address, socket);
     }
 
     @Override
-    public void addConnection (BluetoothDevice device, BluetoothSocket socket) {
-        addDevice(device);
-        socketMap.put(device.getAddress(), socket);
+    public synchronized List<BluetoothDevice> getDevices () {
+        return new ArrayList<>(deviceMap.values());
     }
 
     @Override
-    public List<BluetoothDevice> getDevices () {
-        return devicesList;
+    public synchronized BluetoothSocket getSocket (String deviceAddress) {
+        return socketMap.get(deviceAddress);
     }
 
     @Override
-    public BluetoothSocket getSocket (BluetoothDevice device) {
-        return socketMap.get(device.getAddress());
-    }
-
-    @Override
-    public void disconnectAllDevices () {
-        for (BluetoothDevice device : devicesList) {
-            devicesList.remove(device);
+    public synchronized void disconnectAllDevices () {
+        for (BluetoothSocket socket : socketMap.values()) {
             try {
-                getSocket(device).close();
+                socket.close();
             } catch (IOException e) {
-                Log.e(TAG, "Could not close the connect socket.");
+                Log.e(TAG, "Could not close socket", e);
             }
         }
-        devicesList.clear();
+        deviceMap.clear();
         socketMap.clear();
+    }
+
+    @Override
+    public void disconnectDevice (String deviceAddress) {
+        BluetoothSocket socket = socketMap.get(deviceAddress);
+        if (socket != null) {
+            try {
+                socket.close();
+                socketMap.remove(deviceAddress);
+            } catch (IOException e) {
+                Log.e(TAG, "Could not close socket", e);
+            }
+        }
     }
 }

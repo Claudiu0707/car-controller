@@ -23,7 +23,9 @@ import java.util.List;
 public class DriverModeActivity extends AppCompatActivity {
     private static final String TAG = "DriverModeActivityTAG";
     DevicesConnected devicesConnected = DevicesConnected.getInstance();
-    BluetoothDevice carDevice = null;
+    BluetoothService bluetoothService = BluetoothService.getInstance();
+
+    String carDeviceAddress = null;
     private Button backButton, forwardButton, reverseButton, steerLeftButton, steerRightButton;
     private boolean isForward = false, isReverse = false, isLeft = false, isRight = false;
 
@@ -53,20 +55,19 @@ public class DriverModeActivity extends AppCompatActivity {
 
         // TODO: Clean this snippet of code
         if (!devicesConnected.getDevices().isEmpty()) {
-            carDevice = devicesConnected.getDevices().get(0);
-            List<BluetoothDevice> deviceList = devicesConnected.getDevices();
-            BluetoothService service = new BluetoothService();
-            BluetoothSocket socket = devicesConnected.getSocket(carDevice);
-            service.initializeStream(socket);
+            carDeviceAddress = devicesConnected.getDevices().get(0).getAddress();
+            BluetoothSocket socket = devicesConnected.getSocket(carDeviceAddress);
+            bluetoothService.initializeStream(carDeviceAddress, socket);
+
 
             forwardButton.setOnTouchListener((view, motionEvent) -> {
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     isForward = true;
-                    sendDriveCommand(service);
+                    sendDriveCommand(bluetoothService);
                     return true;
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
                     isForward = false;
-                    sendDriveCommand(service);
+                    sendDriveCommand(bluetoothService);
                     return true;
                 }
                 return false;
@@ -74,11 +75,11 @@ public class DriverModeActivity extends AppCompatActivity {
             reverseButton.setOnTouchListener((view, motionEvent) -> {
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     isReverse = true;
-                    sendDriveCommand(service);
+                    sendDriveCommand(bluetoothService);
                     return true;
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
                     isReverse = false;
-                    sendDriveCommand(service);
+                    sendDriveCommand(bluetoothService);
                     return true;
                 }
                 return false;
@@ -86,11 +87,11 @@ public class DriverModeActivity extends AppCompatActivity {
             steerLeftButton.setOnTouchListener((view, motionEvent) -> {
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     isLeft = true;
-                    sendDriveCommand(service);
+                    sendDriveCommand(bluetoothService);
                     return true;
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
                     isLeft = false;
-                    sendDriveCommand(service);
+                    sendDriveCommand(bluetoothService);
                     return true;
                 }
                 return false;
@@ -98,11 +99,11 @@ public class DriverModeActivity extends AppCompatActivity {
             steerRightButton.setOnTouchListener((view, motionEvent) -> {
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     isRight = true;
-                    sendDriveCommand(service);
+                    sendDriveCommand(bluetoothService);
                     return true;
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
                     isRight = false;
-                    sendDriveCommand(service);
+                    sendDriveCommand(bluetoothService);
                     return true;
                 }
                 return false;
@@ -131,6 +132,6 @@ public class DriverModeActivity extends AppCompatActivity {
         } else {
             command = Commands.STOP;
         }
-        service.write(command.getCommand());
+        service.write(carDeviceAddress, command.getCommand());
     }
 }

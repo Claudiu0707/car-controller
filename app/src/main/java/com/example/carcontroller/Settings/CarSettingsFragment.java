@@ -29,38 +29,36 @@ import org.w3c.dom.Text;
 import java.util.List;
 
 public class CarSettingsFragment extends Fragment {
-    private View view;
+    DevicesConnected devicesConnected = DevicesConnected.getInstance();
+    BluetoothService bluetoothService = BluetoothService.getInstance();
+
     private Context context;
     int operationMode = 0;
-    DevicesConnected devicesConnected = DevicesConnected.getInstance();
-    BluetoothDevice carDevice = null;
-    BluetoothService service = null;
+    String carDeviceAddress = null;
     BluetoothSocket socket = null;
 
     private EditText Kp, Ki, Kd, baseSpeed;
-    private Button backButton, loadDataButton;
     MaterialAutoCompleteTextView dropdownModeOptions;
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_car_settings, container, false);
+        View view1 = inflater.inflate(R.layout.fragment_car_settings, container, false);
         context = requireContext();
 
-        dropdownModeOptions = view.findViewById(R.id.inputTVID);
-        Kp = view.findViewById(R.id.kpTVID);
-        Ki = view.findViewById(R.id.kiTVID);
-        Kd = view.findViewById(R.id.kdTVID);
-        baseSpeed = view.findViewById(R.id.baseSpeedTVID);
+        dropdownModeOptions = view1.findViewById(R.id.inputTVID);
+        Kp = view1.findViewById(R.id.kpTVID);
+        Ki = view1.findViewById(R.id.kiTVID);
+        Kd = view1.findViewById(R.id.kdTVID);
+        baseSpeed = view1.findViewById(R.id.baseSpeedTVID);
 
         if (!devicesConnected.getDevices().isEmpty()) {
-            carDevice = devicesConnected.getDevices().get(0);
-            service = new BluetoothService();
-            socket = devicesConnected.getSocket(carDevice);
-            service.initializeStream(socket);
+            carDeviceAddress = devicesConnected.getDevices().get(0).getAddress();
+            socket = devicesConnected.getSocket(carDeviceAddress);
+            bluetoothService.initializeStream(carDeviceAddress, socket);
         }
         // Buttons initialization
-        backButton = view.findViewById(R.id.backButtonID);
-        loadDataButton = view.findViewById(R.id.loadDataButtonID);
+        Button backButton = view1.findViewById(R.id.backButtonID);
+        Button loadDataButton = view1.findViewById(R.id.loadDataButtonID);
 
         // ---------------- BUTTON ONCLICK LISTENERS ----------------
         backButton.setOnClickListener(view -> {
@@ -93,13 +91,13 @@ public class CarSettingsFragment extends Fragment {
                     command = Commands.LINEFOLLOWERMODE;
                     break;
             }
-            service.write(command.getCommand());
+            bluetoothService.write(carDeviceAddress, command.getCommand());
 
             SharedPreferences prefs = context.getSharedPreferences("app_prefs", MODE_PRIVATE);
             prefs.edit().putInt("operationMode", operationMode).apply();
 
         });
-        return view;
+        return view1;
     }
 
     private void calibrateLineFollowerData () throws InterruptedException {
@@ -151,9 +149,9 @@ public class CarSettingsFragment extends Fragment {
     }
 
     private void sendLineFollowerInstruction (Commands command, String data) {
-        if (service != null) {
-            service.write(command.getCommand());
-            service.write(data);
+        if (bluetoothService != null) {
+            bluetoothService.write(carDeviceAddress, command.getCommand());
+            bluetoothService.write(carDeviceAddress, data);
         }
     }
 
