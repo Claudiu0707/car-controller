@@ -28,6 +28,7 @@ public class BluetoothService {
     private final Map<String, BlockingQueue<byte[]>> readQueues = new HashMap<>();
 
     public void initializeStream (String deviceAddress, BluetoothSocket socket) {
+        Log.i(TAG, "Stream initialized for device: " + deviceAddress);
         readQueues.put(deviceAddress, new LinkedBlockingQueue<>());
 
         ConnectedThread thread = new ConnectedThread(socket);
@@ -36,6 +37,7 @@ public class BluetoothService {
     }
 
     public void write (String deviceAddress, String message) {
+        Log.d(TAG, "Message: " + message);
         ConnectedThread thread = connections.get(deviceAddress);
         if (thread != null) {
             thread.write(message.getBytes());
@@ -83,17 +85,17 @@ public class BluetoothService {
         }
 
         public void run () {
-//            byte[] mmBuffer = new byte[1024];
-//            int numBytes;
-//
-//            while (true) {
-//                try {
-//                    numBytes = mmInStream.read(mmBuffer);
-//                } catch (IOException e) {
-//                    Log.d(TAG, "Input stream was disconnected", e);
-//                    break;
-//                }
-//            }
+            byte[] mmBuffer = new byte[1024];
+            int numBytes;
+
+            while (true) {
+                try {
+                    numBytes = mmInStream.read(mmBuffer);
+                } catch (IOException e) {
+                    Log.d(TAG, "Input stream was disconnected", e);
+                    break;
+                }
+            }
         }
 
         public void write (byte[] bytes) {

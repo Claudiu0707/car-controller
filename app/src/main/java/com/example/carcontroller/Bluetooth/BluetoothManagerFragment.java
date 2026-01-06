@@ -23,6 +23,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.example.carcontroller.Device;
 import com.example.carcontroller.R;
 
 import java.util.ArrayList;
@@ -42,7 +43,6 @@ public class BluetoothManagerFragment extends Fragment {
     // The followings are assumed:
     // First thread corresponds to car, the other correspond to the checkpoints (in order: CP1, CP2, CP3)
     ArrayList<ConnectThread> connectThreads = new ArrayList<>();
-    private Button backButton = null, refreshDevicesButton = null, startConnectionSequenceButton = null, resetConnectionSequenceButton = null;
     private ToggleButton bluetoothToggleButton = null, discoverToggleButton = null;
 
     private boolean receiver1Registered = false, receiver2Registered = false, receiver3Registered = false;
@@ -65,10 +65,10 @@ public class BluetoothManagerFragment extends Fragment {
         mSelectedDevicesList = new ArrayList<>();
 
         // Buttons initialization
-        backButton = view.findViewById(R.id.backButtonID);
-        refreshDevicesButton = view.findViewById(R.id.refreshDevicesButtonID);
-        startConnectionSequenceButton = view.findViewById(R.id.startConnectionSequenceButtonID);
-        resetConnectionSequenceButton = view.findViewById(R.id.resetConnectionSequenceButtonID);
+        Button backButton = view.findViewById(R.id.backButtonID);
+        Button refreshDevicesButton = view.findViewById(R.id.refreshDevicesButtonID);
+        Button startConnectionSequenceButton = view.findViewById(R.id.startConnectionSequenceButtonID);
+        Button resetConnectionSequenceButton = view.findViewById(R.id.resetConnectionSequenceButtonID);
 
         bluetoothToggleButton = view.findViewById(R.id.bluetoothToggleButtonID);
         discoverToggleButton = view.findViewById(R.id.discoverToggleButtonID);
@@ -305,7 +305,13 @@ public class BluetoothManagerFragment extends Fragment {
         if (selectedDeviceCount >= 1) {
             for (BluetoothDevice device : mSelectedDevicesList) {
                 int index = mSelectedDevicesList.indexOf(device);
-                ConnectThread thread = new ConnectThread(device, mBluetoothManager, context);
+                ConnectThread thread;
+
+                if (index == 0)
+                    thread = new ConnectThread(device, mBluetoothManager, context, Device.DeviceType.CAR);
+                else
+                    thread = new ConnectThread(device, mBluetoothManager, context, Device.DeviceType.CHECKPOINT, index);
+
                 connectThreads.add(thread);
                 connectThreads.get(index).start();
             }
@@ -429,14 +435,6 @@ public class BluetoothManagerFragment extends Fragment {
             permissions.add(Manifest.permission.BLUETOOTH_ADVERTISE);
         } else {
             permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        }
-
-        // Filter out already granted permissions
-        ArrayList<String> permissionsToRequest = new ArrayList<>();
-        for (String permission : permissions) {
-            if (context.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
-                permissionsToRequest.add(permission);
-            }
         }
     }
 

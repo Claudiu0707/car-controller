@@ -1,11 +1,10 @@
 package com.example.carcontroller.Main;
 
 import android.annotation.SuppressLint;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,20 +12,16 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.carcontroller.Bluetooth.BluetoothService;
-import com.example.carcontroller.Bluetooth.DevicesConnected;
+import com.example.carcontroller.CarDevice;
+import com.example.carcontroller.DeviceManager;
 import com.example.carcontroller.R;
-
-import java.util.List;
 
 
 public class DriverModeActivity extends AppCompatActivity {
     private static final String TAG = "DriverModeActivityTAG";
-    DevicesConnected devicesConnected = DevicesConnected.getInstance();
-    BluetoothService bluetoothService = BluetoothService.getInstance();
+    DeviceManager deviceManager = DeviceManager.getInstance();
+    CarDevice carDevice;
 
-    String carDeviceAddress = null;
-    private Button backButton, forwardButton, reverseButton, steerLeftButton, steerRightButton;
     private boolean isForward = false, isReverse = false, isLeft = false, isRight = false;
 
     @SuppressLint("ClickableViewAccessibility")
@@ -41,33 +36,32 @@ public class DriverModeActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Buttons initialization
-        backButton = (Button) findViewById(R.id.backButtonID);
+        if (deviceManager.hasCarDevice()) {
+            carDevice = deviceManager.getCarDevice();
+        }
 
-        forwardButton = (Button) findViewById(R.id.forwardButton);
-        reverseButton = (Button) findViewById(R.id.reverseButton);
-        steerLeftButton = (Button) findViewById(R.id.steerLeftButton);
-        steerRightButton = (Button) findViewById(R.id.steerRightButton);
+        // Buttons initialization
+        Button backButton = (Button) findViewById(R.id.backButtonID);
+
+        Button forwardButton = (Button) findViewById(R.id.forwardButton);
+        Button reverseButton = (Button) findViewById(R.id.reverseButton);
+        Button steerLeftButton = (Button) findViewById(R.id.steerLeftButton);
+        Button steerRightButton = (Button) findViewById(R.id.steerRightButton);
+
         // ---------------- BUTTON ONCLICK LISTENERS ----------------
         backButton.setOnClickListener(v -> {
             finish();
         });
 
-        // TODO: Clean this snippet of code
-        if (!devicesConnected.getDevices().isEmpty()) {
-            carDeviceAddress = devicesConnected.getDevices().get(0).getAddress();
-            BluetoothSocket socket = devicesConnected.getSocket(carDeviceAddress);
-            bluetoothService.initializeStream(carDeviceAddress, socket);
-
-
+        if (carDevice.isConnected()) {
             forwardButton.setOnTouchListener((view, motionEvent) -> {
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     isForward = true;
-                    sendDriveCommand(bluetoothService);
+                    sendDriveCommand();
                     return true;
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
                     isForward = false;
-                    sendDriveCommand(bluetoothService);
+                    sendDriveCommand();
                     return true;
                 }
                 return false;
@@ -75,11 +69,11 @@ public class DriverModeActivity extends AppCompatActivity {
             reverseButton.setOnTouchListener((view, motionEvent) -> {
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     isReverse = true;
-                    sendDriveCommand(bluetoothService);
+                    sendDriveCommand();
                     return true;
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
                     isReverse = false;
-                    sendDriveCommand(bluetoothService);
+                    sendDriveCommand();
                     return true;
                 }
                 return false;
@@ -87,11 +81,11 @@ public class DriverModeActivity extends AppCompatActivity {
             steerLeftButton.setOnTouchListener((view, motionEvent) -> {
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     isLeft = true;
-                    sendDriveCommand(bluetoothService);
+                    sendDriveCommand();
                     return true;
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
                     isLeft = false;
-                    sendDriveCommand(bluetoothService);
+                    sendDriveCommand();
                     return true;
                 }
                 return false;
@@ -99,11 +93,11 @@ public class DriverModeActivity extends AppCompatActivity {
             steerRightButton.setOnTouchListener((view, motionEvent) -> {
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     isRight = true;
-                    sendDriveCommand(bluetoothService);
+                    sendDriveCommand();
                     return true;
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
                     isRight = false;
-                    sendDriveCommand(bluetoothService);
+                    sendDriveCommand();
                     return true;
                 }
                 return false;
@@ -111,7 +105,7 @@ public class DriverModeActivity extends AppCompatActivity {
         }
     }
 
-    private void sendDriveCommand (BluetoothService service) {
+    private void sendDriveCommand () {
         Commands command;
         if (isForward && isLeft) {
             command = Commands.FORWARDLEFT;
@@ -132,6 +126,6 @@ public class DriverModeActivity extends AppCompatActivity {
         } else {
             command = Commands.STOP;
         }
-        service.write(carDeviceAddress, command.getCommand());
+        carDevice.sendCommand(command);
     }
 }

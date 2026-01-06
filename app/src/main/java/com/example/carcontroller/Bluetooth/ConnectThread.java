@@ -14,6 +14,9 @@ import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 
+import com.example.carcontroller.Device;
+import com.example.carcontroller.DeviceManager;
+
 import java.io.IOException;
 import java.util.UUID;
 public class ConnectThread extends Thread {
@@ -24,12 +27,15 @@ public class ConnectThread extends Thread {
     private final BluetoothAdapter bluetoothAdapter;
     private final Context context;
 
-    DevicesConnected devicesConnected = DevicesConnected.getInstance();
+    DeviceManager deviceManager = DeviceManager.getInstance();
+    Device.DeviceType type;
+    private int checkpointIndex;
 
-    public ConnectThread(BluetoothDevice device, BluetoothManager manager, Context cntx) {
+    public ConnectThread (BluetoothDevice device, BluetoothManager manager, Context context, Device.DeviceType type) {
         this.bluetoothAdapter = manager.getAdapter();
         this.deviceToConnect = device;
-        this.context = cntx;
+        this.context = context;
+        this.type = type;
         BluetoothSocket tmp = null;
 
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
@@ -44,6 +50,27 @@ public class ConnectThread extends Thread {
         targetSocket = tmp;
     }
 
+    public ConnectThread (BluetoothDevice device, BluetoothManager manager, Context context, Device.DeviceType type, int checkpointIndex) {
+        this.bluetoothAdapter = manager.getAdapter();
+        this.deviceToConnect = device;
+        this.context = context;
+        this.type = type;
+        this.checkpointIndex = checkpointIndex;
+        BluetoothSocket tmp = null;
+
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+            try {
+                tmp = deviceToConnect.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
+            } catch (IOException e) {
+                Log.e(TAG, "Socket's create() method failed", e);
+            }
+        } else {
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission");
+        }
+        targetSocket = tmp;
+    }
+
+
     @Override
     public void run() {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
@@ -54,13 +81,15 @@ public class ConnectThread extends Thread {
 
         try {
             targetSocket.connect();
-            new Handler(Looper.getMainLooper()).post(() ->
-                    Toast.makeText(context,
-                            "Connected to " + deviceToConnect.getName(),
-                            Toast.LENGTH_SHORT).show()
-            );
+            new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "Connected to " + deviceToConnect.getName(), Toast.LENGTH_SHORT).show());
 
-            devicesConnected.addConnection(deviceToConnect, targetSocket);
+            if (type == Device.DeviceType.CAR) {
+                deviceManager.registerCarDevice(deviceToConnect.getAddress(), deviceToConnect.getName(), targetSocket);
+                deviceManager.getCarDevice().connect();
+            } else if (type == Device.DeviceType.CHECKPOINT) {
+                deviceManager.registerCheckpointDevice(deviceToConnect.getAddress(), deviceToConnect.getName(), targetSocket, checkpointIndex);
+                deviceManager.getCheckpointDevice(checkpointIndex).connect();
+            }
             Log.i(TAG, "Connection successful!");
         } catch (IOException e) {
             Log.e(TAG, "Could not connect; closing socket", e);

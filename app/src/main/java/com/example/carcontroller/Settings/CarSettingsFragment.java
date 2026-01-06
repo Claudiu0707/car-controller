@@ -1,43 +1,38 @@
 package com.example.carcontroller.Settings;
 
-import static android.content.Context.MODE_PRIVATE;
-
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.carcontroller.Bluetooth.BluetoothService;
-import com.example.carcontroller.Bluetooth.DevicesConnected;
-import com.example.carcontroller.Main.Commands;
+import com.example.carcontroller.CarDevice;
+import com.example.carcontroller.DeviceManager;
 import com.example.carcontroller.R;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 
-import org.w3c.dom.Text;
-
-import java.util.List;
-
 public class CarSettingsFragment extends Fragment {
-    DevicesConnected devicesConnected = DevicesConnected.getInstance();
+    private static final String TAG = "CarSettingsFragment";
+
     BluetoothService bluetoothService = BluetoothService.getInstance();
+    DeviceManager deviceManager = DeviceManager.getInstance();
+    CarDevice carDevice = deviceManager.getCarDevice();
 
     private Context context;
-    int operationMode = 0;
+    int optionIndex = 0;
     String carDeviceAddress = null;
     BluetoothSocket socket = null;
 
-    private EditText Kp, Ki, Kd, baseSpeed;
+    private EditText Kp, Ki, Kd, baseSpeedLeft, baseSpeedRight;
     MaterialAutoCompleteTextView dropdownModeOptions;
 
     @Override
@@ -46,16 +41,12 @@ public class CarSettingsFragment extends Fragment {
         context = requireContext();
 
         dropdownModeOptions = view1.findViewById(R.id.inputTVID);
-        Kp = view1.findViewById(R.id.kpTVID);
-        Ki = view1.findViewById(R.id.kiTVID);
-        Kd = view1.findViewById(R.id.kdTVID);
-        baseSpeed = view1.findViewById(R.id.baseSpeedTVID);
+        Kp = view1.findViewById(R.id.kpETID);
+        Ki = view1.findViewById(R.id.kiETID);
+        Kd = view1.findViewById(R.id.kdETID);
+        baseSpeedLeft = view1.findViewById(R.id.baseSpeedLeftETID);
+        baseSpeedRight = view1.findViewById(R.id.baseSpeedRightETID);
 
-        if (!devicesConnected.getDevices().isEmpty()) {
-            carDeviceAddress = devicesConnected.getDevices().get(0).getAddress();
-            socket = devicesConnected.getSocket(carDeviceAddress);
-            bluetoothService.initializeStream(carDeviceAddress, socket);
-        }
         // Buttons initialization
         Button backButton = view1.findViewById(R.id.backButtonID);
         Button loadDataButton = view1.findViewById(R.id.loadDataButtonID);
@@ -65,113 +56,39 @@ public class CarSettingsFragment extends Fragment {
             close();
         });
         loadDataButton.setOnClickListener(view -> {
-            try {
-                calibrateLineFollowerData();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            calibrateLineFollowerData();
         });
 
         dropdownModeOptions.setOnItemClickListener((parent, view, position, id) -> {
-            operationMode = position;
-            String text = "empty";
-
-            Commands command = Commands.EMPTY;
-            switch (operationMode) {
-                case 0:
-                    text = "SETUP";
-                    command = Commands.SETUPMODE;
-                    break;
-                case 1:
-                    text = "DRIVE";
-                    command = Commands.DRIVEMODE;
-                    break;
-                case 2:
-                    text = "LINE FOLLOWER";
-                    command = Commands.LINEFOLLOWERMODE;
-                    break;
-            }
-            bluetoothService.write(carDeviceAddress, command.getCommand());
-
-            SharedPreferences prefs = context.getSharedPreferences("app_prefs", MODE_PRIVATE);
-            prefs.edit().putInt("operationMode", operationMode).apply();
-
+            CarDevice.OperationMode[] operationModes = CarDevice.OperationMode.values();
+            CarDevice.OperationMode mode = operationModes[position];
+            carDevice.setOperationMode(mode);
         });
+
         return view1;
     }
 
-    private void calibrateLineFollowerData () throws InterruptedException {
-        String kpString = Kp.getText().toString();
-        String kiString = Ki.getText().toString();
-        String kdString = Kd.getText().toString();
-        String baseSpeedString = baseSpeed.getText().toString();
-
-        boolean bKp = checkData(0, kpString);
-        boolean bKi = checkData(0, kiString);
-        boolean bKd = checkData(0, kdString);
-        boolean bBaseSpeed = checkData(1, baseSpeedString);
-
-        if (!bKp || !bKi || !bKd || !bBaseSpeed) {
-            Toast.makeText(context, "Invalid data format!", Toast.LENGTH_LONG).show();
-        } else {
-            // TODO: Remove Thread.sleep if nothing breaks along with try-catch block in loadDataButton.onClickListener
-            convertLineFollowerDataToInstruction(kpString);
-            Thread.sleep(20); // wait 20 ms
-
-            convertLineFollowerDataToInstruction(kiString);
-            Thread.sleep(20);
-
-            convertLineFollowerDataToInstruction(kdString);
-            Thread.sleep(20);
-
-            convertLineFollowerDataToInstruction(baseSpeedString);
-        }
-    }
-
-    private void convertLineFollowerDataToInstruction (String rawData) {
-        switch (rawData.length()) {
-            case 1:
-                sendLineFollowerInstruction(Commands.WAITFOR1, rawData);
-                break;
-            case 2:
-                sendLineFollowerInstruction(Commands.WAITFOR2, rawData);
-                break;
-            case 3:
-                sendLineFollowerInstruction(Commands.WAITFOR3, rawData);
-                break;
-            case 4:
-                sendLineFollowerInstruction(Commands.WAITFOR4, rawData);
-                break;
-            default:
-                sendLineFollowerInstruction(Commands.WAITFOR5, rawData);
-                break;
-        }
-    }
-
-    private void sendLineFollowerInstruction (Commands command, String data) {
-        if (bluetoothService != null) {
-            bluetoothService.write(carDeviceAddress, command.getCommand());
-            bluetoothService.write(carDeviceAddress, data);
-        }
-    }
-
-    private boolean checkData (int type, String data) {
-        if (data == null) {
-            return false;
-        }
+    private void calibrateLineFollowerData () {
+        float kp = 0, ki = 0, kd = 0, dBaseSpeedLeft = 0, dBaseSpeedRight = 0;
         try {
-            float value = Float.parseFloat(data);
-
-            if (type == 0) {
-                return value >= 0.0f && value <= 100.0f;
-            } else if (type == 1) {
-                return value >= 80.0f && value <= 255.0f;
-            } else {
-                return false;
-            }
+            kp = Float.parseFloat(Kp.getText().toString());
+            ki = Float.parseFloat(Ki.getText().toString());
+            kd = Float.parseFloat(Kd.getText().toString());
+            dBaseSpeedLeft = Float.parseFloat(baseSpeedLeft.getText().toString());
+            dBaseSpeedRight = Float.parseFloat(baseSpeedRight.getText().toString());
         } catch (NumberFormatException e) {
-            return false;
+            Toast.makeText(context, "Invalid data format!", Toast.LENGTH_LONG).show();
         }
+
+        String logMessage;
+        if (!carDevice.configurePID(kp, ki, kd, dBaseSpeedLeft, dBaseSpeedRight)) {
+            logMessage = "Invalid data ranges!";
+        } else {
+            if (carDevice.uploadPID()) logMessage = "Data uploaded!";
+            else logMessage = "Data upload failed!";
+        }
+        // Log.i(TAG, logMessage);
+        Toast.makeText(context, logMessage, Toast.LENGTH_LONG).show();
     }
 
     private void open (Fragment fragment) {
