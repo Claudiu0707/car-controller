@@ -13,15 +13,25 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.carcontroller.CarDevice;
+import com.example.carcontroller.Device;
 import com.example.carcontroller.DeviceManager;
 import com.example.carcontroller.R;
+import com.example.carcontroller.SessionManager;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 public class DriverModeActivity extends AppCompatActivity {
     private static final String TAG = "DriverModeActivityTAG";
     DeviceManager deviceManager = DeviceManager.getInstance();
-    CarDevice carDevice;
+    SessionManager sessionManager = SessionManager.getInstance();
 
+    CarDevice carDevice;
+    Button backButton, forwardButton, reverseButton, steerLeftButton, steerRightButton;
+    Button startSessionButton;
+    Button endSessionButton;
     private boolean isForward = false, isReverse = false, isLeft = false, isRight = false;
 
     @SuppressLint("ClickableViewAccessibility")
@@ -40,20 +50,35 @@ public class DriverModeActivity extends AppCompatActivity {
             carDevice = deviceManager.getCarDevice();
         }
 
-        // Buttons initialization
-        Button backButton = (Button) findViewById(R.id.backButtonID);
-
-        Button forwardButton = (Button) findViewById(R.id.forwardButton);
-        Button reverseButton = (Button) findViewById(R.id.reverseButton);
-        Button steerLeftButton = (Button) findViewById(R.id.steerLeftButton);
-        Button steerRightButton = (Button) findViewById(R.id.steerRightButton);
+        initializeViews();
 
         // ---------------- BUTTON ONCLICK LISTENERS ----------------
         backButton.setOnClickListener(v -> {
             finish();
         });
 
-        if (carDevice.isConnected()) {
+        if (carDevice.getDeviceStatus() == Device.DeviceStatus.CONNECTED) {
+            startSessionButton.setOnClickListener(v -> {
+                String birthdateStr = "2005-07-07";
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                Date birthdate = null;
+                try {
+                    birthdate = formatter.parse(birthdateStr);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+
+                SessionManager.Driver dummyDriver = new SessionManager.Driver("dummyDriverName", 20, SessionManager.Gender.MALE, birthdate);
+                sessionManager.setCurrentDriver(dummyDriver);
+                boolean toDeleteLater = sessionManager.startNewRaceSession("dummyCircuitName");
+
+
+            });
+
+            endSessionButton.setOnClickListener(v -> {
+                sessionManager.finishRaceSession();
+            });
+
             forwardButton.setOnTouchListener((view, motionEvent) -> {
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     isForward = true;
@@ -103,6 +128,18 @@ public class DriverModeActivity extends AppCompatActivity {
                 return false;
             });
         }
+    }
+
+    private void initializeViews () {
+        // Buttons initialization
+        backButton = (Button) findViewById(R.id.backButtonID);
+        forwardButton = (Button) findViewById(R.id.forwardButtonID);
+        reverseButton = (Button) findViewById(R.id.reverseButtonID);
+        steerLeftButton = (Button) findViewById(R.id.steerLeftButtonID);
+        steerRightButton = (Button) findViewById(R.id.steerRightButtonID);
+
+        startSessionButton = (Button) findViewById(R.id.startSessionButtonID);
+        endSessionButton = (Button) findViewById(R.id.endSessionButtonID);
     }
 
     private void sendDriveCommand () {

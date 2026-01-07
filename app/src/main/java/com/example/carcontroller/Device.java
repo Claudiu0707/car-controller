@@ -4,7 +4,7 @@ import com.example.carcontroller.Bluetooth.BluetoothService;
 
 import java.util.Date;
 
-public abstract class Device {
+public abstract class Device implements BluetoothDataListener {
     private final String deviceAddress;
     private final DeviceType deviceType;
     private String deviceName;
@@ -57,8 +57,6 @@ public abstract class Device {
     public abstract boolean disconnect ();
 
     public abstract boolean sendData (String data);
-
-    public abstract String receiveData ();
 
     public abstract boolean isConnected ();
 

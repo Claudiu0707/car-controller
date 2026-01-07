@@ -3,6 +3,8 @@ package com.example.carcontroller.Bluetooth;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
+import com.example.carcontroller.BluetoothDataListener;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -16,7 +18,7 @@ public class BluetoothService {
     private static final String TAG = "BluetoothServiceTAG";
 
     private static BluetoothService instance;
-
+    private Map<String, BluetoothDataListener> listeners = new HashMap<>();
     public static synchronized BluetoothService getInstance () {
         if (instance == null) {
             instance = new BluetoothService();
@@ -24,14 +26,15 @@ public class BluetoothService {
         return instance;
     }
 
-    private final Map<String, ConnectedThread> connections = new HashMap<>();
-    private final Map<String, BlockingQueue<byte[]>> readQueues = new HashMap<>();
+    public void registerListener (String deviceAddress, BluetoothDataListener listener) {
+        listeners.put(deviceAddress, listener);
+    }
 
+    private final Map<String, ConnectedThread> connections = new HashMap<>();
     public void initializeStream (String deviceAddress, BluetoothSocket socket) {
         Log.i(TAG, "Stream initialized for device: " + deviceAddress);
-        readQueues.put(deviceAddress, new LinkedBlockingQueue<>());
 
-        ConnectedThread thread = new ConnectedThread(socket);
+        ConnectedThread thread = new ConnectedThread(socket, deviceAddress);
         connections.put(deviceAddress, thread);
         thread.start();
     }
@@ -46,27 +49,24 @@ public class BluetoothService {
         }
     }
 
-    public String read (String deviceAddress) {
-        BlockingQueue<byte[]> queue = readQueues.get(deviceAddress);
-        if (queue != null) {
-            byte[] data = queue.poll(); // returns null if no data available
-            if (data != null) {
-                return new String(data);
-            }
+    public void notifyDataReceived (String deviceAddress, byte[] data) {
+        BluetoothDataListener listener = listeners.get(deviceAddress);
+        if (listener != null) {
+            listener.onDataReceived(deviceAddress, data);
         }
-        return null;
     }
-
 
     private class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
+        private String deviceAddress;
 
-        public ConnectedThread (BluetoothSocket socket) {
+        public ConnectedThread (BluetoothSocket socket, String deviceAddress) {
             mmSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
+            this.deviceAddress = deviceAddress;
 
             try {
                 tmpIn = socket.getInputStream();
@@ -86,11 +86,19 @@ public class BluetoothService {
 
         public void run () {
             byte[] mmBuffer = new byte[1024];
-            int numBytes;
-
+            byte[] instructionBuffer = new byte[2];
+            int byteInstructionIndex = 0;
             while (true) {
                 try {
-                    numBytes = mmInStream.read(mmBuffer);
+                    int readBytes = mmInStream.read(mmBuffer);
+                    if (readBytes == -1) break;
+                    for (int i = 0; i < readBytes; i++) {
+                        instructionBuffer[byteInstructionIndex++] = mmBuffer[i];
+                        if (byteInstructionIndex == 2) {
+                            notifyDataReceived(deviceAddress, instructionBuffer);
+                            byteInstructionIndex = 0;
+                        }
+                    }
                 } catch (IOException e) {
                     Log.d(TAG, "Input stream was disconnected", e);
                     break;

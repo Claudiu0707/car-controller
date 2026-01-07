@@ -32,6 +32,9 @@ public class CarDevice extends Device {
         this.bluetoothService = BluetoothService.getInstance();
         this.currentMode = OperationMode.SETUP;
         this.configuration = new CarConfiguration();
+
+
+        bluetoothService.registerListener(deviceAddress, this);
     }
 
     @Override
@@ -77,9 +80,10 @@ public class CarDevice extends Device {
     }
 
     @Override
-    public String receiveData () {
-        // For now I don't have any functionality that handles car feedback
-        return "";
+    public void onDataReceived (String deviceAddress, byte[] data) {
+        if (getDeviceAddress().contentEquals(deviceAddress)) {
+            Log.d(TAG, "Car received data");
+        }
     }
 
     @Override

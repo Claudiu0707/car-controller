@@ -20,7 +20,7 @@
         app:layout_constraintVertical_bias="0.044" />
 
     <Button
-        android:id="@+id/forwardButton"
+        android:id="@+id/forwardButtonID"
         android:layout_width="102dp"
         android:layout_height="98dp"
         android:layout_marginStart="16dp"
@@ -31,30 +31,30 @@
         app:layout_constraintVertical_bias="0.875" />
 
     <Button
-        android:id="@+id/steerLeftButton"
+        android:id="@+id/steerLeftButtonID"
         android:layout_width="102dp"
         android:layout_height="98dp"
         android:text="Left"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/steerRightButton"
+        app:layout_constraintEnd_toStartOf="@+id/steerRightButtonID"
         app:layout_constraintHorizontal_bias="0.938"
-        app:layout_constraintStart_toEndOf="@+id/reverseButton"
+        app:layout_constraintStart_toEndOf="@+id/reverseButtonID"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.875" />
 
     <Button
-        android:id="@+id/reverseButton"
+        android:id="@+id/reverseButtonID"
         android:layout_width="102dp"
         android:layout_height="98dp"
         android:layout_marginStart="20dp"
         android:text="Reverse"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/forwardButton"
+        app:layout_constraintStart_toEndOf="@+id/forwardButtonID"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.875" />
 
     <Button
-        android:id="@+id/steerRightButton"
+        android:id="@+id/steerRightButtonID"
         android:layout_width="102dp"
         android:layout_height="98dp"
         android:text="Right"
@@ -64,4 +64,28 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.875" />
+
+    <Button
+        android:id="@+id/startSessionButtonID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start Race"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.975"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.044" />
+
+    <Button
+        android:id="@+id/endSessionButtonID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="End Race"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.964"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.201" />
 </androidx.constraintlayout.widget.ConstraintLayout>
