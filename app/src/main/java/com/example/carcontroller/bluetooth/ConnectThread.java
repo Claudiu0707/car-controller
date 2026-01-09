@@ -1,4 +1,4 @@
-package com.example.carcontroller.Bluetooth;
+package com.example.carcontroller.bluetooth;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
@@ -14,8 +14,8 @@ import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 
-import com.example.carcontroller.Device;
-import com.example.carcontroller.DeviceManager;
+import com.example.carcontroller.devices.Device;
+import com.example.carcontroller.devices.DeviceManager;
 
 import java.io.IOException;
 import java.util.UUID;

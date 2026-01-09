@@ -1,4 +1,4 @@
-package com.example.carcontroller.Bluetooth;
+package com.example.carcontroller.main.Fragments;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -23,7 +23,9 @@ import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.example.carcontroller.Device;
+import com.example.carcontroller.bluetooth.ConnectThread;
+import com.example.carcontroller.bluetooth.DeviceListAdapter;
+import com.example.carcontroller.devices.Device;
 import com.example.carcontroller.R;
 
 import java.util.ArrayList;

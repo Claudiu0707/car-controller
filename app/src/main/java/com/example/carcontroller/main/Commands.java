@@ -1,4 +1,4 @@
-package com.example.carcontroller.Main;
+package com.example.carcontroller.main;
 
 public enum Commands {
     // Other commands

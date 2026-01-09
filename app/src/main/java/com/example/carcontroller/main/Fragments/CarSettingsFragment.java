@@ -1,4 +1,4 @@
-package com.example.carcontroller.Settings;
+package com.example.carcontroller.main.Fragments;
 
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
@@ -6,7 +6,6 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +13,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.carcontroller.Bluetooth.BluetoothService;
-import com.example.carcontroller.CarDevice;
-import com.example.carcontroller.DeviceManager;
+import com.example.carcontroller.bluetooth.BluetoothService;
+import com.example.carcontroller.devices.CarDevice;
+import com.example.carcontroller.devices.DeviceManager;
 import com.example.carcontroller.R;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 
@@ -37,35 +36,35 @@ public class CarSettingsFragment extends Fragment {
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view1 = inflater.inflate(R.layout.fragment_car_settings, container, false);
+        View view = inflater.inflate(R.layout.fragment_car_settings, container, false);
         context = requireContext();
 
-        dropdownModeOptions = view1.findViewById(R.id.inputTVID);
-        Kp = view1.findViewById(R.id.kpETID);
-        Ki = view1.findViewById(R.id.kiETID);
-        Kd = view1.findViewById(R.id.kdETID);
-        baseSpeedLeft = view1.findViewById(R.id.baseSpeedLeftETID);
-        baseSpeedRight = view1.findViewById(R.id.baseSpeedRightETID);
+        dropdownModeOptions = view.findViewById(R.id.inputModeID);
+        Kp = view.findViewById(R.id.kpETID);
+        Ki = view.findViewById(R.id.kiETID);
+        Kd = view.findViewById(R.id.kdETID);
+        baseSpeedLeft = view.findViewById(R.id.baseSpeedLeftETID);
+        baseSpeedRight = view.findViewById(R.id.baseSpeedRightETID);
 
         // Buttons initialization
-        Button backButton = view1.findViewById(R.id.backButtonID);
-        Button loadDataButton = view1.findViewById(R.id.loadDataButtonID);
+        Button backButton = view.findViewById(R.id.backButtonID);
+        Button loadDataButton = view.findViewById(R.id.loadDataButtonID);
 
         // ---------------- BUTTON ONCLICK LISTENERS ----------------
-        backButton.setOnClickListener(view -> {
+        backButton.setOnClickListener(v -> {
             close();
         });
-        loadDataButton.setOnClickListener(view -> {
+        loadDataButton.setOnClickListener(v -> {
             calibrateLineFollowerData();
         });
 
-        dropdownModeOptions.setOnItemClickListener((parent, view, position, id) -> {
+        dropdownModeOptions.setOnItemClickListener((parent, v, position, id) -> {
             CarDevice.OperationMode[] operationModes = CarDevice.OperationMode.values();
             CarDevice.OperationMode mode = operationModes[position];
             carDevice.setOperationMode(mode);
         });
 
-        return view1;
+        return view;
     }
 
     private void calibrateLineFollowerData () {

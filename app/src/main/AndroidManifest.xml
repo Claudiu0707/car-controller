@@ -15,8 +15,11 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- First one is to allow insecure connections -->
     <application
+        android:networkSecurityConfig="@xml/network_security_config"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -27,13 +30,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CarController">
         <activity
-            android:name=".Settings.SettingsActivity"
+            android:name=".main.Fragments.SettingsActivity"
             android:exported="false" />
         <activity
-            android:name=".Main.DriverModeActivity"
+            android:name=".main.Activities.DriverModeActivity"
             android:exported="false" />
         <activity
-            android:name=".Main.MainActivity"
+            android:name=".main.Activities.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

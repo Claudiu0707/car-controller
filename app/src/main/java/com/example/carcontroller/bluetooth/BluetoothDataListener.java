@@ -1,4 +1,4 @@
-package com.example.carcontroller;
+package com.example.carcontroller.bluetooth;
 
 public interface BluetoothDataListener {
 

@@ -1,4 +1,4 @@
-package com.example.carcontroller.Settings;
+package com.example.carcontroller.main.Fragments;
 
 import android.os.Bundle;
 
@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.example.carcontroller.Bluetooth.BluetoothManagerFragment;
 import com.example.carcontroller.R;
 
 public class SettingsFragment extends Fragment {

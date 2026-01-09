@@ -1,6 +1,6 @@
-package com.example.carcontroller;
+package com.example.carcontroller.devices;
 
-import com.example.carcontroller.Bluetooth.BluetoothService;
+import com.example.carcontroller.bluetooth.BluetoothDataListener;
 
 import java.util.Date;
 

@@ -5,7 +5,7 @@
     android:id="@+id/bluetoothManagerFragmentID"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Bluetooth.BluetoothManagerFragment">
+    tools:context=".main.Fragments.BluetoothManagerFragment">
 
     <ListView
         android:id="@+id/lvPairedDevicesID"

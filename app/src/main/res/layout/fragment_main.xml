@@ -2,71 +2,58 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/frameLayout"
+    android:id="@+id/frameLayout3"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".main.Fragments.SettingsFragment">
-
-    <!-- TODO: Update blank fragment layout -->
+    tools:context=".main.Fragments.MainFragment">
 
     <Button
-        android:id="@+id/bluetoothSettingsButtonID"
+        android:id="@+id/settingsButtonID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Bluetooth Settings"
+        android:text=" Settings "
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.499"
+        app:layout_constraintHorizontal_bias="0.025"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.286" />
+        app:layout_constraintVertical_bias="0.214" />
 
     <Button
-        android:id="@+id/carSettingsButtonID"
+        android:id="@+id/driverButtonID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Car Settings"
+        android:text="Drive Mode"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.499"
+        app:layout_constraintHorizontal_bias="0.026"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/bluetoothSettingsButtonID"
-        app:layout_constraintVertical_bias="0.066" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.385" />
 
-    <Button
-        android:id="@+id/databaseSettingsButtonID"
+    <TextView
+        android:id="@+id/textView5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Database Settings"
+        android:scaleX="2"
+        android:scaleY="2"
+        android:text="@string/car_controller"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.499"
+        app:layout_constraintHorizontal_bias="0.472"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/carSettingsButtonID"
-        app:layout_constraintVertical_bias="0.073" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.084" />
 
     <Button
-        android:id="@+id/backButtonID"
+        android:id="@+id/driverLoginButtonID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Back"
+        android:text="Login"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.024"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.044" />
-
-    <TextView
-        android:id="@+id/fragmentSettingsTitleID"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:scaleX="2.5"
-        android:scaleY="2.5"
-        android:text="Settings"
-        app:layout_constraintBottom_toTopOf="@+id/bluetoothSettingsButtonID"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

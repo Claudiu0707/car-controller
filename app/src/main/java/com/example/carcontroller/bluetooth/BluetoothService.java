@@ -1,18 +1,13 @@
-package com.example.carcontroller.Bluetooth;
+package com.example.carcontroller.bluetooth;
 
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
-import com.example.carcontroller.BluetoothDataListener;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class BluetoothService {
     private static final String TAG = "BluetoothServiceTAG";

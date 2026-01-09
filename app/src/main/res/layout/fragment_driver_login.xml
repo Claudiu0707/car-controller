@@ -2,10 +2,53 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/carSettingsFragmentID"
+    android:id="@+id/frameLayout2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".main.Fragments.CarSettingsFragment">
+    tools:context=".main.Fragments.DriverLoginFragment">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/carModeSelectionLayoutID"
+        style="@style/Widget.Material3.TextInputLayout.FilledBox.Dense.ExposedDropdownMenu"
+        android:layout_width="160dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="25dp"
+        android:hint="Select gender"
+        app:boxCornerRadiusBottomEnd="10sp"
+        app:boxCornerRadiusBottomStart="10sp"
+        app:boxCornerRadiusTopEnd="10sp"
+        app:boxCornerRadiusTopStart="10sp"
+        app:boxStrokeWidth="0sp"
+        app:boxStrokeWidthFocused="0sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.61"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.362">
+
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/inputGenderID"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:inputType="none"
+            app:simpleItems="@array/gender_options_list" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/driverLoginTitleTVID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleX="2"
+        android:scaleY="2"
+        android:text="Login Menu"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.472"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.084" />
 
     <Button
         android:id="@+id/backButtonID"
@@ -19,115 +62,71 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.044" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/carModeSelectionLayoutID"
-        style="@style/Widget.Material3.TextInputLayout.FilledBox.Dense.ExposedDropdownMenu"
-        android:layout_width="251dp"
-        android:layout_height="56dp"
-        android:layout_marginStart="25dp"
-        android:layout_marginEnd="25dp"
-        android:hint="Select car mode"
-        app:boxCornerRadiusBottomEnd="10sp"
-        app:boxCornerRadiusBottomStart="10sp"
-        app:boxCornerRadiusTopEnd="10sp"
-        app:boxCornerRadiusTopStart="10sp"
-        app:boxStrokeWidth="0sp"
-        app:boxStrokeWidthFocused="0sp"
+    <EditText
+        android:id="@+id/firstNameInputID"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:ems="10"
+        android:hint="First name"
+        android:inputType="text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.235"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.234">
-
-        <com.google.android.material.textfield.MaterialAutoCompleteTextView
-            android:id="@+id/inputModeID"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:inputType="none"
-            app:simpleItems="@array/modes_options_list" />
-    </com.google.android.material.textfield.TextInputLayout>
+        app:layout_constraintVertical_bias="0.199" />
 
     <EditText
-        android:id="@+id/kpETID"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/ageInputID"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
         android:ems="10"
-        android:inputType="text"
-        android:hint="P Factor"
+        android:hint="Age"
+        android:inputType="numberSigned"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.046"
+        app:layout_constraintHorizontal_bias="0.235"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.412" />
+        app:layout_constraintVertical_bias="0.501" />
 
     <EditText
-        android:id="@+id/baseSpeedLeftETID"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/lastNameInputID"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
         android:ems="10"
+        android:hint="Last name"
         android:inputType="text"
-        android:hint="Left Base Speed"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.047"
+        app:layout_constraintHorizontal_bias="0.235"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.789" />
-
-    <EditText
-        android:id="@+id/baseSpeedRightETID"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:hint="Right Base Speed"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.046"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.912" />
-
-    <EditText
-        android:id="@+id/kdETID"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:hint="D Factor"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.046"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.666" />
-
-    <EditText
-        android:id="@+id/kiETID"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:hint="I Factor"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.046"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.543" />
+        app:layout_constraintVertical_bias="0.349" />
 
     <Button
-        android:id="@+id/loadDataButtonID"
+        android:id="@+id/createProfileButtonID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Load Data"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="Create profile"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/datePickupButtonID"
+        style="?android:spinnerStyle"
+        android:layout_width="160dp"
+        android:layout_height="50dp"
+        android:text="DD:MM:YYYY"
+        android:textColor="@color/black"
+        android:textSize="16.95sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.417"
+        app:layout_constraintHorizontal_bias=".6"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.415" />
+        app:layout_constraintVertical_bias="0.2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

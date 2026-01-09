@@ -1,10 +1,9 @@
-package com.example.carcontroller.Main;
+package com.example.carcontroller.main.Activities;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,15 +11,12 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.carcontroller.CarDevice;
-import com.example.carcontroller.Device;
-import com.example.carcontroller.DeviceManager;
+import com.example.carcontroller.devices.CarDevice;
+import com.example.carcontroller.devices.Device;
+import com.example.carcontroller.devices.DeviceManager;
+import com.example.carcontroller.main.Commands;
 import com.example.carcontroller.R;
-import com.example.carcontroller.SessionManager;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import com.example.carcontroller.main.SessionManager;
 
 
 public class DriverModeActivity extends AppCompatActivity {
@@ -59,20 +55,7 @@ public class DriverModeActivity extends AppCompatActivity {
 
         if (carDevice.getDeviceStatus() == Device.DeviceStatus.CONNECTED) {
             startSessionButton.setOnClickListener(v -> {
-                String birthdateStr = "2005-07-07";
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-                Date birthdate = null;
-                try {
-                    birthdate = formatter.parse(birthdateStr);
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
-
-                SessionManager.Driver dummyDriver = new SessionManager.Driver("dummyDriverName", 20, SessionManager.Gender.MALE, birthdate);
-                sessionManager.setCurrentDriver(dummyDriver);
-                boolean toDeleteLater = sessionManager.startNewRaceSession("dummyCircuitName");
-
-
+                sessionManager.startNewRaceSession("dummyCircuitName"); // TODO: delete this and replace with proper initialization
             });
 
             endSessionButton.setOnClickListener(v -> {

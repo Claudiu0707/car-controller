@@ -1,10 +1,11 @@
-package com.example.carcontroller;
+package com.example.carcontroller.main;
 
 import android.util.Log;
 
+import com.example.carcontroller.devices.DeviceManager;
+
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,8 @@ public class SessionManager {
 
     public void setCurrentDriver (Driver driver) {
         this.currentDriver = driver;
-        Log.i(TAG, "Current driver set to " + driver.getDriverName());
+        // Log.i(TAG, "Current driver set to " + driver.getDriverName());
+        driver.logDriverDetails();
     }
 
     public Driver getCurrentDriver () {
@@ -80,8 +82,6 @@ public class SessionManager {
             this.driver = driver;
             this.circuitName = circuitName;
 
-            this.startTime = this.finishTime = 0;
-
             this.checkpointsTimeStamps = new HashMap<>();
             this.active = false;
         }
@@ -92,7 +92,7 @@ public class SessionManager {
         }
 
         public void setFinishTime () {
-            this.finishTime = System.currentTimeMillis();
+            this.finishTime = System.currentTimeMillis() - startTime;
             this.active = false;
         }
 
@@ -125,35 +125,28 @@ public class SessionManager {
         }
 
         public void displaySessionData () {
-            // TODO: solve the problem with how times are formated for checkpoints
-            // Start and finish time are wrong for some reason (there are crazy large values - e.g.
-            // for an approximate 9 seconds session, there are numbers in the values of billions 1767821788657)
             Log.d(TAG, "Session: " + sessionId +
                     " | Driver: " + driver.getDriverName() +
-                    " | Start time: " + startTime +
                     " | Finish time: " + finishTime +
-                    " | Total time: " + getTotalTime() / 100);
+                    " | Total time: " + getTotalTime());
 
-            // Checkpoint time is displayed in correct ms (for example I waited approximate 9 seconds for detection and
-            // in the log it appeared as 9131 (close to 9seconds)
             for (Integer index : getAllCheckpointsTimes().keySet()) {
                 long timeStamp = checkpointsTimeStamps.get(index);
-                Log.d(TAG, "Checkpoint " + index + " | detection time: " + timeStamp / 100);
+                Log.d(TAG, "Checkpoint " + index + " | detection time: " + timeStamp);
             }
         }
     }
 
     public static class Driver implements Serializable {
-        private String driverId;
-        private String driverName;
+        private String driverFirstName;
+        private String driverLastName;
+        private String birthdate;
         private int age;
         private Gender gender;
-        private Date birthdate;
 
-        public Driver (String driverName, int age, Gender gender, Date birthdate) {
-            this.driverId = UUID.randomUUID().toString(); // Change later to generate unique int ID for database
-
-            this.driverName = driverName;
+        public Driver (String driverFirstName, String driverLastName, int age, Gender gender, String birthdate) {
+            this.driverFirstName = driverFirstName;
+            this.driverLastName = driverLastName;
             this.age = age;
             this.gender = gender;
             this.birthdate = birthdate;
@@ -161,11 +154,15 @@ public class SessionManager {
         }
 
         public String getDriverName () {
-            return driverName;
+            return driverFirstName + driverLastName;
         }
 
-        public String getDriverId () {
-            return driverId;
+        public String getDriverFirstName () {
+            return driverFirstName;
+        }
+
+        public String getDriverLastName () {
+            return driverLastName;
         }
 
         public int getDriverAge () {
@@ -176,12 +173,16 @@ public class SessionManager {
             return gender;
         }
 
-        public Date getBirthdate () {
+        public String getBirthdate () {
             return birthdate;
         }
 
-        public void setDriverName (String driverName) {
-            this.driverName = driverName;
+        public void setDriverFirstName (String driverFirstName) {
+            this.driverFirstName = driverFirstName;
+        }
+
+        public void setDriverLastName (String driverLastName) {
+            this.driverLastName = driverLastName;
         }
 
         public void setAge (int age) {
@@ -192,12 +193,20 @@ public class SessionManager {
             this.gender = gender;
         }
 
-        public void setBirthdate (Date birthdate) {
+        public void setBirthdate (String birthdate) {
             this.birthdate = birthdate;
         }
 
-        public void setDriverId (String driverId) {
-            this.driverId = driverId;
+        public void logDriverDetails () {
+
+            Log.d(TAG,
+                    "Driver Details -> " +
+                            "First Name: " + driverFirstName +
+                            ", Last Name: " + driverLastName +
+                            ", Age: " + age +
+                            ", Gender: " + (gender != null ? gender.name() : "UNKNOWN") +
+                            ", Birthdate: " + (birthdate != null ? birthdate : "N/A")
+            );
         }
     }
 

@@ -1,4 +1,4 @@
-package com.example.carcontroller.Settings;
+package com.example.carcontroller.main.Fragments;
 
 import android.os.Bundle;
 
@@ -11,7 +11,6 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.carcontroller.R;
 
 public class SettingsActivity extends AppCompatActivity {
-    private static final String TAG = "SettingsActivityTAG";
 
     @Override
     protected void onCreate (Bundle savedInstanceState) {
