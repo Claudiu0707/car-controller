@@ -7,6 +7,8 @@ import com.example.carcontroller.bluetooth_package.BluetoothService;
 import com.example.carcontroller.main_package.Commands;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 public class CarDevice extends Device {
     private static final String TAG = "CarDeviceTAG";
@@ -133,6 +135,7 @@ public class CarDevice extends Device {
         this.kd = kd;
         this.baseSpeedLeft = baseLeftSpeed;
         this.baseSpeedRight = baseRightSpeed;
+        this.configuration.setCreationDate();
 
         configuration.setKp(kp);
         configuration.setKi(ki);
@@ -203,146 +206,155 @@ public class CarDevice extends Device {
     }
 
     public static class CarConfiguration {
-        private double kp, ki, kd;
-        private double LMSW, LSW, CSW, RSW, RMSW;
-        private double baseLeftSpeed, baseRightSpeed;
+        private float kp, ki, kd;
+        private float LMSW, LSW, CSW, RSW, RMSW;
+        private float baseLeftSpeed;
+        private float baseRightSpeed;
 
-        private double speedRightFWD, speedLeftFWD, speedRightBWD, speedLeftBWD;
+        private float speedRightFWD, speedLeftFWD, speedRightBWD, speedLeftBWD;
 
-        public double getKp () {
+        private String creationDate;
+
+        public float getKp () {
             return kp;
         }
 
-        public double getKi () {
+        public float getKi () {
             return ki;
         }
 
-        public double getKd () {
+        public float getKd () {
             return kd;
         }
 
-        public double getLMSW () {
+        public float getLMSW () {
             return LMSW;
         }
 
-        public double getLSW () {
+        public float getLSW () {
             return LSW;
         }
 
-        public double getCSW () {
+        public float getCSW () {
             return CSW;
         }
 
-        public double getRSW () {
+        public float getRSW () {
             return RSW;
         }
 
-        public double getRMSW () {
+        public float getRMSW () {
             return RMSW;
         }
 
-        public double getBaseLeftSpeed () {
+        public float getBaseLeftSpeed () {
             return baseLeftSpeed;
         }
 
-        public double getBaseRightSpeed () {
+        public float getBaseRightSpeed () {
             return baseRightSpeed;
         }
 
-        public double getSpeedRightFWD () {
+        public float getSpeedRightFWD () {
             return speedRightFWD;
         }
 
-        public double getSpeedLeftFWD () {
+        public float getSpeedLeftFWD () {
             return speedLeftFWD;
         }
 
-        public double getSpeedRightBWD () {
+        public float getSpeedRightBWD () {
             return speedRightBWD;
         }
 
-        public double getSpeedLeftBWD () {
+        public float getSpeedLeftBWD () {
             return speedLeftBWD;
         }
 
-        public void setKp (double kp) {
+        public void setKp (float kp) {
             this.kp = kp;
         }
 
-        public void setKi (double ki) {
+        public void setKi (float ki) {
             this.ki = ki;
         }
 
-        public void setKd (double kd) {
+        public void setKd (float kd) {
             this.kd = kd;
         }
 
-        public void setLMSW (double LMSW) {
+        public void setLMSW (float LMSW) {
             this.LMSW = LMSW;
         }
 
-        public void setLSW (double LSW) {
+        public void setLSW (float LSW) {
             this.LSW = LSW;
         }
 
-        public void setCSW (double CSW) {
+        public void setCSW (float CSW) {
             this.CSW = CSW;
         }
 
-        public void setRSW (double RSW) {
+        public void setRSW (float RSW) {
             this.RSW = RSW;
         }
 
-        public void setRMSW (double RMSW) {
+        public void setRMSW (float RMSW) {
             this.RMSW = RMSW;
         }
 
-        public void setBaseSpeed (double baseLeftSpeed, double baseRightSpeed) {
+        public void setBaseSpeed (float baseLeftSpeed, float baseRightSpeed) {
             this.baseLeftSpeed = baseLeftSpeed;
             this.baseRightSpeed = baseRightSpeed;
         }
 
-        public void setBaseLeftSpeed (double baseLeftSpeed) {
+        public void setBaseLeftSpeed (float baseLeftSpeed) {
             this.baseLeftSpeed = baseLeftSpeed;
         }
 
-        public void setBaseRightSpeed (double baseRightSpeed) {
+        public void setBaseRightSpeed (float baseRightSpeed) {
             this.baseRightSpeed = baseRightSpeed;
         }
 
-        public void setSpeed (double speedRightFWD, double speedLeftFWD, double speedRightBWD, double speedLeftBWD) {
+        public void setSpeed (float speedRightFWD, float speedLeftFWD, float speedRightBWD, float speedLeftBWD) {
             this.speedLeftFWD = speedLeftFWD;
             this.speedRightFWD = speedRightFWD;
             this.speedLeftBWD = speedLeftBWD;
             this.speedRightBWD = speedRightBWD;
         }
 
-        public void setSpeedFWD (double speedRightFWD, double speedLeftFWD) {
+        public void setSpeedFWD (float speedRightFWD, float speedLeftFWD) {
             this.speedLeftFWD = speedLeftFWD;
             this.speedRightFWD = speedRightFWD;
         }
 
-        public void setSpeedRightFWD (double speedRightFWD) {
+        public void setSpeedRightFWD (float speedRightFWD) {
             this.speedRightFWD = speedRightFWD;
         }
 
-        public void setSpeedLeftFWD (double speedLeftFWD) {
+        public void setSpeedLeftFWD (float speedLeftFWD) {
             this.speedLeftFWD = speedLeftFWD;
         }
 
-        public void setSpeedBWD (double speedRightBWD, double speedLeftBWD) {
+        public void setSpeedBWD (float speedRightBWD, float speedLeftBWD) {
             this.speedLeftBWD = speedLeftBWD;
             this.speedRightBWD = speedRightBWD;
         }
 
-        public void setSpeedRightBWD (double speedRightBWD) {
+        public void setSpeedRightBWD (float speedRightBWD) {
             this.speedRightBWD = speedRightBWD;
         }
 
-        public void setSpeedLeftBWD (double speedLeftBWD) {
+        public void setSpeedLeftBWD (float speedLeftBWD) {
             this.speedLeftBWD = speedLeftBWD;
         }
 
+        public String getCreationDate() {
+            return creationDate;
+        }
 
+        public void setCreationDate () {
+            this.creationDate = LocalDate.now().toString();
+        }
     }
 }

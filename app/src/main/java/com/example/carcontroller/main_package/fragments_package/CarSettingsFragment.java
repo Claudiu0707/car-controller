@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.carcontroller.api_package.ConfigurationRepository;
+import com.example.carcontroller.api_package.models_package.CarConfigurationResponse;
 import com.example.carcontroller.bluetooth_package.BluetoothService;
 import com.example.carcontroller.devices_package.CarDevice;
 import com.example.carcontroller.devices_package.DeviceManager;
@@ -20,11 +23,12 @@ import com.example.carcontroller.R;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 
 public class CarSettingsFragment extends Fragment {
-    private static final String TAG = "CarSettingsFragment";
+    private static final String TAG = "CarSettingsFragmentTAG";
 
     BluetoothService bluetoothService = BluetoothService.getInstance();
     DeviceManager deviceManager = DeviceManager.getInstance();
     CarDevice carDevice = deviceManager.getCarDevice();
+    ConfigurationRepository configurationRepository = ConfigurationRepository.getInstance();
 
     private Context context;
     int optionIndex = 0;
@@ -56,6 +60,7 @@ public class CarSettingsFragment extends Fragment {
         });
         loadDataButton.setOnClickListener(v -> {
             calibrateLineFollowerData();
+            createConfiguration();
         });
 
         dropdownModeOptions.setOnItemClickListener((parent, v, position, id) -> {
@@ -65,6 +70,20 @@ public class CarSettingsFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void createConfiguration() {
+        configurationRepository.saveConfiguration(carDevice, new ConfigurationRepository.ConfigurationCallback() {
+            @Override
+            public void onSuccess(CarConfigurationResponse configuration) {
+                Toast.makeText(requireContext(), "Configuration saved", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(requireContext(), "Error: " + error, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void calibrateLineFollowerData () {

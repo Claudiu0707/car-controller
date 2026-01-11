@@ -2,8 +2,10 @@ package com.example.carcontroller.main_package.activities_package;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +13,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.carcontroller.api_package.DriverRepository;
+import com.example.carcontroller.api_package.RaceRepository;
+import com.example.carcontroller.api_package.models_package.RaceResponse;
 import com.example.carcontroller.devices_package.CarDevice;
 import com.example.carcontroller.devices_package.Device;
 import com.example.carcontroller.devices_package.DeviceManager;
@@ -21,11 +26,12 @@ import com.example.carcontroller.main_package.SessionManager;
 
 public class DriverModeActivity extends AppCompatActivity {
     private static final String TAG = "DriverModeActivityTAG";
-    DeviceManager deviceManager = DeviceManager.getInstance();
-    SessionManager sessionManager = SessionManager.getInstance();
 
-    CarDevice carDevice;
+    private final DeviceManager deviceManager = DeviceManager.getInstance();
+    private final SessionManager sessionManager = SessionManager.getInstance();
+    private final RaceRepository raceRepository = RaceRepository.getInstance();
     Button backButton, forwardButton, reverseButton, steerLeftButton, steerRightButton;
+    CarDevice carDevice;
     Button startSessionButton;
     Button endSessionButton;
     private boolean isForward = false, isReverse = false, isLeft = false, isRight = false;
@@ -42,9 +48,12 @@ public class DriverModeActivity extends AppCompatActivity {
             return insets;
         });
 
-        if (deviceManager.hasCarDevice()) {
-            carDevice = deviceManager.getCarDevice();
+        if (!deviceManager.hasCarDevice()) {
+            Toast.makeText(this, "Please connect a device!", Toast.LENGTH_LONG).show();
+            finish();
+            return;
         }
+        carDevice = deviceManager.getCarDevice();
 
         initializeViews();
 
@@ -60,6 +69,7 @@ public class DriverModeActivity extends AppCompatActivity {
 
             endSessionButton.setOnClickListener(v -> {
                 sessionManager.finishRaceSession();
+                // createRace();    // TODO: finish this
             });
 
             forwardButton.setOnTouchListener((view, motionEvent) -> {
@@ -111,6 +121,21 @@ public class DriverModeActivity extends AppCompatActivity {
                 return false;
             });
         }
+    }
+
+    private void createRace() {
+        raceRepository.saveRace(sessionManager.getCurrentSession(), new RaceRepository.RaceCallback() {
+            @Override
+            public void onSuccess(RaceResponse race) {
+                Log.d(TAG, "Race session saved with id: " + race.getRaceId());
+                Toast.makeText(DriverModeActivity.this, "Race saved", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(DriverModeActivity.this, "Error: " + error, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void initializeViews () {

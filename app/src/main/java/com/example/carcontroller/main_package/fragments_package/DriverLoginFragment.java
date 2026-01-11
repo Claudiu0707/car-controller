@@ -27,12 +27,10 @@ import java.util.Date;
 import java.util.Locale;
 
 public class DriverLoginFragment extends Fragment {
-    private static final String TAG = "DriverLoginFragment";
-    private static final String DATE_FORMAT = "yyyy-MM-dd";
-    private static final String DISPLAY_DATE_FORMAT = "dd:MM:yyyy";
+    private static final String TAG = "DriverLoginFragmentTAG";
 
     private final SessionManager sessionManager = SessionManager.getInstance();
-    private DriverRepository driverRepository;
+    private final DriverRepository driverRepository = DriverRepository.getInstance();
 
 
     MaterialAutoCompleteTextView dropdownGenderOptions;
@@ -47,8 +45,6 @@ public class DriverLoginFragment extends Fragment {
     @Override
     public View onCreateView (@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_driver_login, container, false);
-
-        driverRepository = DriverRepository.getInstance();
 
         initializeViews(view);
         initializeDatePicker();
@@ -69,8 +65,6 @@ public class DriverLoginFragment extends Fragment {
         createProfileButton = view.findViewById(R.id.createProfileButtonID);
 
         dateButton.setText("Birthday");   // TODO: R.string.birthdate_label
-
-
     }
 
     private void setupListeners () {
@@ -136,10 +130,10 @@ public class DriverLoginFragment extends Fragment {
         driverRepository.saveDriver(driver, new DriverRepository.DriverCallback() {
             @Override
             public void onSuccess (DriverResponse driver) {
-                // TODO: make this work :)))
                 sessionManager.getCurrentDriver().setDriverId(driver.getDriverId());                // Set the current driver id with the id from the database
                 Log.d(TAG, "ID: " + driver.getDriverId());
                 Toast.makeText(requireContext(), "Profile saved", Toast.LENGTH_LONG).show();
+                SessionManager.getInstance().getCurrentDriver().logDriverDetails();
             }
 
             @Override

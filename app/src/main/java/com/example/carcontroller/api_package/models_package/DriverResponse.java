@@ -19,7 +19,6 @@ public class DriverResponse {
     @SerializedName("gender_id")
     private Integer genderId;
 
-    // Getters
     public int getDriverId () {
         return driverId;
     }

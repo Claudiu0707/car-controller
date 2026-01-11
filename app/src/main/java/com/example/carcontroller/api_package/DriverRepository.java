@@ -11,7 +11,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class DriverRepository {
-    private static final String TAG = "DriverRepository";
+    private static final String TAG = "DriverRepositoryTAG";
     private static DriverRepository instance;
     private ApiService apiService;
 
@@ -20,9 +20,7 @@ public class DriverRepository {
     }
 
     public static synchronized DriverRepository getInstance () {
-        if (instance == null) {
-            instance = new DriverRepository();
-        }
+        if (instance == null) instance = new DriverRepository();
         return instance;
     }
 

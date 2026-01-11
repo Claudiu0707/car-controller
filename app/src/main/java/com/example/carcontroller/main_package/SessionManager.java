@@ -5,6 +5,7 @@ import android.util.Log;
 import com.example.carcontroller.devices_package.DeviceManager;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +20,7 @@ public class SessionManager {
     private RaceSession currentSession;
     private List<RaceSession> sessionsHistory = new ArrayList<>();
     private Driver currentDriver;
+    private boolean driverLogged;
 
     private SessionManager () {
         sessionsHistory = new ArrayList<>();
@@ -35,12 +37,17 @@ public class SessionManager {
 
     public void setCurrentDriver (Driver driver) {
         this.currentDriver = driver;
+        driverLogged = true;
         // Log.i(TAG, "Current driver set to " + driver.getDriverName());
         driver.logDriverDetails();
     }
 
     public Driver getCurrentDriver () {
         return currentDriver;
+    }
+
+    public boolean isDriverLogged () {
+        return driverLogged;
     }
 
     public boolean startNewRaceSession (String circuitName) {
@@ -68,22 +75,25 @@ public class SessionManager {
     }
 
     public static class RaceSession implements Serializable {
-        private String sessionId;
         private Driver driver;
         private String circuitName;
+        private String raceDate;
+        // When creating a circuit log data in database and get back the circuit Id
+        private int circuitId;
         private long startTime;
         private long finishTime;
         private boolean active;
         private Map<Integer, Long> checkpointsTimeStamps;
 
         public RaceSession (Driver driver, String circuitName) {
-            this.sessionId = UUID.randomUUID().toString();      // Change later to generate unique int ID for database
-
             this.driver = driver;
             this.circuitName = circuitName;
 
             this.checkpointsTimeStamps = new HashMap<>();
             this.active = false;
+
+            raceDate = LocalDate.now().toString();
+
         }
 
         public void setStartTime () {
@@ -108,6 +118,13 @@ public class SessionManager {
             return finishTime - startTime;
         }
 
+        public int getCircuitId () {
+            return circuitId;
+        }
+
+        public String getRaceDate () {
+            return raceDate;
+        }
         public Long getCheckpointTime (int checkpointIndex) {
             if (checkpointsTimeStamps.containsKey(checkpointIndex))
                 return checkpointsTimeStamps.get(checkpointIndex);
@@ -125,7 +142,7 @@ public class SessionManager {
         }
 
         public void displaySessionData () {
-            Log.d(TAG, "Session: " + sessionId +
+            Log.d(TAG, "Session: " +
                     " | Driver: " + driver.getDriverName() +
                     " | Finish time: " + finishTime +
                     " | Total time: " + getTotalTime());
@@ -141,7 +158,7 @@ public class SessionManager {
         private String driverFirstName;
         private String driverLastName;
         private String birthdate;
-        private int driverId;
+        private Integer driverId;
         private int age;
         private Gender gender;
 
@@ -200,6 +217,9 @@ public class SessionManager {
 
         public void setDriverId (int driverId) {
             this.driverId = driverId;
+        }
+        public Integer getDriverId () {
+            return driverId;
         }
         public void logDriverDetails () {
             Log.d(TAG, "Driver Details: " +
