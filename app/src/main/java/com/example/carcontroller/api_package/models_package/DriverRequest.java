@@ -1,4 +1,4 @@
-package com.example.carcontroller.api.models;
+package com.example.carcontroller.api_package.models_package;
 
 import com.google.gson.annotations.SerializedName;
 

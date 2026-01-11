@@ -1,7 +1,8 @@
-package com.example.carcontroller.api.models;
+package com.example.carcontroller.api_package.models_package;
 
 import com.google.gson.annotations.SerializedName;
 
+// Response from the server
 public class DriverResponse {
     @SerializedName("driver_id")
     private int driverId;

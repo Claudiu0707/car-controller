@@ -5,7 +5,7 @@
     android:id="@+id/frameLayout3"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".main.Fragments.MainFragment">
+    tools:context=".main_package.fragments_package.MainFragment">
 
     <Button
         android:id="@+id/settingsButtonID"

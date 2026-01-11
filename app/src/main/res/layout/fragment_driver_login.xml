@@ -5,7 +5,7 @@
     android:id="@+id/frameLayout2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".main.Fragments.DriverLoginFragment">
+    tools:context=".main_package.fragments_package.DriverLoginFragment">
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/carModeSelectionLayoutID"

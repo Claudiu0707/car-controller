@@ -1,14 +1,13 @@
-package com.example.carcontroller.devices;
+package com.example.carcontroller.devices_package;
 
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
-import com.example.carcontroller.bluetooth.BluetoothService;
-import com.example.carcontroller.main.Commands;
-import com.example.carcontroller.main.SessionManager;
+import com.example.carcontroller.bluetooth_package.BluetoothService;
+import com.example.carcontroller.main_package.Commands;
+import com.example.carcontroller.main_package.SessionManager;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 public class CheckpointDevice extends Device {
     private static final String TAG = "CheckpointDeviceTAG";
@@ -81,7 +80,7 @@ public class CheckpointDevice extends Device {
     @Override
     public void onDataReceived (String deviceAddress, byte[] data) {
         if (getDeviceAddress().contentEquals(deviceAddress)) {
-            String dataString = new String(data, StandardCharsets.UTF_8);
+            String dataString = new String(data);
             processCheckpointData(dataString);
             Log.d(TAG, dataString);
         }

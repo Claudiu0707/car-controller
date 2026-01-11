@@ -1,4 +1,4 @@
-package com.example.carcontroller.main.Fragments;
+package com.example.carcontroller.main_package.fragments_package;
 
 import android.os.Bundle;
 

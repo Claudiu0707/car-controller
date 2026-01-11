@@ -1,10 +1,10 @@
-package com.example.carcontroller.devices;
+package com.example.carcontroller.devices_package;
 
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
-import com.example.carcontroller.bluetooth.BluetoothService;
-import com.example.carcontroller.main.Commands;
+import com.example.carcontroller.bluetooth_package.BluetoothService;
+import com.example.carcontroller.main_package.Commands;
 
 import java.io.IOException;
 

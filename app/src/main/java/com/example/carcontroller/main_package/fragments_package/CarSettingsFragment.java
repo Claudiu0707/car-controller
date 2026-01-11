@@ -1,4 +1,4 @@
-package com.example.carcontroller.main.Fragments;
+package com.example.carcontroller.main_package.fragments_package;
 
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
@@ -13,9 +13,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.carcontroller.bluetooth.BluetoothService;
-import com.example.carcontroller.devices.CarDevice;
-import com.example.carcontroller.devices.DeviceManager;
+import com.example.carcontroller.bluetooth_package.BluetoothService;
+import com.example.carcontroller.devices_package.CarDevice;
+import com.example.carcontroller.devices_package.DeviceManager;
 import com.example.carcontroller.R;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 

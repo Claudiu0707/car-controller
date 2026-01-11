@@ -3,7 +3,7 @@
  */
 
 
-package com.example.carcontroller.main.Activities;
+package com.example.carcontroller.main_package.activities_package;
 
 import android.os.Bundle;
 
@@ -13,7 +13,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.carcontroller.main.Fragments.MainFragment;
+import com.example.carcontroller.main_package.fragments_package.MainFragment;
 import com.example.carcontroller.R;
 
 public class MainActivity extends AppCompatActivity {

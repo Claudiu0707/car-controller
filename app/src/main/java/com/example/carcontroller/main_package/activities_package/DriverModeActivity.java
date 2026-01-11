@@ -1,4 +1,4 @@
-package com.example.carcontroller.main.Activities;
+package com.example.carcontroller.main_package.activities_package;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -11,12 +11,12 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.carcontroller.devices.CarDevice;
-import com.example.carcontroller.devices.Device;
-import com.example.carcontroller.devices.DeviceManager;
-import com.example.carcontroller.main.Commands;
+import com.example.carcontroller.devices_package.CarDevice;
+import com.example.carcontroller.devices_package.Device;
+import com.example.carcontroller.devices_package.DeviceManager;
+import com.example.carcontroller.main_package.Commands;
 import com.example.carcontroller.R;
-import com.example.carcontroller.main.SessionManager;
+import com.example.carcontroller.main_package.SessionManager;
 
 
 public class DriverModeActivity extends AppCompatActivity {

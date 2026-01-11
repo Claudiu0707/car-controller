@@ -1,4 +1,4 @@
-package com.example.carcontroller.devices;
+package com.example.carcontroller.devices_package;
 
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;

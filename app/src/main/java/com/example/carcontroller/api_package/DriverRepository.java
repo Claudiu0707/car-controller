@@ -1,10 +1,10 @@
-package com.example.carcontroller.api;
+package com.example.carcontroller.api_package;
 
 import android.util.Log;
 
-import com.example.carcontroller.main.SessionManager;
-import com.example.carcontroller.api.models.DriverRequest;
-import com.example.carcontroller.api.models.DriverResponse;
+import com.example.carcontroller.main_package.SessionManager;
+import com.example.carcontroller.api_package.models_package.DriverRequest;
+import com.example.carcontroller.api_package.models_package.DriverResponse;
 
 import retrofit2.Call;
 import retrofit2.Callback;

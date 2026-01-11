@@ -1,6 +1,6 @@
-package com.example.carcontroller.devices;
+package com.example.carcontroller.devices_package;
 
-import com.example.carcontroller.bluetooth.BluetoothDataListener;
+import com.example.carcontroller.bluetooth_package.BluetoothDataListener;
 
 import java.util.Date;
 
@@ -12,7 +12,6 @@ public abstract class Device implements BluetoothDataListener {
     private Date lastConnectedTime;
 
     public enum DeviceType {CAR, CHECKPOINT}
-
     public enum DeviceStatus {DISCONNECTED, CONNECTING, CONNECTED, ERROR}
 
     public Device (String deviceAddress, String deviceName, DeviceType deviceType) {
@@ -61,7 +60,6 @@ public abstract class Device implements BluetoothDataListener {
     public abstract boolean isConnected ();
 
     public String getDeviceInfo () {
-        return String.format("Device[ID=%s, Name=%s, Type=%s, Status=%s]",
-                deviceAddress, deviceName, deviceType, deviceStatus);
+        return String.format("Device: ID=%s | Name=%s | Type=%s | Status=%s", deviceAddress, deviceName, deviceType, deviceStatus);
     }
 }

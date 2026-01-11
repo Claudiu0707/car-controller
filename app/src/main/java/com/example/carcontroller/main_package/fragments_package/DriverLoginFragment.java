@@ -1,4 +1,4 @@
-package com.example.carcontroller.main.Fragments;
+package com.example.carcontroller.main_package.fragments_package;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -17,9 +17,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.carcontroller.R;
-import com.example.carcontroller.main.SessionManager;
-import com.example.carcontroller.api.DriverRepository;
-import com.example.carcontroller.api.models.DriverResponse;
+import com.example.carcontroller.main_package.SessionManager;
+import com.example.carcontroller.api_package.DriverRepository;
+import com.example.carcontroller.api_package.models_package.DriverResponse;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 
 import java.util.Calendar;
@@ -136,6 +136,9 @@ public class DriverLoginFragment extends Fragment {
         driverRepository.saveDriver(driver, new DriverRepository.DriverCallback() {
             @Override
             public void onSuccess (DriverResponse driver) {
+                // TODO: make this work :)))
+                sessionManager.getCurrentDriver().setDriverId(driver.getDriverId());                // Set the current driver id with the id from the database
+                Log.d(TAG, "ID: " + driver.getDriverId());
                 Toast.makeText(requireContext(), "Profile saved", Toast.LENGTH_LONG).show();
             }
 

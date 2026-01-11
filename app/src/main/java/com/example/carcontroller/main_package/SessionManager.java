@@ -1,8 +1,8 @@
-package com.example.carcontroller.main;
+package com.example.carcontroller.main_package;
 
 import android.util.Log;
 
-import com.example.carcontroller.devices.DeviceManager;
+import com.example.carcontroller.devices_package.DeviceManager;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -77,7 +77,7 @@ public class SessionManager {
         private Map<Integer, Long> checkpointsTimeStamps;
 
         public RaceSession (Driver driver, String circuitName) {
-            this.sessionId = UUID.randomUUID().toString(); // Change later to generate unique int ID for database
+            this.sessionId = UUID.randomUUID().toString();      // Change later to generate unique int ID for database
 
             this.driver = driver;
             this.circuitName = circuitName;
@@ -141,6 +141,7 @@ public class SessionManager {
         private String driverFirstName;
         private String driverLastName;
         private String birthdate;
+        private int driverId;
         private int age;
         private Gender gender;
 
@@ -197,20 +198,20 @@ public class SessionManager {
             this.birthdate = birthdate;
         }
 
+        public void setDriverId (int driverId) {
+            this.driverId = driverId;
+        }
         public void logDriverDetails () {
-
-            Log.d(TAG,
-                    "Driver Details -> " +
-                            "First Name: " + driverFirstName +
-                            ", Last Name: " + driverLastName +
-                            ", Age: " + age +
-                            ", Gender: " + (gender != null ? gender.name() : "UNKNOWN") +
-                            ", Birthdate: " + (birthdate != null ? birthdate : "N/A")
+            Log.d(TAG, "Driver Details: " +
+                    "Driver ID: " + driverId +
+                    ", First Name: " + driverFirstName +
+                    ", Last Name: " + driverLastName +
+                    ", Age: " + age +
+                    ", Gender: " + (gender != null ? gender.name() : "UNKNOWN") +
+                    ", Birthdate: " + (birthdate != null ? birthdate : "N/A")
             );
         }
     }
 
-    public enum Gender {
-        MALE, FEMALE, OTHER
-    }
+    public enum Gender {MALE, FEMALE, OTHER}
 }

@@ -1,4 +1,4 @@
-package com.example.carcontroller.bluetooth;
+package com.example.carcontroller.bluetooth_package;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;

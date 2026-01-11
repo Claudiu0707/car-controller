@@ -1,8 +1,8 @@
-package com.example.carcontroller.main;
+package com.example.carcontroller.main_package;
 
 public enum Commands {
     // Other commands
-    EMPTY("00"), // Nothing
+    EMPTY("00"), // NAN
 
     // Setup commands
     SETUPMODE("S0"), DRIVEMODE("S1"), LINEFOLLOWERMODE("S2"),

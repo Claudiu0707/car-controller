@@ -1,4 +1,4 @@
-package com.example.carcontroller.bluetooth;
+package com.example.carcontroller.bluetooth_package;
 
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
@@ -13,7 +13,9 @@ public class BluetoothService {
     private static final String TAG = "BluetoothServiceTAG";
 
     private static BluetoothService instance;
-    private Map<String, BluetoothDataListener> listeners = new HashMap<>();
+    private final Map<String, ConnectedThread> connections = new HashMap<>();
+    private final Map<String, BluetoothDataListener> listeners = new HashMap<>();
+
     public static synchronized BluetoothService getInstance () {
         if (instance == null) {
             instance = new BluetoothService();
@@ -25,7 +27,6 @@ public class BluetoothService {
         listeners.put(deviceAddress, listener);
     }
 
-    private final Map<String, ConnectedThread> connections = new HashMap<>();
     public void initializeStream (String deviceAddress, BluetoothSocket socket) {
         Log.i(TAG, "Stream initialized for device: " + deviceAddress);
 

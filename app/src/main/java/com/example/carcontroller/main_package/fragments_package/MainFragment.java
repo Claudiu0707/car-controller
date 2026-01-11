@@ -1,4 +1,4 @@
-package com.example.carcontroller.main.Fragments;
+package com.example.carcontroller.main_package.fragments_package;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,7 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.example.carcontroller.main.Activities.DriverModeActivity;
+import com.example.carcontroller.main_package.activities_package.DriverModeActivity;
 import com.example.carcontroller.R;
 
 public class MainFragment extends Fragment {
