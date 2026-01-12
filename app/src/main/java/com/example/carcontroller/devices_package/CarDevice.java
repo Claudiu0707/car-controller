@@ -14,16 +14,15 @@ public class CarDevice extends Device {
     private static final String TAG = "CarDeviceTAG";
 
     private final BluetoothSocket bluetoothSocket;
-    private final BluetoothService bluetoothService;
     private final CarConfiguration configuration;
     private OperationMode currentMode;
 
-    // Line-follower mode related fields
+    // Line-follower mode parameters
     private float kp, ki, kd;
     private float baseSpeedLeft, baseSpeedRight;
-    private float LMSW, LSW, CSW, RSW, RMSW;
+    private float LMSW, LSW, CSW, RSW, RMSW;        // IR digital module - sensor weights
 
-    // Driver mode related fields
+    // Motors PWM variables
     private float speedRightFWD, speedLeftFWD, speedRightBWD, speedLeftBWD;
 
     public enum OperationMode {SETUP, DRIVER, LINE_FOLLOWER}
@@ -31,19 +30,15 @@ public class CarDevice extends Device {
     public CarDevice (String deviceAddress, String deviceName, BluetoothSocket socket) {
         super(deviceAddress, deviceName, DeviceType.CAR);
         this.bluetoothSocket = socket;
-        this.bluetoothService = BluetoothService.getInstance();
         this.currentMode = OperationMode.SETUP;
         this.configuration = new CarConfiguration();
-
-
-        bluetoothService.registerListener(deviceAddress, this);
     }
 
     @Override
     public boolean connect () {
         try {
             if (bluetoothSocket != null && bluetoothSocket.isConnected()) {
-                bluetoothService.initializeStream(getDeviceAddress(), bluetoothSocket);
+                getBluetoothService().initializeStream(getDeviceAddress(), bluetoothSocket);
                 setDeviceStatus(DeviceStatus.CONNECTED);
                 Log.i(TAG, "Car device " + getDeviceName() + " connected successfully");
                 return true;
@@ -74,8 +69,8 @@ public class CarDevice extends Device {
 
     @Override
     public boolean sendData (String data) {
-        if (bluetoothService != null && isConnected()) {
-            bluetoothService.write(getDeviceAddress(), data);
+        if (getBluetoothService() != null && isConnected()) {
+            getBluetoothService().write(getDeviceAddress(), data);
             return true;
         }
         return false;
@@ -121,6 +116,7 @@ public class CarDevice extends Device {
     }
 
     public boolean configurePID (float kp, float ki, float kd, float baseLeftSpeed, float baseRightSpeed) {
+        // Check if the data range is valid
         boolean bKp = checkData(0, kp);
         boolean bKi = checkData(0, ki);
         boolean bKd = checkData(0, kd);
@@ -141,13 +137,13 @@ public class CarDevice extends Device {
         configuration.setKi(ki);
         configuration.setKd(kd);
         configuration.setBaseSpeed(baseLeftSpeed, baseRightSpeed);
-        /*String logMessage = "kp = " + kp + " | " +
+        /* String logMessage = "kp = " + kp + " | " +
                             "ki = " + ki + " | " +
                             "kd = " + kd + " | " +
                             "leftSpeed = "  + baseLeftSpeed  + " | " +
                             "rightSpeed = " + baseRightSpeed;
 
-        Log.i(TAG, logMessage);*/
+        Log.i(TAG, logMessage); */
         return true;
     }
 
@@ -164,6 +160,7 @@ public class CarDevice extends Device {
     }
 
     public void sendPIDValues (String value) {
+        // According to the length of the PID parameter value, send a command signalling length of the incoming value
         Commands waitCommand;
         switch (value.length()) {
             case 1:
@@ -184,8 +181,8 @@ public class CarDevice extends Device {
             default:
                 return;
         }
-        sendCommand(waitCommand);
-        sendData(value);
+        sendCommand(waitCommand);   // Inform the length of the PID parameter value
+        sendData(value);            // Send the actual value
     }
 
     private boolean checkData (int type, float data) {
@@ -205,6 +202,8 @@ public class CarDevice extends Device {
         return configuration;
     }
 
+
+    // =========================== CAR CONFIGURATION ===========================
     public static class CarConfiguration {
         private float kp, ki, kd;
         private float LMSW, LSW, CSW, RSW, RMSW;
@@ -227,6 +226,43 @@ public class CarDevice extends Device {
             return kd;
         }
 
+        public float getBaseLeftSpeed () {
+            return baseLeftSpeed;
+        }
+
+        public float getBaseRightSpeed () {
+            return baseRightSpeed;
+        }
+
+        public void setKp (float kp) {
+            this.kp = kp;
+        }
+
+        public void setKi (float ki) {
+            this.ki = ki;
+        }
+
+        public void setKd (float kd) {
+            this.kd = kd;
+        }
+
+        public void setBaseSpeed (float baseLeftSpeed, float baseRightSpeed) {
+            this.baseLeftSpeed = baseLeftSpeed;
+            this.baseRightSpeed = baseRightSpeed;
+        }
+
+        public String getCreationDate() {
+            return creationDate;
+        }
+
+        public void setCreationDate () {
+            this.creationDate = LocalDate.now().toString();
+        }
+
+
+        // Following values will be implemented in future iterations
+        // They are driver mode related parameters
+
         public float getLMSW () {
             return LMSW;
         }
@@ -247,13 +283,6 @@ public class CarDevice extends Device {
             return RMSW;
         }
 
-        public float getBaseLeftSpeed () {
-            return baseLeftSpeed;
-        }
-
-        public float getBaseRightSpeed () {
-            return baseRightSpeed;
-        }
 
         public float getSpeedRightFWD () {
             return speedRightFWD;
@@ -271,17 +300,6 @@ public class CarDevice extends Device {
             return speedLeftBWD;
         }
 
-        public void setKp (float kp) {
-            this.kp = kp;
-        }
-
-        public void setKi (float ki) {
-            this.ki = ki;
-        }
-
-        public void setKd (float kd) {
-            this.kd = kd;
-        }
 
         public void setLMSW (float LMSW) {
             this.LMSW = LMSW;
@@ -301,11 +319,6 @@ public class CarDevice extends Device {
 
         public void setRMSW (float RMSW) {
             this.RMSW = RMSW;
-        }
-
-        public void setBaseSpeed (float baseLeftSpeed, float baseRightSpeed) {
-            this.baseLeftSpeed = baseLeftSpeed;
-            this.baseRightSpeed = baseRightSpeed;
         }
 
         public void setBaseLeftSpeed (float baseLeftSpeed) {
@@ -347,14 +360,6 @@ public class CarDevice extends Device {
 
         public void setSpeedLeftBWD (float speedLeftBWD) {
             this.speedLeftBWD = speedLeftBWD;
-        }
-
-        public String getCreationDate() {
-            return creationDate;
-        }
-
-        public void setCreationDate () {
-            this.creationDate = LocalDate.now().toString();
         }
     }
 }

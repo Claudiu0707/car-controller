@@ -64,7 +64,7 @@ public class DriverModeActivity extends AppCompatActivity {
 
         if (carDevice.getDeviceStatus() == Device.DeviceStatus.CONNECTED) {
             startSessionButton.setOnClickListener(v -> {
-                sessionManager.startNewRaceSession("dummyCircuitName"); // TODO: delete this and replace with proper initialization
+                sessionManager.startNewRaceSession("dummyCircuitName", null, null); // TODO: delete this and replace with proper initialization
             });
 
             endSessionButton.setOnClickListener(v -> {

@@ -11,35 +11,29 @@ import java.io.IOException;
 
 public class CheckpointDevice extends Device {
     private static final String TAG = "CheckpointDeviceTAG";
-
     SessionManager sessionManager = SessionManager.getInstance();
-
     private final BluetoothSocket bluetoothSocket;
-    private final BluetoothService bluetoothService;
 
     private long detectionTime;
-    private int distanceDetectionThreshold;     // Car detection threshold distance
-    private int distanceFromPreviousCheckpoint; // Distance interval between this checkpoint and previous one
     private final int checkpointIndex;
+    private int distanceDetectionThreshold;     // Car detection threshold distance, will be implemented in future iterations
+    private int distanceFromPreviousCheckpoint; // Distance interval between this checkpoint and previous one
 
     private boolean carDetected;
 
     public CheckpointDevice (String deviceAddress, String deviceName, BluetoothSocket socket, int checkpointIndex) {
         super(deviceAddress, deviceName, DeviceType.CHECKPOINT);
-        this.bluetoothService = BluetoothService.getInstance();
         this.bluetoothSocket = socket;
         this.checkpointIndex = checkpointIndex;
         this.distanceDetectionThreshold = 10;
         this.carDetected = false;
-
-        bluetoothService.registerListener(deviceAddress, this);
     }
 
     @Override
     public boolean connect () {
         try {
             if (bluetoothSocket != null && bluetoothSocket.isConnected()) {
-                bluetoothService.initializeStream(getDeviceAddress(), bluetoothSocket);
+                getBluetoothService().initializeStream(getDeviceAddress(), bluetoothSocket);
                 setDeviceStatus(DeviceStatus.CONNECTED);
                 Log.i(TAG, "Checkpoint device " + getDeviceName() + " with index " + checkpointIndex + " connected successfully");
                 return true;
@@ -70,8 +64,8 @@ public class CheckpointDevice extends Device {
 
     @Override
     public boolean sendData (String data) {
-        if (bluetoothService != null && isConnected()) {
-            bluetoothService.write(getDeviceAddress(), data);
+        if (getBluetoothService() != null && isConnected()) {
+            getBluetoothService().write(getDeviceAddress(), data);
             return true;
         }
         return false;
@@ -93,19 +87,16 @@ public class CheckpointDevice extends Device {
 
     public void processCheckpointData (String data) {
         String commandStringDetected = Commands.DETECTED.getCommand();
-        String commandStringNotDetected = Commands.NOTDETECTED.getCommand();
 
-        if (data.contentEquals(commandStringDetected)) {
+        // If checkpoint detected a car and no car was previously detected
+        if (data.contentEquals(commandStringDetected) && !carDetected) {
             carDetected = true;
-            detectionTime = System.currentTimeMillis();
+            detectionTime = System.currentTimeMillis();     // Record the time of detection
             SessionManager.RaceSession currentSession = sessionManager.getCurrentSession();
             if (currentSession != null) {
                 currentSession.recordCheckpointTime(checkpointIndex, detectionTime);
             }
             Log.i(TAG, "Checkpoint " + checkpointIndex + " detected object!");
-        } else if (data.contentEquals(commandStringNotDetected)) {
-            carDetected = false;
-            detectionTime = 0;
         } else {
             Log.e(TAG, "Data format incorrect");
         }

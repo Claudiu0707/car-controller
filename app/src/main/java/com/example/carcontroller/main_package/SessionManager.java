@@ -4,27 +4,20 @@ import android.util.Log;
 
 import com.example.carcontroller.devices_package.DeviceManager;
 
-import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class SessionManager {
-    public static final String TAG = "SessionManagerTAG";
+    private static final String TAG = "SessionManagerTAG";
     private static SessionManager instance;
 
     private DeviceManager deviceManager = DeviceManager.getInstance();
+
     private RaceSession currentSession;
-    private List<RaceSession> sessionsHistory = new ArrayList<>();
     private Driver currentDriver;
     private boolean driverLogged;
 
-    private SessionManager () {
-        sessionsHistory = new ArrayList<>();
-    }
 
     public static synchronized SessionManager getInstance () {
         if (instance == null) instance = new SessionManager();
@@ -38,8 +31,7 @@ public class SessionManager {
     public void setCurrentDriver (Driver driver) {
         this.currentDriver = driver;
         driverLogged = true;
-        // Log.i(TAG, "Current driver set to " + driver.getDriverName());
-        driver.logDriverDetails();
+        // driver.logDriverDetails();
     }
 
     public Driver getCurrentDriver () {
@@ -50,40 +42,41 @@ public class SessionManager {
         return driverLogged;
     }
 
-    public boolean startNewRaceSession (String circuitName) {
+    public void startNewRaceSession (String circuitName, String cityName, String locationName) {
         if (currentDriver == null) {
             Log.e(TAG, "Cannot start session. No driver available!");
-            return false;
+            return;
         }
 
-        currentSession = new RaceSession(currentDriver, circuitName);
+        if (cityName == null && locationName == null)
+            currentSession = new RaceSession(currentDriver, circuitName);
+        else
+            currentSession = new RaceSession(currentDriver, circuitName, cityName, locationName);
+
         currentSession.setStartTime();
-        return true;
     }
 
-    public boolean finishRaceSession () {
+    public void finishRaceSession () {
         if (currentSession == null) {
             Log.e(TAG, "Session cannot be finished!");
-            return false;
+            return;
         }
 
         currentSession.setFinishTime();
-        sessionsHistory.add(currentSession);
         currentSession.displaySessionData();
         currentSession = null;
-        return true;
     }
 
-    public static class RaceSession implements Serializable {
+    public static class RaceSession {
         private Driver driver;
-        private String circuitName;
+        private String circuitName, cityName, locationName;
         private String raceDate;
         // When creating a circuit log data in database and get back the circuit Id
         private int circuitId;
         private long startTime;
         private long finishTime;
         private boolean active;
-        private Map<Integer, Long> checkpointsTimeStamps;
+        private final Map<Integer, Long> checkpointsTimeStamps;
 
         public RaceSession (Driver driver, String circuitName) {
             this.driver = driver;
@@ -93,7 +86,19 @@ public class SessionManager {
             this.active = false;
 
             raceDate = LocalDate.now().toString();
+        }
 
+        public RaceSession (Driver driver, String circuitName, String cityName, String locationName) {
+            this.driver = driver;
+
+            this.circuitName = circuitName;
+            this.cityName = cityName;
+            this.locationName = locationName;
+
+            this.checkpointsTimeStamps = new HashMap<>();
+            this.active = false;
+
+            raceDate = LocalDate.now().toString();
         }
 
         public void setStartTime () {
@@ -154,7 +159,7 @@ public class SessionManager {
         }
     }
 
-    public static class Driver implements Serializable {
+    public static class Driver {
         private String driverFirstName;
         private String driverLastName;
         private String birthdate;
