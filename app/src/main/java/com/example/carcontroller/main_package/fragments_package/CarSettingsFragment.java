@@ -1,5 +1,6 @@
 package com.example.carcontroller.main_package.fragments_package;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.os.Bundle;
@@ -25,24 +26,29 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 public class CarSettingsFragment extends Fragment {
     private static final String TAG = "CarSettingsFragmentTAG";
 
-    BluetoothService bluetoothService = BluetoothService.getInstance();
     DeviceManager deviceManager = DeviceManager.getInstance();
     CarDevice carDevice = deviceManager.getCarDevice();
     ConfigurationRepository configurationRepository = ConfigurationRepository.getInstance();
 
+    Button backButton, loadDataButton;
     private Context context;
-    int optionIndex = 0;
-    String carDeviceAddress = null;
-    BluetoothSocket socket = null;
-
+    View view;
     private EditText Kp, Ki, Kd, baseSpeedLeft, baseSpeedRight;
     MaterialAutoCompleteTextView dropdownModeOptions;
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_car_settings, container, false);
+        view = inflater.inflate(R.layout.fragment_car_settings, container, false);
         context = requireContext();
 
+        initializeViews();
+        initializeOnClickListeners();
+
+        return view;
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void initializeViews() {
         dropdownModeOptions = view.findViewById(R.id.inputModeID);
         Kp = view.findViewById(R.id.kpETID);
         Ki = view.findViewById(R.id.kiETID);
@@ -51,9 +57,20 @@ public class CarSettingsFragment extends Fragment {
         baseSpeedRight = view.findViewById(R.id.baseSpeedRightETID);
 
         // Buttons initialization
-        Button backButton = view.findViewById(R.id.backButtonID);
-        Button loadDataButton = view.findViewById(R.id.loadDataButtonID);
+        backButton = view.findViewById(R.id.backButtonID);
+        loadDataButton = view.findViewById(R.id.loadDataButtonID);
+        if (carDevice.getConfiguration() != null) {
+            CarDevice.CarConfiguration carConfiguration = carDevice.getConfiguration();
 
+            Kp.setText(Float.toString(carConfiguration.getKp()));
+            Ki.setText(Float.toString(carConfiguration.getKi()));
+            Kd.setText(Float.toString(carConfiguration.getKd()));
+            baseSpeedLeft.setText(Float.toString(carConfiguration.getBaseLeftSpeed()));
+            baseSpeedRight.setText(Float.toString(carConfiguration.getBaseRightSpeed()));
+        }
+    }
+
+    private void initializeOnClickListeners () {
         // ---------------- BUTTON ONCLICK LISTENERS ----------------
         backButton.setOnClickListener(v -> {
             close();
@@ -68,10 +85,7 @@ public class CarSettingsFragment extends Fragment {
             CarDevice.OperationMode mode = operationModes[position];
             carDevice.setOperationMode(mode);
         });
-
-        return view;
     }
-
     private void createConfiguration() {
         configurationRepository.saveConfiguration(carDevice, new ConfigurationRepository.ConfigurationCallback() {
             @Override
@@ -99,18 +113,13 @@ public class CarSettingsFragment extends Fragment {
         }
 
         String logMessage;
-        if (!carDevice.configurePID(kp, ki, kd, dBaseSpeedLeft, dBaseSpeedRight)) {
+        if (!carDevice.createConfiguration(kp, ki, kd, dBaseSpeedLeft, dBaseSpeedRight)) {
             logMessage = "Invalid data ranges!";
         } else {
             if (carDevice.uploadPID()) logMessage = "Data uploaded!";
             else logMessage = "Data upload failed!";
         }
-        // Log.i(TAG, logMessage);
         Toast.makeText(context, logMessage, Toast.LENGTH_LONG).show();
-    }
-
-    private void open (Fragment fragment) {
-        requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.main_container_id, fragment).addToBackStack(null).commit();
     }
 
     private void close () {

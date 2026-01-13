@@ -2,13 +2,12 @@ package com.example.carcontroller.api_package;
 
 import com.example.carcontroller.api_package.models_package.CarConfigurationRequest;
 import com.example.carcontroller.api_package.models_package.CarConfigurationResponse;
-import com.example.carcontroller.api_package.models_package.CircuitLocationRequest;
-import com.example.carcontroller.api_package.models_package.CircuitLocationResponse;
+import com.example.carcontroller.api_package.models_package.CircuitRequest;
+import com.example.carcontroller.api_package.models_package.CircuitResponse;
 import com.example.carcontroller.api_package.models_package.DriverRequest;
 import com.example.carcontroller.api_package.models_package.DriverResponse;
 import com.example.carcontroller.api_package.models_package.RaceRequest;
 import com.example.carcontroller.api_package.models_package.RaceResponse;
-import com.example.carcontroller.devices_package.CarDevice;
 
 import retrofit2.Call;
 import retrofit2.http.*;
@@ -23,6 +22,6 @@ public interface ApiService {
     @POST("configurations")
     Call<CarConfigurationResponse> createConfiguration(@Body CarConfigurationRequest configuration);
 
-    @POST("/circuit-locations") Call<CircuitLocationResponse> createCircuitLocation(@Body CircuitLocationRequest request
-    );
+    @POST("/circuits")
+    Call<CircuitResponse> createCircuit(@Body CircuitRequest request);
 }

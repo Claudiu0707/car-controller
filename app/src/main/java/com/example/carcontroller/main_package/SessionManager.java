@@ -5,6 +5,7 @@ import android.util.Log;
 import com.example.carcontroller.devices_package.DeviceManager;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +17,8 @@ public class SessionManager {
 
     private RaceSession currentSession;
     private Driver currentDriver;
+    private Circuit currentCircuit;
+
     private boolean driverLogged;
 
 
@@ -31,27 +34,33 @@ public class SessionManager {
     public void setCurrentDriver (Driver driver) {
         this.currentDriver = driver;
         driverLogged = true;
-        // driver.logDriverDetails();
     }
 
     public Driver getCurrentDriver () {
         return currentDriver;
     }
 
+    public Circuit getCurrentCircuit() {
+        return currentCircuit;
+    }
+
     public boolean isDriverLogged () {
         return driverLogged;
     }
 
+    public void createCircuit(String circuitName, String cityName, String locationName, CircuitType circuitType, Integer segmentsCount) {
+        currentCircuit = new Circuit(circuitName, cityName, locationName, circuitType, segmentsCount);
+    }
     public void createNewRaceSession (String circuitName, String cityName, String locationName) {
         if (currentDriver == null) {
             Log.e(TAG, "Cannot start session. No driver available!");
             return;
         }
 
-        if (cityName == null && locationName == null)
+        /*if (cityName == null && locationName == null)
             currentSession = new RaceSession(currentDriver, circuitName);
         else
-            currentSession = new RaceSession(currentDriver, circuitName, cityName, locationName);
+            currentSession = new RaceSession(currentDriver, circuitName, cityName, locationName);*/
     }
     public void startRaceSession () {
         if (currentSession == null) {
@@ -77,31 +86,14 @@ public class SessionManager {
 
     public static class RaceSession {
         private Driver driver;
-        private String circuitName, cityName, locationName;
         private String raceDate;
-        // When creating a circuit log data in database and get back the circuit Id
-        private int circuitId;
         private long startTime;
         private long finishTime;
         private boolean active;
         private final Map<Integer, Long> checkpointsTimeStamps;
 
-        public RaceSession (Driver driver, String circuitName) {
+        public RaceSession (Driver driver) {
             this.driver = driver;
-            this.circuitName = circuitName;
-
-            this.checkpointsTimeStamps = new HashMap<>();
-            this.active = false;
-
-            raceDate = LocalDate.now().toString();
-        }
-
-        public RaceSession (Driver driver, String circuitName, String cityName, String locationName) {
-            this.driver = driver;
-
-            this.circuitName = circuitName;
-            this.cityName = cityName;
-            this.locationName = locationName;
 
             this.checkpointsTimeStamps = new HashMap<>();
             this.active = false;
@@ -131,9 +123,6 @@ public class SessionManager {
             return finishTime - startTime;
         }
 
-        public int getCircuitId () {
-            return circuitId;
-        }
 
         public String getRaceDate () {
             return raceDate;
@@ -155,10 +144,7 @@ public class SessionManager {
         }
 
         public void displaySessionData () {
-            Log.d(TAG, "Session: " +
-                    " | Driver: " + driver.getDriverName() +
-                    " | Finish time: " + finishTime +
-                    " | Total time: " + getTotalTime());
+            Log.d(TAG, "Session: " + " | Driver: " + driver.getDriverName() + " | Finish time: " + finishTime + " | Total time: " + getTotalTime());
 
             for (Integer index : getAllCheckpointsTimes().keySet()) {
                 long timeStamp = checkpointsTimeStamps.get(index);
@@ -181,7 +167,6 @@ public class SessionManager {
             this.age = age;
             this.gender = gender;
             this.birthdate = birthdate;
-
         }
 
         public String getDriverName () {
@@ -246,5 +231,97 @@ public class SessionManager {
         }
     }
 
+    public static class Circuit {
+        private String circuitName;
+        private String cityName, locationName;
+        private CircuitType circuitType;
+        private String creationDate;
+        private Integer segmentsCount;
+        private SegmentDifficulty difficulty;
+        private ArrayList<SegmentDifficulty> segmentDifficulties;
+
+        public Circuit(String circuitName, String cityName, String locationName, CircuitType circuitType,Integer segmentsCount) {
+            this.circuitName = circuitName;
+            this.cityName = cityName;
+            this.locationName = locationName;
+            this.circuitType = circuitType;
+            this.creationDate = LocalDate.now().toString();
+            this.segmentsCount = segmentsCount;
+
+            this.segmentDifficulties = new ArrayList<>(segmentsCount);
+        }
+
+        public String getCircuitName() {
+            return circuitName;
+        }
+
+        public void setCircuitName(String circuitName) {
+            this.circuitName = circuitName;
+        }
+
+        public String getCityName() {
+            return cityName;
+        }
+
+        public void setCityName(String cityName) {
+            this.cityName = cityName;
+        }
+
+        public String getLocationName() {
+            return locationName;
+        }
+
+        public void setLocationName(String locationName) {
+            this.locationName = locationName;
+        }
+
+        public String getCreationDate() {
+            return creationDate;
+        }
+
+        public void setCreationDate(String creationDate) {
+            this.creationDate = creationDate;
+        }
+
+        public Integer getSegmentsCount() {
+            return segmentsCount;
+        }
+
+        public void setSegmentsCount(Integer segmentsCount) {
+            this.segmentsCount = segmentsCount;
+        }
+
+        public SegmentDifficulty getDifficulty() {
+            return difficulty;
+        }
+
+        public void setDifficulty(SegmentDifficulty difficulty) {
+            this.difficulty = difficulty;
+        }
+
+        public ArrayList<SegmentDifficulty> getSegmentDifficulties() {
+            return segmentDifficulties;
+        }
+
+        public void setSegmentDifficulties(ArrayList<SegmentDifficulty> segmentDifficulties) {
+            this.segmentDifficulties = segmentDifficulties;
+        }
+
+        public void setOneSegmentDifficulty(int segmentPosition, SegmentDifficulty difficulty) {
+            segmentDifficulties.set(segmentPosition, difficulty);
+
+        }
+
+        public CircuitType getCircuitType() {
+            return circuitType;
+        }
+
+        public void setCircuitType(CircuitType circuitType) {
+            this.circuitType = circuitType;
+        }
+    }
+
+    public enum CircuitType {LineFollowerCircuit, DriverCircuit}
     public enum Gender {MALE, FEMALE, OTHER}
+    public enum SegmentDifficulty {VERYEASY, EASY, AVERAGE, HARD, VERYHARD}
 }

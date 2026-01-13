@@ -8,8 +8,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.example.carcontroller.R;
+import com.example.carcontroller.devices_package.DeviceManager;
 
 public class SettingsFragment extends Fragment {
 
@@ -34,7 +36,9 @@ public class SettingsFragment extends Fragment {
             open(new BluetoothManagerFragment());
         });
         carSettingsButton.setOnClickListener(v -> {
-            open(new CarSettingsFragment());
+            if (DeviceManager.getInstance().hasCarDevice())
+                open(new CarSettingsFragment());
+            else showToast("Please connect a car");
         });
         createCircuitButton.setOnClickListener(v -> {
             open(new CircuitCreatorFragment());
@@ -44,6 +48,10 @@ public class SettingsFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void showToast (String message) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
     }
 
     private void open (Fragment fragment) {

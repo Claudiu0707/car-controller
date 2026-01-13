@@ -20,8 +20,8 @@
         <item>Other</item>
     </string-array>
     <string-array name="circuit_type_options_list">
-        <item>Drive Circuit</item>
         <item>Line Follower Circuit</item>
+        <item>Drive Circuit</item>
     </string-array>
     <string-array name="segment_difficulty_options_list">
         <item>Very Easy</item>

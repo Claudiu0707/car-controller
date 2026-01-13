@@ -12,16 +12,8 @@ public class CarDevice extends Device {
     private static final String TAG = "CarDeviceTAG";
 
     private final BluetoothSocket bluetoothSocket;
-    private final CarConfiguration configuration;
+    private CarConfiguration configuration;
     private OperationMode currentMode;
-
-    // Line-follower mode parameters
-    private float kp, ki, kd;
-    private float baseSpeedLeft, baseSpeedRight;
-    private float LMSW, LSW, CSW, RSW, RMSW;        // IR digital module - sensor weights
-
-    // Motors PWM variables
-    private float speedRightFWD, speedLeftFWD, speedRightBWD, speedLeftBWD;
 
     public enum OperationMode {SETUP, DRIVER, LINE_FOLLOWER}
 
@@ -29,7 +21,6 @@ public class CarDevice extends Device {
         super(deviceAddress, deviceName, DeviceType.CAR);
         this.bluetoothSocket = socket;
         this.currentMode = OperationMode.SETUP;
-        this.configuration = new CarConfiguration();
     }
 
     @Override
@@ -86,6 +77,21 @@ public class CarDevice extends Device {
         return bluetoothSocket != null && bluetoothSocket.isConnected() && getDeviceStatus() == DeviceStatus.CONNECTED;
     }
 
+    public boolean createConfiguration(float kp, float ki, float kd, float baseLeftSpeed, float baseRightSpeed) {
+        boolean bKp = checkData(0, kp);
+        boolean bKi = checkData(0, ki);
+        boolean bKd = checkData(0, kd);
+        boolean bBaseSpeedLeft = checkData(1, baseLeftSpeed);
+        boolean bBaseSpeedRight = checkData(1, baseRightSpeed);
+
+        if (!bKp || !bKi || !bKd || !bBaseSpeedLeft || !bBaseSpeedRight)
+            return false;
+
+        this.configuration = new CarConfiguration(kp, ki, kd, baseLeftSpeed, baseRightSpeed);
+        this.configuration.setCreationDate();
+        return true;
+    }
+
     public boolean sendCommand (Commands command) {
         return sendData(command.getCommand());
     }
@@ -119,46 +125,15 @@ public class CarDevice extends Device {
         }
     }
 
-    public boolean configurePID (float kp, float ki, float kd, float baseLeftSpeed, float baseRightSpeed) {
-        // Check if the data range is valid
-        boolean bKp = checkData(0, kp);
-        boolean bKi = checkData(0, ki);
-        boolean bKd = checkData(0, kd);
-        boolean bBaseSpeedLeft = checkData(1, baseLeftSpeed);
-        boolean bBaseSpeedRight = checkData(1, baseRightSpeed);
-
-        if (!bKp || !bKi || !bKd || !bBaseSpeedLeft || !bBaseSpeedRight)
-            return false;
-
-        this.kp = kp;
-        this.ki = ki;
-        this.kd = kd;
-        this.baseSpeedLeft = baseLeftSpeed;
-        this.baseSpeedRight = baseRightSpeed;
-        this.configuration.setCreationDate();
-
-        configuration.setKp(kp);
-        configuration.setKi(ki);
-        configuration.setKd(kd);
-        configuration.setBaseSpeed(baseLeftSpeed, baseRightSpeed);
-        /* String logMessage = "kp = " + kp + " | " +
-                            "ki = " + ki + " | " +
-                            "kd = " + kd + " | " +
-                            "leftSpeed = "  + baseLeftSpeed  + " | " +
-                            "rightSpeed = " + baseRightSpeed;
-
-        Log.i(TAG, logMessage); */
-        return true;
-    }
-
     public boolean uploadPID () {
         if (!isConnected()) return false;
-
-        sendPIDValues(String.valueOf(kp));
-        sendPIDValues(String.valueOf(ki));
-        sendPIDValues(String.valueOf(kd));
-        sendPIDValues(String.valueOf(baseSpeedLeft));
-        sendPIDValues(String.valueOf(baseSpeedRight));
+        if (configuration != null) {
+            sendPIDValues(String.valueOf(configuration.getKp()));
+            sendPIDValues(String.valueOf(configuration.getKi()));
+            sendPIDValues(String.valueOf(configuration.getKd()));
+            sendPIDValues(String.valueOf(configuration.getBaseLeftSpeed()));
+            sendPIDValues(String.valueOf(configuration.getBaseRightSpeed()));
+        }
 
         return true;
     }
@@ -217,6 +192,14 @@ public class CarDevice extends Device {
         private float speedRightFWD, speedLeftFWD, speedRightBWD, speedLeftBWD;
 
         private String creationDate;
+
+        public CarConfiguration(float kp, float ki, float kd, float baseLeftSpeed, float baseRightSpeed) {
+            this.kp = kp;
+            this.ki = ki;
+            this.kd = kd;
+            this.baseLeftSpeed = baseLeftSpeed;
+            this.baseRightSpeed = baseRightSpeed;
+        }
 
         public float getKp () {
             return kp;
