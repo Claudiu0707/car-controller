@@ -5,4 +5,4 @@ APEX Car controller app is an android application, designed to control an Arduin
 
 ## Authors
 
-- [Muresan Claudiu](https://www.github.com/octokatherine)
+- [Muresan Claudiu](https://github.com/Claudiu0707)
