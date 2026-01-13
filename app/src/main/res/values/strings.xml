@@ -7,6 +7,8 @@
     <string name="discoverDevices">Discover</string>
     <string name="bluetoothButton">Bluetooth</string>
     <string name="title_activity_settings">Settings</string>
+    <string name="backButton">Back</string>
+    <string name="logCircuitButton">Log Circuit Data</string>
     <!-- Preference Titles -->
     <string name="messages_header">Messages</string>
     <string name="sync_header">Sync</string>

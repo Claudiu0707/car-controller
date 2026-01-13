@@ -52,10 +52,7 @@ public class BluetoothManagerFragment extends Fragment {
 
     @SuppressLint("MissingPermission")
     @Override
-    public View onCreateView (LayoutInflater inflater, ViewGroup container,
-                              Bundle savedInstanceState) {
-
-
+    public View onCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_bluetooth_manager, container, false);
         context = requireContext();
@@ -420,7 +417,7 @@ public class BluetoothManagerFragment extends Fragment {
 
 
     private void open (Fragment fragment) {
-        requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.settings_container_id, fragment).addToBackStack(null).commit();
+        requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.main_container_id, fragment).addToBackStack(null).commit();
     }
 
     private void close () {

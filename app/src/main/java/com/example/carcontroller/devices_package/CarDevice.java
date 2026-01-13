@@ -3,12 +3,10 @@ package com.example.carcontroller.devices_package;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
-import com.example.carcontroller.bluetooth_package.BluetoothService;
 import com.example.carcontroller.main_package.Commands;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 public class CarDevice extends Device {
     private static final String TAG = "CarDeviceTAG";
@@ -91,8 +89,16 @@ public class CarDevice extends Device {
     public boolean sendCommand (Commands command) {
         return sendData(command.getCommand());
     }
+    public void stopLineFollow() {
+        if (currentMode == OperationMode.LINE_FOLLOWER)
+            sendCommand(Commands.STOPFOLLOWLINE);
+    }
 
-    public boolean setOperationMode (OperationMode operationMode) {
+    public void startLineFollow() {
+        if (currentMode == OperationMode.LINE_FOLLOWER)
+            sendCommand(Commands.STARTFOLLOWLINE);
+    }
+    public void setOperationMode (OperationMode operationMode) {
         Commands command;
         switch (operationMode) {
             case SETUP:
@@ -105,14 +111,12 @@ public class CarDevice extends Device {
                 command = Commands.LINEFOLLOWERMODE;
                 break;
             default:
-                return false;
+                return;
         }
         if (sendCommand(command)) {
             this.currentMode = operationMode;
             Log.i(TAG, "Operation mode changed to " + operationMode);
-            return true;
         }
-        return false;
     }
 
     public boolean configurePID (float kp, float ki, float kd, float baseLeftSpeed, float baseRightSpeed) {

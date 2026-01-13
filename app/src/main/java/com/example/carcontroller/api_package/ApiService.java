@@ -2,6 +2,8 @@ package com.example.carcontroller.api_package;
 
 import com.example.carcontroller.api_package.models_package.CarConfigurationRequest;
 import com.example.carcontroller.api_package.models_package.CarConfigurationResponse;
+import com.example.carcontroller.api_package.models_package.CircuitLocationRequest;
+import com.example.carcontroller.api_package.models_package.CircuitLocationResponse;
 import com.example.carcontroller.api_package.models_package.DriverRequest;
 import com.example.carcontroller.api_package.models_package.DriverResponse;
 import com.example.carcontroller.api_package.models_package.RaceRequest;
@@ -20,4 +22,7 @@ public interface ApiService {
 
     @POST("configurations")
     Call<CarConfigurationResponse> createConfiguration(@Body CarConfigurationRequest configuration);
+
+    @POST("/circuit-locations") Call<CircuitLocationResponse> createCircuitLocation(@Body CircuitLocationRequest request
+    );
 }

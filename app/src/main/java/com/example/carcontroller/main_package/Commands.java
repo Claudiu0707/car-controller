@@ -12,6 +12,7 @@ public enum Commands {
 
     // Line Follower commands
     WAITFOR1("W1"), WAITFOR2("W2"), WAITFOR3("W3"), WAITFOR4("W4"), WAITFOR5("W5"),
+    STOPFOLLOWLINE("L0"), STARTFOLLOWLINE("L1"),
 
     // Checkpoint commands
     NOTDETECTED("C0"), DETECTED("C1");

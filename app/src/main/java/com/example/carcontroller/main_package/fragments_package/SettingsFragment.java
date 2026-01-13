@@ -12,7 +12,6 @@ import android.widget.Button;
 import com.example.carcontroller.R;
 
 public class SettingsFragment extends Fragment {
-    private Button backButton, bluetoothSettingsButton, carSettingsButton, databaseSettingsButton;
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -20,14 +19,16 @@ public class SettingsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
         // Buttons initialization
-        backButton = view.findViewById(R.id.backButtonID);
-        bluetoothSettingsButton = view.findViewById(R.id.bluetoothSettingsButtonID);
-        carSettingsButton = view.findViewById(R.id.carSettingsButtonID);
-        databaseSettingsButton = view.findViewById(R.id.databaseSettingsButtonID);
+        Button backButton = view.findViewById(R.id.backButtonID);
+        Button bluetoothSettingsButton = view.findViewById(R.id.bluetoothSettingsButtonID);
+        Button carSettingsButton = view.findViewById(R.id.carSettingsButtonID);
+        Button databaseSettingsButton = view.findViewById(R.id.databaseSettingsButtonID);
+        Button createCircuitButton = view.findViewById(R.id.circuitCreateButtonID);
+
 
         // ---------------- BUTTON ONCLICK LISTENERS ----------------
         backButton.setOnClickListener(v -> {
-            requireActivity().finish();
+            close();
         });
         bluetoothSettingsButton.setOnClickListener(v -> {
             open(new BluetoothManagerFragment());
@@ -35,15 +36,18 @@ public class SettingsFragment extends Fragment {
         carSettingsButton.setOnClickListener(v -> {
             open(new CarSettingsFragment());
         });
+        createCircuitButton.setOnClickListener(v -> {
+            open(new CircuitCreatorFragment());
+        });
         databaseSettingsButton.setOnClickListener(v -> {
-
+            // Sometimes :)))
         });
 
         return view;
     }
 
     private void open (Fragment fragment) {
-        requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.settings_container_id, fragment).addToBackStack(null).commit();
+        requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.main_container_id, fragment).addToBackStack(null).commit();
     }
 
     private void close () {

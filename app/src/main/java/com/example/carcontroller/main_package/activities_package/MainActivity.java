@@ -1,5 +1,6 @@
 /**
  * @Author Muresan Claudiu
+ * @ProjectName APEX: Car Controller
  */
 
 
@@ -31,9 +32,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main_container_id, new MainFragment())
-                    .commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.main_container_id, new MainFragment()).commit();
         }
     }
 }

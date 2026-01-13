@@ -42,7 +42,7 @@ public class SessionManager {
         return driverLogged;
     }
 
-    public void startNewRaceSession (String circuitName, String cityName, String locationName) {
+    public void createNewRaceSession (String circuitName, String cityName, String locationName) {
         if (currentDriver == null) {
             Log.e(TAG, "Cannot start session. No driver available!");
             return;
@@ -52,7 +52,12 @@ public class SessionManager {
             currentSession = new RaceSession(currentDriver, circuitName);
         else
             currentSession = new RaceSession(currentDriver, circuitName, cityName, locationName);
-
+    }
+    public void startRaceSession () {
+        if (currentSession == null) {
+            Log.e(TAG, "No available race session");
+            return;
+        }
         currentSession.setStartTime();
     }
 
@@ -65,6 +70,9 @@ public class SessionManager {
         currentSession.setFinishTime();
         currentSession.displaySessionData();
         currentSession = null;
+    }
+
+    public void setCircuitLocationId(int circuitLocationId) {
     }
 
     public static class RaceSession {

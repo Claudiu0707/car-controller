@@ -110,7 +110,7 @@ public class CarSettingsFragment extends Fragment {
     }
 
     private void open (Fragment fragment) {
-        requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.settings_container_id, fragment).addToBackStack(null).commit();
+        requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.main_container_id, fragment).addToBackStack(null).commit();
     }
 
     private void close () {

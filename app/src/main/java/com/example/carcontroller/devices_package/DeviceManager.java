@@ -75,6 +75,10 @@ public class DeviceManager {
         return (List<CheckpointDevice>) checkpoints.values();
     }
 
+    public int getCheckpointsCount () {
+        return checkpoints.size();
+    }
+
     public List<Device> getAllDevices () {
         return allDevices;
     }

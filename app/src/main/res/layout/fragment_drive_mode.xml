@@ -2,10 +2,10 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/frameLayout4"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".main_package.activities_package.DriverModeActivity">
+    tools:context=".main_package.fragments_package.DriveModeFragment" >
 
     <Button
         android:id="@+id/backButtonID"
@@ -21,49 +21,52 @@
 
     <Button
         android:id="@+id/forwardButtonID"
-        android:layout_width="102dp"
-        android:layout_height="98dp"
-        android:layout_marginStart="16dp"
+        android:layout_width="135dp"
+        android:layout_height="135dp"
         android:text="Forward"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.026"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.875" />
+        app:layout_constraintVertical_bias="0.942" />
 
     <Button
         android:id="@+id/steerLeftButtonID"
-        android:layout_width="102dp"
-        android:layout_height="98dp"
+        android:layout_width="135dp"
+        android:layout_height="135dp"
         android:text="Left"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/steerRightButtonID"
-        app:layout_constraintHorizontal_bias="0.938"
-        app:layout_constraintStart_toEndOf="@+id/reverseButtonID"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.729"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.875" />
+        app:layout_constraintVertical_bias="0.945" />
 
     <Button
         android:id="@+id/reverseButtonID"
-        android:layout_width="102dp"
-        android:layout_height="98dp"
+        android:layout_width="135dp"
+        android:layout_height="135dp"
         android:layout_marginStart="20dp"
         android:text="Reverse"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/forwardButtonID"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.256"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.875" />
+        app:layout_constraintVertical_bias="0.945" />
 
     <Button
         android:id="@+id/steerRightButtonID"
-        android:layout_width="102dp"
-        android:layout_height="98dp"
+        android:layout_width="135dp"
+        android:layout_height="135dp"
         android:text="Right"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.957"
+        app:layout_constraintHorizontal_bias="0.973"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.875" />
+        app:layout_constraintVertical_bias="0.942" />
 
     <Button
         android:id="@+id/startSessionButtonID"
@@ -88,4 +91,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.201" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -10,15 +10,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
-import com.example.carcontroller.main_package.activities_package.DriverModeActivity;
 import com.example.carcontroller.R;
+import com.example.carcontroller.devices_package.CarDevice;
+import com.example.carcontroller.devices_package.DeviceManager;
+import com.example.carcontroller.main_package.SessionManager;
 
 public class MainFragment extends Fragment {
 
     private static final String TAG = "MainFragmentTAG";
 
-    Button settingsButton, driverButton, driverLoginButton;
+    Button settingsButton, modeFragmentButton, driverLoginButton;
     Context context;
     View view;
 
@@ -29,34 +32,31 @@ public class MainFragment extends Fragment {
         context = requireContext();
 
         // Buttons initialization
-        driverButton = (Button) view.findViewById(R.id.driverButtonID);
+        modeFragmentButton = (Button) view.findViewById(R.id.modeFragmentButtonID);
         settingsButton = (Button) view.findViewById(R.id.settingsButtonID);
         driverLoginButton = (Button) view.findViewById(R.id.driverLoginButtonID);
 
         // ---------------- BUTTON ONCLICK LISTENERS ----------------
-        driverButton.setOnClickListener(v -> {
-            launchActivityDriverMode();
+        modeFragmentButton.setOnClickListener(v -> {
+            if (!DeviceManager.getInstance().hasCarDevice()) {
+                Toast.makeText(requireActivity(), "Please connect a device!", Toast.LENGTH_LONG).show();
+            }
+            else {
+                if (DeviceManager.getInstance().getCarDevice().getCurrentMode() == CarDevice.OperationMode.DRIVER)
+                    open(new DriveModeFragment());
+                else if (DeviceManager.getInstance().getCarDevice().getCurrentMode() == CarDevice.OperationMode.LINE_FOLLOWER)
+                    open(new LineFollowModeFragment());
+            }
         });
         driverLoginButton.setOnClickListener(v -> {
             open(new DriverLoginFragment());
         });
         settingsButton.setOnClickListener(v -> {
-            launchActivitySettings();
+            open(new SettingsFragment());
         });
 
         return view;
     }
-
-    private void launchActivityDriverMode () {
-        Intent intent = new Intent(context, DriverModeActivity.class);
-        startActivity(intent);
-    }
-
-    private void launchActivitySettings () {
-        Intent intent = new Intent(context, SettingsActivity.class);
-        startActivity(intent);
-    }
-
     private void open (Fragment fragment) {
         requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.main_container_id, fragment).addToBackStack(null).commit();
     }

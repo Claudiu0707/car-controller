@@ -30,7 +30,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CarController">
         <activity
-            android:name=".main_package.fragments_package.SettingsActivity"
+            android:name=".main_package.activities_package.SettingsActivity"
             android:exported="false" />
         <activity
             android:name=".main_package.activities_package.DriverModeActivity"

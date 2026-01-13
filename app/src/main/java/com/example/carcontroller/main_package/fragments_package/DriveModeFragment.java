@@ -1,70 +1,81 @@
-package com.example.carcontroller.main_package.activities_package;
+package com.example.carcontroller.main_package.fragments_package;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
-import com.example.carcontroller.api_package.DriverRepository;
+import com.example.carcontroller.R;
 import com.example.carcontroller.api_package.RaceRepository;
-import com.example.carcontroller.api_package.models_package.RaceResponse;
 import com.example.carcontroller.devices_package.CarDevice;
 import com.example.carcontroller.devices_package.Device;
 import com.example.carcontroller.devices_package.DeviceManager;
 import com.example.carcontroller.main_package.Commands;
-import com.example.carcontroller.R;
 import com.example.carcontroller.main_package.SessionManager;
 
 
-public class DriverModeActivity extends AppCompatActivity {
-    private static final String TAG = "DriverModeActivityTAG";
+public class DriveModeFragment extends Fragment {
+    private static final String TAG = "DriveModeFragment";
 
     private final DeviceManager deviceManager = DeviceManager.getInstance();
     private final SessionManager sessionManager = SessionManager.getInstance();
     private final RaceRepository raceRepository = RaceRepository.getInstance();
     Button backButton, forwardButton, reverseButton, steerLeftButton, steerRightButton;
+    Button startSessionButton, endSessionButton;
     CarDevice carDevice;
-    Button startSessionButton;
-    Button endSessionButton;
     private boolean isForward = false, isReverse = false, isLeft = false, isRight = false;
 
-    @SuppressLint("ClickableViewAccessibility")
+    private View view;
     @Override
-    protected void onCreate (Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_driver_mode);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        view = inflater.inflate(R.layout.fragment_drive_mode, container, false);
 
-        if (!deviceManager.hasCarDevice()) {
-            Toast.makeText(this, "Please connect a device!", Toast.LENGTH_LONG).show();
-            finish();
-            return;
-        }
         carDevice = deviceManager.getCarDevice();
 
         initializeViews();
+        initializeOnClickListeners();
 
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+    }
+
+    private void initializeViews () {
+        // Buttons initialization
+        backButton = (Button) view.findViewById(R.id.backButtonID);
+
+        forwardButton = (Button) view.findViewById(R.id.forwardButtonID);
+        reverseButton = (Button) view.findViewById(R.id.reverseButtonID);
+        steerLeftButton = (Button) view.findViewById(R.id.steerLeftButtonID);
+        steerRightButton = (Button) view.findViewById(R.id.steerRightButtonID);
+
+        startSessionButton = (Button) view.findViewById(R.id.startSessionButtonID);
+        endSessionButton = (Button) view.findViewById(R.id.endSessionButtonID);
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void initializeOnClickListeners() {
         // ---------------- BUTTON ONCLICK LISTENERS ----------------
         backButton.setOnClickListener(v -> {
-            finish();
+            close();
         });
 
         if (carDevice.getDeviceStatus() == Device.DeviceStatus.CONNECTED) {
             startSessionButton.setOnClickListener(v -> {
-                sessionManager.startNewRaceSession("dummyCircuitName", null, null); // TODO: delete this and replace with proper initialization
+                sessionManager.startRaceSession();
+                // sessionManager.startNewRaceSession("dummyCircuitName", null, null); // TODO: delete this and replace with proper initialization
             });
 
             endSessionButton.setOnClickListener(v -> {
@@ -122,34 +133,6 @@ public class DriverModeActivity extends AppCompatActivity {
             });
         }
     }
-
-    private void createRace() {
-        raceRepository.saveRace(sessionManager.getCurrentSession(), new RaceRepository.RaceCallback() {
-            @Override
-            public void onSuccess(RaceResponse race) {
-                Log.d(TAG, "Race session saved with id: " + race.getRaceId());
-                Toast.makeText(DriverModeActivity.this, "Race saved", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onError(String error) {
-                Toast.makeText(DriverModeActivity.this, "Error: " + error, Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-
-    private void initializeViews () {
-        // Buttons initialization
-        backButton = (Button) findViewById(R.id.backButtonID);
-        forwardButton = (Button) findViewById(R.id.forwardButtonID);
-        reverseButton = (Button) findViewById(R.id.reverseButtonID);
-        steerLeftButton = (Button) findViewById(R.id.steerLeftButtonID);
-        steerRightButton = (Button) findViewById(R.id.steerRightButtonID);
-
-        startSessionButton = (Button) findViewById(R.id.startSessionButtonID);
-        endSessionButton = (Button) findViewById(R.id.endSessionButtonID);
-    }
-
     private void sendDriveCommand () {
         Commands command;
         if (isForward && isLeft) {
@@ -172,5 +155,13 @@ public class DriverModeActivity extends AppCompatActivity {
             command = Commands.STOP;
         }
         carDevice.sendCommand(command);
+    }
+
+    private void open (Fragment fragment) {
+        requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.main_container_id, fragment).addToBackStack(null).commit();
+    }
+
+    private void close () {
+        requireActivity().getSupportFragmentManager().popBackStack();
     }
 }
