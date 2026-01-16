@@ -14,9 +14,8 @@ public class CarDevice extends Device {
     private final BluetoothSocket bluetoothSocket;
     private CarConfiguration configuration;
     private OperationMode currentMode;
-
-    public enum OperationMode {SETUP, DRIVER, LINE_FOLLOWER}
-
+    public enum OperationMode {SETUP, DRIVE, LINE_FOLLOWER}
+    enum ConfigValidation { PID, MOTOR_SPEED }
     public CarDevice (String deviceAddress, String deviceName, BluetoothSocket socket) {
         super(deviceAddress, deviceName, DeviceType.CAR);
         this.bluetoothSocket = socket;
@@ -24,19 +23,16 @@ public class CarDevice extends Device {
     }
 
     @Override
-    public boolean connect () {
+    public void connect () {
         try {
             if (bluetoothSocket != null && bluetoothSocket.isConnected()) {
                 getBluetoothService().initializeStream(getDeviceAddress(), bluetoothSocket);
                 setDeviceStatus(DeviceStatus.CONNECTED);
                 Log.i(TAG, "Car device " + getDeviceName() + " connected successfully");
-                return true;
             }
-            return false;
         } catch (Exception e) {
             Log.e(TAG, "Connection failed!", e);
             setDeviceStatus(DeviceStatus.ERROR);
-            return false;
         }
     }
 
@@ -65,6 +61,12 @@ public class CarDevice extends Device {
         return false;
     }
 
+    /**
+     * When the BluetoothService receives data from the device, the device, identified by its address is notified that there is available data.
+     * The received data is further processed
+     * @param deviceAddress device address
+     * @param data data received
+     */
     @Override
     public void onDataReceived (String deviceAddress, byte[] data) {
         if (getDeviceAddress().contentEquals(deviceAddress)) {
@@ -72,45 +74,81 @@ public class CarDevice extends Device {
         }
     }
 
+    /**
+     * Checks if the device is connected
+     * @return true if the device is connected, false otherwise
+     */
     @Override
     public boolean isConnected () {
         return bluetoothSocket != null && bluetoothSocket.isConnected() && getDeviceStatus() == DeviceStatus.CONNECTED;
     }
 
+    /**
+     * Creates a new configuration for the car device. Input is validated before creating
+     * the configuration. If you want to check validation process, check method: checkConfigurationData
+     *
+     * @param kp proportional parameter
+     * @param ki integral parameter
+     * @param kd derivative parameter
+     * @param baseLeftSpeed base speed for the left motor
+     * @param baseRightSpeed base speed for the right motor
+     *
+     * @return true if the configuration was created successfully, false otherwise
+     **/
     public boolean createConfiguration(float kp, float ki, float kd, float baseLeftSpeed, float baseRightSpeed) {
-        boolean bKp = checkData(0, kp);
-        boolean bKi = checkData(0, ki);
-        boolean bKd = checkData(0, kd);
-        boolean bBaseSpeedLeft = checkData(1, baseLeftSpeed);
-        boolean bBaseSpeedRight = checkData(1, baseRightSpeed);
+        boolean bKp = checkConfigurationData(ConfigValidation.PID, kp);
+        boolean bKi = checkConfigurationData(ConfigValidation.PID, ki);
+        boolean bKd = checkConfigurationData(ConfigValidation.PID, kd);
+        boolean bBaseSpeedLeft = checkConfigurationData(ConfigValidation.MOTOR_SPEED, baseLeftSpeed);
+        boolean bBaseSpeedRight = checkConfigurationData(ConfigValidation.MOTOR_SPEED, baseRightSpeed);
 
         if (!bKp || !bKi || !bKd || !bBaseSpeedLeft || !bBaseSpeedRight)
             return false;
 
         this.configuration = new CarConfiguration(kp, ki, kd, baseLeftSpeed, baseRightSpeed);
-        this.configuration.setCreationDate();
         return true;
     }
 
+    /**
+     * Sends a command to the car device. Translates the command to a string and calls the sendData method
+     *
+     * @param command command to be sent
+     * @return true if the command was sent successfully, false otherwise
+     */
     public boolean sendCommand (Commands command) {
         return sendData(command.getCommand());
     }
-    public void stopLineFollow() {
-        if (currentMode == OperationMode.LINE_FOLLOWER)
+
+    /**
+     * Commands the car to start following the line. This works only if the car is set in Line Follower Mode
+     * @param followLine true if the car should start following the line, false otherwise
+     */
+    public void setLineFollowing(boolean followLine) {
+        if (currentMode!= OperationMode.LINE_FOLLOWER)
+            return;
+
+        if(followLine) {
+            sendCommand(Commands.STARTFOLLOWLINE);
+        } else {
             sendCommand(Commands.STOPFOLLOWLINE);
+        }
     }
 
-    public void startLineFollow() {
-        if (currentMode == OperationMode.LINE_FOLLOWER)
-            sendCommand(Commands.STARTFOLLOWLINE);
-    }
+    /**
+     * Sets the operation mode of the car device.
+     * - SETUP MODE allows the modification of the car configuration
+     * - DRIVE MODE allows the manual control of the car
+     * - LINE FOLLOW MODE allows the car to follow a predefined path
+     *
+     * @param operationMode operation mode to be set
+     */
     public void setOperationMode (OperationMode operationMode) {
         Commands command;
         switch (operationMode) {
             case SETUP:
                 command = Commands.SETUPMODE;
                 break;
-            case DRIVER:
+            case DRIVE:
                 command = Commands.DRIVEMODE;
                 break;
             case LINE_FOLLOWER:
@@ -120,13 +158,17 @@ public class CarDevice extends Device {
                 return;
         }
         if (sendCommand(command)) {
-            this.currentMode = operationMode;
+            currentMode = operationMode;
             Log.i(TAG, "Operation mode changed to " + operationMode);
         }
     }
 
+    /**
+     * Start upload PID values sequence. It is important that the car is connected (obviously) and that it is set in SETUP mode, otherwise it won't work
+     * @return true if the PID values were uploaded successfully, false otherwise
+    * */
     public boolean uploadPID () {
-        if (!isConnected()) return false;
+        if (!isConnected() || currentMode != OperationMode.SETUP) return false;
         if (configuration != null) {
             sendPIDValues(String.valueOf(configuration.getKp()));
             sendPIDValues(String.valueOf(configuration.getKi()));
@@ -134,10 +176,14 @@ public class CarDevice extends Device {
             sendPIDValues(String.valueOf(configuration.getBaseLeftSpeed()));
             sendPIDValues(String.valueOf(configuration.getBaseRightSpeed()));
         }
-
         return true;
     }
 
+    /**
+     * Sends an instruction in the standard format (command_type:value) to the car device (check Commands.java for more info about the standard format)
+     * Signaling number of bytes the device should listen for (e.g. waitCommand = WAITFOR3 => car device will wait for 3 incoming bytes before processing anything)
+     * @param value effective PID value to be sent
+     * */
     public void sendPIDValues (String value) {
         // According to the length of the PID parameter value, send a command signalling length of the incoming value
         Commands waitCommand;
@@ -154,21 +200,25 @@ public class CarDevice extends Device {
             case 4:
                 waitCommand = Commands.WAITFOR4;
                 break;
-            case 5:
-                waitCommand = Commands.WAITFOR5;
-                break;
             default:
-                return;
+                waitCommand = Commands.WAITFOR5;
         }
         sendCommand(waitCommand);   // Inform the length of the PID parameter value
         sendData(value);            // Send the actual value
     }
 
-    private boolean checkData (int type, float data) {
-        if (type == 0) {
-            return data >= 0.0f && data <= 100.0f;
-        } else if (type == 1) {
-            return data >= 80.0f && data <= 255.0f;
+    /**
+     * Check if the configuration data is valid.
+     *
+     * @param option option of the data that should be checked (option = PID - effective kp, ki, kd parameters will be checked accordingly |
+     *             option = MOTOR_SPEED - motor speeds (PWMs) will be checked accordingly)
+     * @return true if data validation passed, false otherwise
+     * */
+    private boolean checkConfigurationData(ConfigValidation option, float data) {
+        if (option == ConfigValidation.PID) {
+            return data >= 0.0f;
+        } else if (option == ConfigValidation.MOTOR_SPEED) {
+            return data >= 0.0f && data <= 255.0f;
         }
         return false;
     }
@@ -184,14 +234,29 @@ public class CarDevice extends Device {
 
     // =========================== CAR CONFIGURATION ===========================
     public static class CarConfiguration {
+        /**
+         * PID calibration values
+         * kp - influences proportional parameter of the PID controller
+         * ki - influences integral parameter of the PID controller
+         * kd - influences derivative parameter of the PID controller
+         * */
         private float kp, ki, kd;
-        private float LMSW, LSW, CSW, RSW, RMSW;
-        private float baseLeftSpeed;
-        private float baseRightSpeed;
 
-        private float speedRightFWD, speedLeftFWD, speedRightBWD, speedLeftBWD;
+        /**
+         * Weights for each IR sensor (especially important to be calibrated if a digital IR module is used)
+         * */
+        private float LMSW, LSW, CSW, RSW, RMSW;
+
+        /**
+         * Base speeds for the left and right motors for line follower mode. In this mode, the car usually has lower speeds and need more specific tuning
+         * */
+        private float baseLeftSpeed, baseRightSpeed;
 
         private String creationDate;
+
+        // NOTE: Will be implemented in future iterations when a drive mode calibration feature will be added
+        private float speedRightFWD, speedLeftFWD, speedRightBWD, speedLeftBWD;
+
 
         public CarConfiguration(float kp, float ki, float kd, float baseLeftSpeed, float baseRightSpeed) {
             this.kp = kp;
@@ -199,6 +264,15 @@ public class CarDevice extends Device {
             this.kd = kd;
             this.baseLeftSpeed = baseLeftSpeed;
             this.baseRightSpeed = baseRightSpeed;
+
+            this.creationDate = LocalDate.now().toString();
+        }
+
+        public String getCreationDate() {
+            return creationDate;
+        }
+        public void setCreationDate () {
+            this.creationDate = LocalDate.now().toString();
         }
 
         public float getKp () {
@@ -213,14 +287,6 @@ public class CarDevice extends Device {
             return kd;
         }
 
-        public float getBaseLeftSpeed () {
-            return baseLeftSpeed;
-        }
-
-        public float getBaseRightSpeed () {
-            return baseRightSpeed;
-        }
-
         public void setKp (float kp) {
             this.kp = kp;
         }
@@ -233,22 +299,33 @@ public class CarDevice extends Device {
             this.kd = kd;
         }
 
+
+        public float getBaseLeftSpeed () {
+            return baseLeftSpeed;
+        }
+
+        public float getBaseRightSpeed () {
+            return baseRightSpeed;
+        }
+        public void setBaseLeftSpeed (float baseLeftSpeed) {
+            this.baseLeftSpeed = baseLeftSpeed;
+        }
+
+        public void setBaseRightSpeed (float baseRightSpeed) {
+            this.baseRightSpeed = baseRightSpeed;
+        }
+
         public void setBaseSpeed (float baseLeftSpeed, float baseRightSpeed) {
             this.baseLeftSpeed = baseLeftSpeed;
             this.baseRightSpeed = baseRightSpeed;
         }
 
-        public String getCreationDate() {
-            return creationDate;
-        }
-
-        public void setCreationDate () {
-            this.creationDate = LocalDate.now().toString();
-        }
 
 
-        // Following values will be implemented in future iterations
-        // They are driver mode related parameters
+        // ================================================================
+        // FOLLOWING METHODS WILL BE IMPLEMENTED IN FUTURE ITERATIONS
+        // THEY ARE DRIVE_MODE MODE CALIBRATIONS RELATED METHODS
+        // ================================================================
 
         public float getLMSW () {
             return LMSW;
@@ -306,14 +383,6 @@ public class CarDevice extends Device {
 
         public void setRMSW (float RMSW) {
             this.RMSW = RMSW;
-        }
-
-        public void setBaseLeftSpeed (float baseLeftSpeed) {
-            this.baseLeftSpeed = baseLeftSpeed;
-        }
-
-        public void setBaseRightSpeed (float baseRightSpeed) {
-            this.baseRightSpeed = baseRightSpeed;
         }
 
         public void setSpeed (float speedRightFWD, float speedLeftFWD, float speedRightBWD, float speedLeftBWD) {

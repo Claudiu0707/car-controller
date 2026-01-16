@@ -60,13 +60,7 @@ public class CarSettingsFragment extends Fragment {
         backButton = view.findViewById(R.id.backButtonID);
         loadDataButton = view.findViewById(R.id.loadDataButtonID);
         if (carDevice.getConfiguration() != null) {
-            CarDevice.CarConfiguration carConfiguration = carDevice.getConfiguration();
-
-            Kp.setText(Float.toString(carConfiguration.getKp()));
-            Ki.setText(Float.toString(carConfiguration.getKi()));
-            Kd.setText(Float.toString(carConfiguration.getKd()));
-            baseSpeedLeft.setText(Float.toString(carConfiguration.getBaseLeftSpeed()));
-            baseSpeedRight.setText(Float.toString(carConfiguration.getBaseRightSpeed()));
+   
         }
     }
 
@@ -87,17 +81,17 @@ public class CarSettingsFragment extends Fragment {
         });
     }
     private void createConfiguration() {
-        configurationRepository.saveConfiguration(carDevice, new ConfigurationRepository.ConfigurationCallback() {
-            @Override
-            public void onSuccess(CarConfigurationResponse configuration) {
-                Toast.makeText(requireContext(), "Configuration saved", Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onError(String error) {
-                Toast.makeText(requireContext(), "Error: " + error, Toast.LENGTH_LONG).show();
-            }
-        });
+//        configurationRepository.saveConfiguration(carDevice, new ConfigurationRepository.ConfigurationCallback() {
+//            @Override
+//            public void onSuccess(CarConfigurationResponse configuration) {
+//                Toast.makeText(requireContext(), "Configuration saved", Toast.LENGTH_LONG).show();
+//            }
+//
+//            @Override
+//            public void onError(String error) {
+//                Toast.makeText(requireContext(), "Error: " + error, Toast.LENGTH_LONG).show();
+//            }
+//        });
     }
 
     private void calibrateLineFollowerData () {

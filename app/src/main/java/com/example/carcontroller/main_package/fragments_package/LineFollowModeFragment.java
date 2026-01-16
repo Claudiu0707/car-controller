@@ -38,10 +38,10 @@ public class LineFollowModeFragment extends Fragment {
             close();
         });
         startFollowLineButton.setOnClickListener(v -> {
-            deviceManager.getCarDevice().startLineFollow();
+            deviceManager.getCarDevice().setLineFollowing(true);
         });
         stopFollowLineButton.setOnClickListener(v -> {
-            deviceManager.getCarDevice().stopLineFollow();
+            deviceManager.getCarDevice().setLineFollowing(false);
         });
     }
 

@@ -5,7 +5,6 @@ import android.util.Log;
 import com.example.carcontroller.api_package.models_package.CarConfigurationRequest;
 import com.example.carcontroller.api_package.models_package.CarConfigurationResponse;
 import com.example.carcontroller.devices_package.CarDevice;
-import com.google.gson.annotations.SerializedName;
 
 import retrofit2.*;
 
@@ -63,7 +62,7 @@ public class ConfigurationRepository {
         if (mode == null) return null;
 
         switch (mode) {
-            case DRIVER:
+            case DRIVE:
                 return 1;
             case LINE_FOLLOWER:
                 return 2;

@@ -31,6 +31,8 @@ public class DriveModeFragment extends Fragment {
     Button backButton, forwardButton, reverseButton, steerLeftButton, steerRightButton;
     Button startSessionButton, endSessionButton;
     CarDevice carDevice;
+
+    SessionManager.RaceSession raceSession;
     private boolean isForward = false, isReverse = false, isLeft = false, isRight = false;
 
     private View view;
@@ -74,13 +76,13 @@ public class DriveModeFragment extends Fragment {
 
         if (carDevice.getDeviceStatus() == Device.DeviceStatus.CONNECTED) {
             startSessionButton.setOnClickListener(v -> {
+                sessionManager.createNewRaceSession("dummy name", "dummy city", "dummy location");
                 sessionManager.startRaceSession();
                 // sessionManager.startNewRaceSession("dummyCircuitName", null, null); // TODO: delete this and replace with proper initialization
             });
 
             endSessionButton.setOnClickListener(v -> {
                 sessionManager.finishRaceSession();
-                // createRace();    // TODO: finish this
             });
 
             forwardButton.setOnTouchListener((view, motionEvent) -> {

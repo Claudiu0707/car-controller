@@ -3,17 +3,12 @@ package com.example.carcontroller.devices_package;
 import com.example.carcontroller.bluetooth_package.BluetoothDataListener;
 import com.example.carcontroller.bluetooth_package.BluetoothService;
 
-import java.util.Date;
-
 public abstract class Device implements BluetoothDataListener {
-
     private final BluetoothService bluetoothService;
-
     private final String deviceAddress;
     private final DeviceType deviceType;
     private String deviceName;
     private DeviceStatus deviceStatus;
-    private Date lastConnectedTime;
 
     public enum DeviceType {CAR, CHECKPOINT}
     public enum DeviceStatus {DISCONNECTED, CONNECTED, ERROR}
@@ -24,9 +19,10 @@ public abstract class Device implements BluetoothDataListener {
         this.deviceType = deviceType;
         this.deviceStatus = DeviceStatus.DISCONNECTED;
 
+        //  Gets the bluetooth service instance
         this.bluetoothService = BluetoothService.getInstance();
 
-        // Sets a new incoming data listener for the device with the address
+        //  Sets a new incoming data listener for the device with the address
         bluetoothService.registerListener(deviceAddress, this);
     }
 
@@ -70,9 +66,6 @@ public abstract class Device implements BluetoothDataListener {
         return deviceStatus;
     }
 
-    public Date getLastConnectedTime () {
-        return lastConnectedTime;
-    }
 
     /**
      * Modifies the status of the device
@@ -80,8 +73,6 @@ public abstract class Device implements BluetoothDataListener {
      */
     protected void setDeviceStatus (DeviceStatus deviceStatus) {
         this.deviceStatus = deviceStatus;
-        if (deviceStatus == DeviceStatus.CONNECTED)
-            this.lastConnectedTime = new Date();
     }
 
     /**
@@ -94,9 +85,8 @@ public abstract class Device implements BluetoothDataListener {
 
     /**
      * Initializes data stream for the device if the connection was successful. Creates a new thread to listen for data or send data.
-     * @return true if the initialization was successful, false otherwise
      */
-    public abstract boolean connect ();
+    public abstract void connect ();
 
     /**
      * Closes the connection socket to the device and sets the device status to DISCONNECTED

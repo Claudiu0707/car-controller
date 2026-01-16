@@ -2,8 +2,6 @@ package com.example.carcontroller.main_package.fragments_package;
 
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.text.TextUtils;
@@ -19,7 +17,6 @@ import com.example.carcontroller.R;
 import com.example.carcontroller.api_package.CircuitRepository;
 import com.example.carcontroller.api_package.models_package.CircuitRequest;
 import com.example.carcontroller.api_package.models_package.CircuitResponse;
-import com.example.carcontroller.devices_package.CarDevice;
 import com.example.carcontroller.devices_package.DeviceManager;
 import com.example.carcontroller.main_package.SessionManager;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
@@ -189,8 +186,8 @@ public class CircuitCreatorFragment extends Fragment {
 
     private String convertCircuitTypeToString(SessionManager.CircuitType circuitType) {
         switch (circuitType) {
-            case DriverCircuit: return "Driver Circuit";
-            case LineFollowerCircuit: return "Line Follower Circuit";
+            case DRIVER_CIRCUIT: return "Driver Circuit";
+            case LINE_FOLLOWER_CIRCUIT: return "Line Follower Circuit";
             default: return null;
         }
     }

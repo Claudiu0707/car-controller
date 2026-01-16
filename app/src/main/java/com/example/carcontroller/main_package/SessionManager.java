@@ -2,6 +2,8 @@ package com.example.carcontroller.main_package;
 
 import android.util.Log;
 
+import com.example.carcontroller.devices_package.CarDevice;
+import com.example.carcontroller.devices_package.CheckpointDevice;
 import com.example.carcontroller.devices_package.DeviceManager;
 
 import java.time.LocalDate;
@@ -9,11 +11,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ *  Central manager for creating and managing race sessions, drivers and circuits instances.
+ *
+ *  Class is a singleton to guarantee at any time only one instance of the manager is created.
+ * */
 public class SessionManager {
     private static final String TAG = "SessionManagerTAG";
     private static SessionManager instance;
-
-    private DeviceManager deviceManager = DeviceManager.getInstance();
 
     private RaceSession currentSession;
     private Driver currentDriver;
@@ -21,48 +26,40 @@ public class SessionManager {
 
     private boolean driverLogged;
 
-
     public static synchronized SessionManager getInstance () {
         if (instance == null) instance = new SessionManager();
         return instance;
     }
 
-    public RaceSession getCurrentSession () {
-        return currentSession;
-    }
-
-    public void setCurrentDriver (Driver driver) {
-        this.currentDriver = driver;
-        driverLogged = true;
-    }
-
-    public Driver getCurrentDriver () {
-        return currentDriver;
-    }
-
-    public Circuit getCurrentCircuit() {
-        return currentCircuit;
-    }
-
-    public boolean isDriverLogged () {
-        return driverLogged;
-    }
-
-    public void createCircuit(String circuitName, String cityName, String locationName, CircuitType circuitType, Integer segmentsCount) {
-        currentCircuit = new Circuit(circuitName, cityName, locationName, circuitType, segmentsCount);
-    }
+    /**
+     * Initiates a new race session.
+     *
+     * @param circuitName name of the circuit
+     * @param cityName name of the city
+     * */
     public void createNewRaceSession (String circuitName, String cityName, String locationName) {
-        if (currentDriver == null) {
+        // If I have no driver logged in, but the car is set in line follower mode, I want to be able to create a race session
+        // the existence of a current driver is necessary only for DRIVE MODE
+
+        // TODO: DELETE AFTER TESTING!!!
+        currentDriver = new Driver("first_name", "last_name", 20, Gender.MALE, "01/01/2000");
+        if (currentDriver ==  null && DeviceManager.getInstance().getCarDevice().getCurrentMode() == CarDevice.OperationMode.DRIVE) {
             Log.e(TAG, "Cannot start session. No driver available!");
             return;
         }
 
+        currentSession = new RaceSession(currentDriver);
         /*if (cityName == null && locationName == null)
             currentSession = new RaceSession(currentDriver, circuitName);
         else
             currentSession = new RaceSession(currentDriver, circuitName, cityName, locationName);*/
     }
+
+    /**
+     * Starts the race session and initializes the start time.
+     * */
     public void startRaceSession () {
+        resetAllCheckpoints();
         if (currentSession == null) {
             Log.e(TAG, "No available race session");
             return;
@@ -70,6 +67,9 @@ public class SessionManager {
         currentSession.setStartTime();
     }
 
+    /**
+     * Finishes the race session and sets the finish time.
+     * */
     public void finishRaceSession () {
         if (currentSession == null) {
             Log.e(TAG, "Session cannot be finished!");
@@ -78,17 +78,53 @@ public class SessionManager {
 
         currentSession.setFinishTime();
         currentSession.displaySessionData();
-        currentSession = null;
+        // currentSession = null; This is useless because I will initialize another session and this will be deleted by the gc
     }
 
-    public void setCircuitLocationId(int circuitLocationId) {
+    /**
+     * Clears detection times and resets checkpoints. Must be called when starting a new race session.
+     * */
+    public void resetAllCheckpoints () {
+        for (CheckpointDevice checkpointDevice: DeviceManager.getInstance().getAllCheckpointDevices()) {
+            checkpointDevice.resetCheckpoint();
+        }
     }
 
+    public RaceSession getCurrentSession () {
+        return currentSession;
+    }
+
+    /**
+     * Creates a new circuit instance.
+     **/
+    public void createCircuit(String circuitName, String cityName, String locationName, CircuitType circuitType, Integer segmentsCount) {
+        this.currentCircuit = new Circuit(circuitName, cityName, locationName, circuitType, segmentsCount);
+    }
+
+    public Circuit getCurrentCircuit() {
+        return currentCircuit;
+    }
+
+    public Driver getCurrentDriver () {
+        return currentDriver;
+    }
+    public void setCurrentDriver (Driver driver) {
+        this.currentDriver = driver;
+        driverLogged = true;
+    }
+
+    public boolean isDriverLogged () {
+        return driverLogged;
+    }
+
+
+    // ======================== RACE SESSION CLASS ========================
     public static class RaceSession {
-        private Driver driver;
-        private String raceDate;
+        private final Driver driver;
+        private final String raceDate;
         private long startTime;
         private long finishTime;
+        private long stopTime;
         private boolean active;
         private final Map<Integer, Long> checkpointsTimeStamps;
 
@@ -98,7 +134,7 @@ public class SessionManager {
             this.checkpointsTimeStamps = new HashMap<>();
             this.active = false;
 
-            raceDate = LocalDate.now().toString();
+            this.raceDate = LocalDate.now().toString();
         }
 
         public void setStartTime () {
@@ -107,7 +143,8 @@ public class SessionManager {
         }
 
         public void setFinishTime () {
-            this.finishTime = System.currentTimeMillis() - startTime;
+            this.stopTime = System.currentTimeMillis();
+            this.finishTime = stopTime - startTime;
             this.active = false;
         }
 
@@ -120,13 +157,13 @@ public class SessionManager {
         }
 
         public long getTotalTime () {
-            return finishTime - startTime;
+            return stopTime;
         }
-
 
         public String getRaceDate () {
             return raceDate;
         }
+
         public Long getCheckpointTime (int checkpointIndex) {
             if (checkpointsTimeStamps.containsKey(checkpointIndex))
                 return checkpointsTimeStamps.get(checkpointIndex);
@@ -144,22 +181,24 @@ public class SessionManager {
         }
 
         public void displaySessionData () {
-            Log.d(TAG, "Session: " + " | Driver: " + driver.getDriverName() + " | Finish time: " + finishTime + " | Total time: " + getTotalTime());
+            Log.d(TAG, "Session: " + " | Driver: " + driver.getDriverName() + " | Finish time: " + finishTime + " | Total time: " + stopTime);
 
             for (Integer index : getAllCheckpointsTimes().keySet()) {
-                long timeStamp = checkpointsTimeStamps.get(index);
-                Log.d(TAG, "Checkpoint " + index + " | detection time: " + timeStamp);
+                Long timeStamp = checkpointsTimeStamps.get(index);
+                if (timeStamp != null)
+                    Log.d(TAG, "Checkpoint " + index + " | detection time: " + timeStamp / 100F);
             }
         }
     }
 
+    // ======================== DRIVER CLASS ========================
     public static class Driver {
         private String driverFirstName;
         private String driverLastName;
         private String birthdate;
         private Integer driverId;
-        private int age;
         private Gender gender;
+        private int age;
 
         public Driver (String driverFirstName, String driverLastName, int age, Gender gender, String birthdate) {
             this.driverFirstName = driverFirstName;
@@ -231,6 +270,7 @@ public class SessionManager {
         }
     }
 
+    // ======================== CIRCUIT CLASS ========================
     public static class Circuit {
         private String circuitName;
         private String cityName, locationName;
@@ -309,7 +349,6 @@ public class SessionManager {
 
         public void setOneSegmentDifficulty(int segmentPosition, SegmentDifficulty difficulty) {
             segmentDifficulties.set(segmentPosition, difficulty);
-
         }
 
         public CircuitType getCircuitType() {
@@ -321,7 +360,9 @@ public class SessionManager {
         }
     }
 
-    public enum CircuitType {LineFollowerCircuit, DriverCircuit}
+
+    // ======================== ENUMERATORS ========================
+    public enum CircuitType {LINE_FOLLOWER_CIRCUIT, DRIVER_CIRCUIT}
     public enum Gender {MALE, FEMALE, OTHER}
     public enum SegmentDifficulty {VERYEASY, EASY, AVERAGE, HARD, VERYHARD}
 }

@@ -13,6 +13,8 @@
       <w>reversleft</w>
       <w>rmsw</w>
       <w>setupmode</w>
+      <w>startfollowline</w>
+      <w>stopfollowline</w>
       <w>veryeasy</w>
       <w>veryhard</w>
       <w>waitfor</w>

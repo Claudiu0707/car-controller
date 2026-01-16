@@ -3,7 +3,6 @@ package com.example.carcontroller.devices_package;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
-import com.example.carcontroller.bluetooth_package.BluetoothService;
 import com.example.carcontroller.main_package.Commands;
 import com.example.carcontroller.main_package.SessionManager;
 
@@ -14,35 +13,28 @@ public class CheckpointDevice extends Device {
     SessionManager sessionManager = SessionManager.getInstance();
     private final BluetoothSocket bluetoothSocket;
 
-    private long detectionTime;
     private final int checkpointIndex;
-    private int distanceDetectionThreshold;     // Car detection threshold distance, will be implemented in future iterations
-    private int distanceFromPreviousCheckpoint; // Distance interval between this checkpoint and previous one
-
+    private long detectionTime;
     private boolean carDetected;
 
     public CheckpointDevice (String deviceAddress, String deviceName, BluetoothSocket socket, int checkpointIndex) {
         super(deviceAddress, deviceName, DeviceType.CHECKPOINT);
         this.bluetoothSocket = socket;
         this.checkpointIndex = checkpointIndex;
-        this.distanceDetectionThreshold = 10;
         this.carDetected = false;
     }
 
     @Override
-    public boolean connect () {
+    public void connect () {
         try {
             if (bluetoothSocket != null && bluetoothSocket.isConnected()) {
                 getBluetoothService().initializeStream(getDeviceAddress(), bluetoothSocket);
                 setDeviceStatus(DeviceStatus.CONNECTED);
                 Log.i(TAG, "Checkpoint device " + getDeviceName() + " with index " + checkpointIndex + " connected successfully");
-                return true;
             }
-            return false;
         } catch (Exception e) {
             Log.e(TAG, "Connection failed for checkpoint: " + checkpointIndex, e);
             setDeviceStatus(DeviceStatus.ERROR);
-            return false;
         }
     }
 
@@ -64,13 +56,19 @@ public class CheckpointDevice extends Device {
 
     @Override
     public boolean sendData (String data) {
-        if (getBluetoothService() != null && isConnected()) {
+        if (getBluetoothService()!= null && isConnected()) {
             getBluetoothService().write(getDeviceAddress(), data);
             return true;
         }
         return false;
     }
 
+    /**
+     * When the BluetoothService receives data from the device, the device, identified by its address is notified that there is available data.
+     * The received data is further processed
+     * @param deviceAddress device address
+     * @param data data received
+     */
     @Override
     public void onDataReceived (String deviceAddress, byte[] data) {
         if (getDeviceAddress().contentEquals(deviceAddress)) {
@@ -80,26 +78,45 @@ public class CheckpointDevice extends Device {
         }
     }
 
+    /**
+     * Checks if the device is connected
+     * @return true if the device is connected, false otherwise
+     */
     @Override
     public boolean isConnected () {
         return bluetoothSocket != null && bluetoothSocket.isConnected() && getDeviceStatus() == DeviceStatus.CONNECTED;
     }
 
+    /**
+     * Processes the data received from the device.
+     * @param data data received
+     */
     public void processCheckpointData (String data) {
         String commandStringDetected = Commands.DETECTED.getCommand();
 
-        // If checkpoint detected a car and no car was previously detected
+        // If checkpoint detected a car and no car was previously detected - prevents multiple checkpoints crossings in the same race session
         if (data.contentEquals(commandStringDetected) && !carDetected) {
             carDetected = true;
-            detectionTime = System.currentTimeMillis();     // Record the time of detection
+
+            // Record the time of detection in the current session
+            detectionTime = System.currentTimeMillis();
             SessionManager.RaceSession currentSession = sessionManager.getCurrentSession();
             if (currentSession != null) {
                 currentSession.recordCheckpointTime(checkpointIndex, detectionTime);
             }
+
             Log.i(TAG, "Checkpoint " + checkpointIndex + " detected object!");
         } else {
             Log.e(TAG, "Data format incorrect");
         }
+    }
+
+    /**
+     * When a new race session is started, this method can be  called to ensure that the checkpoint info is reset
+     * */
+    public void resetCheckpoint () {
+        carDetected = false;
+        detectionTime = 0;
     }
 
     public long getDetectionTime () {
@@ -110,21 +127,7 @@ public class CheckpointDevice extends Device {
         this.detectionTime = detectionTime;
     }
 
-    public void setDistanceDetectionThreshold (int distanceDetectionThreshold) {
-        this.distanceDetectionThreshold = distanceDetectionThreshold;
-    }
-
-    public void setDistanceFromPreviousCheckpoint (int distanceFromPreviousCheckpoint) {
-        this.distanceFromPreviousCheckpoint = distanceFromPreviousCheckpoint;
-    }
-
     public boolean isCarDetected () {
         return carDetected;
     }
-
-    public int getDistanceFromPreviousCheckpoint () {
-        return distanceFromPreviousCheckpoint;
-    }
-
-
 }

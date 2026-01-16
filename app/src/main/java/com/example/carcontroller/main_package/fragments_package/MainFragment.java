@@ -1,7 +1,6 @@
 package com.example.carcontroller.main_package.fragments_package;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -15,7 +14,6 @@ import android.widget.Toast;
 import com.example.carcontroller.R;
 import com.example.carcontroller.devices_package.CarDevice;
 import com.example.carcontroller.devices_package.DeviceManager;
-import com.example.carcontroller.main_package.SessionManager;
 
 public class MainFragment extends Fragment {
 
@@ -42,7 +40,7 @@ public class MainFragment extends Fragment {
                 Toast.makeText(requireActivity(), "Please connect a device!", Toast.LENGTH_LONG).show();
             }
             else {
-                if (DeviceManager.getInstance().getCarDevice().getCurrentMode() == CarDevice.OperationMode.DRIVER)
+                if (DeviceManager.getInstance().getCarDevice().getCurrentMode() == CarDevice.OperationMode.DRIVE)
                     open(new DriveModeFragment());
                 else if (DeviceManager.getInstance().getCarDevice().getCurrentMode() == CarDevice.OperationMode.LINE_FOLLOWER)
                     open(new LineFollowModeFragment());
