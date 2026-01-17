@@ -14,8 +14,10 @@ public class CarDevice extends Device {
     private final BluetoothSocket bluetoothSocket;
     private CarConfiguration configuration;
     private OperationMode currentMode;
+
     public enum OperationMode {SETUP, DRIVE, LINE_FOLLOWER}
     enum ConfigValidation { PID, MOTOR_SPEED }
+
     public CarDevice (String deviceAddress, String deviceName, BluetoothSocket socket) {
         super(deviceAddress, deviceName, DeviceType.CAR);
         this.bluetoothSocket = socket;

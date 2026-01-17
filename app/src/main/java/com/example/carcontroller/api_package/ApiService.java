@@ -2,10 +2,14 @@ package com.example.carcontroller.api_package;
 
 import com.example.carcontroller.api_package.models_package.CarConfigurationRequest;
 import com.example.carcontroller.api_package.models_package.CarConfigurationResponse;
+import com.example.carcontroller.api_package.models_package.CheckpointRequest;
+import com.example.carcontroller.api_package.models_package.CheckpointResponse;
 import com.example.carcontroller.api_package.models_package.CircuitRequest;
 import com.example.carcontroller.api_package.models_package.CircuitResponse;
 import com.example.carcontroller.api_package.models_package.DriverRequest;
 import com.example.carcontroller.api_package.models_package.DriverResponse;
+import com.example.carcontroller.api_package.models_package.RaceCheckpointRequest;
+import com.example.carcontroller.api_package.models_package.RaceCheckpointResponse;
 import com.example.carcontroller.api_package.models_package.RaceRequest;
 import com.example.carcontroller.api_package.models_package.RaceResponse;
 import com.example.carcontroller.api_package.models_package.TrackSegmentRequest;
@@ -30,5 +34,10 @@ public interface ApiService {
     @POST("/track-segments")
     Call<TrackSegmentResponse> createTrackSegment(@Body TrackSegmentRequest request);
 
+    @POST("/checkpoints")
+    Call<CheckpointResponse> createCheckpoint(@Body CheckpointRequest request);
+
+    @POST("/race-checkpoints")
+    Call<RaceCheckpointResponse> createRaceCheckpoint(@Body RaceCheckpointRequest request);
 
 }

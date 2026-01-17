@@ -15,19 +15,25 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.carcontroller.R;
+import com.example.carcontroller.api_package.RaceCheckpointRepository;
 import com.example.carcontroller.api_package.RaceRepository;
+import com.example.carcontroller.api_package.models_package.RaceCheckpointRequest;
+import com.example.carcontroller.api_package.models_package.RaceCheckpointResponse;
 import com.example.carcontroller.api_package.models_package.RaceResponse;
 import com.example.carcontroller.devices_package.CarDevice;
+import com.example.carcontroller.devices_package.CheckpointDevice;
 import com.example.carcontroller.devices_package.Device;
 import com.example.carcontroller.devices_package.DeviceManager;
 import com.example.carcontroller.main_package.Commands;
 import com.example.carcontroller.main_package.SessionManager;
 
+import java.time.Duration;
+
 /**
  * Fragment that provides manual driving controls for the car device.
  */
 public class DriveModeFragment extends Fragment {
-    private static final String TAG = "DriveModeFragment";
+    private static final String TAG = "DriveModeFragmentTAG";
 
     // ============ Managers & repositories ============
     private final DeviceManager deviceManager = DeviceManager.getInstance();
@@ -166,19 +172,64 @@ public class DriveModeFragment extends Fragment {
      */
     private void saveRace() {
         raceRepository.saveRace(sessionManager.getCurrentSession(), new RaceRepository.RaceCallback() {
-            @Override
-            public void onSuccess(RaceResponse race) {
-                sessionManager.getCurrentSession().setRaceId(race.getRaceId());
-                Log.d(TAG, "Race ID: " + race.getRaceId());
-                Toast.makeText(requireContext(), "Race saved", Toast.LENGTH_LONG).show();
-            }
+                @Override
+                public void onSuccess(RaceResponse race) {
+                    sessionManager.getCurrentSession().setRaceId(race.getRaceId());
+                    Log.d(TAG, "Race ID: " + race.getRaceId());
 
-            @Override
-            public void onError(String error) {
-                Toast.makeText(requireContext(), "Error: " + error, Toast.LENGTH_LONG).show();
+                    Toast.makeText(requireContext(), "Race saved", Toast.LENGTH_LONG).show();
+                    int checkpointCount = deviceManager.getCheckpointsCount();
+
+                    for (int i = 1; i <= checkpointCount; i++) {
+                        CheckpointDevice checkpointDevice = deviceManager.getCheckpointDevice(i);
+
+                        if (checkpointDevice == null) {
+                            Log.w(TAG, "Checkpoint device " + i + " not found, skipping");
+                            continue;
+                        }
+
+                        if (checkpointDevice.getCheckpointId() == null) {
+                            Log.w(TAG, "Checkpoint " + i + " has no DB id, skipping");
+                            continue;
+                        }
+
+                        double detectionTime = checkpointDevice.getDetectionTime() / 1000.0;;
+
+                        if (detectionTime <= 0) {
+                            Log.w(TAG, "Checkpoint " + i + " was not triggered, skipping");
+                            continue;
+                        }
+
+                        long timeStampSeconds = SessionManager.getInstance().getCurrentSession().getCheckpointTime(i);
+                        String passedTime= Duration.ofMillis(timeStampSeconds).toString();
+
+                        RaceCheckpointRequest request = new RaceCheckpointRequest(
+                                        race.getRaceId(),
+                                        checkpointDevice.getCheckpointId(),
+                                        passedTime
+                                );
+                        RaceCheckpointRepository.getInstance().saveRaceCheckpoint(request, new RaceCheckpointRepository.RaceCheckpointCallback() {
+                            @Override
+                            public void onSuccess(RaceCheckpointResponse response) {
+                                Log.d(TAG, "RaceCheckpoint saved: " + response.getRaceCheckpointId() + " (checkpoint " + response.getCheckpointId() + ")");
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                Log.e(TAG, "Failed to save RaceCheckpoint: " + error);
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onError(String error) {
+                    Toast.makeText(requireContext(), "Error saving race: " + error, Toast.LENGTH_LONG).show();
+                }
             }
-        });
+        );
     }
+
 
     /**
      * Determines and sends the appropriate driving command
@@ -214,8 +265,6 @@ public class DriveModeFragment extends Fragment {
      * Closes the fragment and returns to the previous screen.
      */
     private void close() {
-        requireActivity()
-                .getSupportFragmentManager()
-                .popBackStack();
+        requireActivity().getSupportFragmentManager().popBackStack();
     }
 }

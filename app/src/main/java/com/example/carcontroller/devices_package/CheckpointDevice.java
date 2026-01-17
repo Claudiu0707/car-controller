@@ -17,6 +17,8 @@ public class CheckpointDevice extends Device {
     private long detectionTime;
     private boolean carDetected;
 
+    private Integer checkpointId;
+
     public CheckpointDevice (String deviceAddress, String deviceName, BluetoothSocket socket, int checkpointIndex) {
         super(deviceAddress, deviceName, DeviceType.CHECKPOINT);
         this.bluetoothSocket = socket;
@@ -105,7 +107,7 @@ public class CheckpointDevice extends Device {
                 currentSession.recordCheckpointTime(checkpointIndex, detectionTime);
             }
 
-            Log.i(TAG, "Checkpoint " + checkpointIndex + " detected object!");
+            Log.i(TAG, "Checkpoint " + checkpointIndex + " detected object at " + detectionTime);
         } else {
             Log.e(TAG, "Data format incorrect");
         }
@@ -129,5 +131,22 @@ public class CheckpointDevice extends Device {
 
     public boolean isCarDetected () {
         return carDetected;
+    }
+
+    public Integer getCheckpointId() {
+        return checkpointId;
+    }
+
+    public void setCheckpointId(Integer checkpointId) {
+        this.checkpointId = checkpointId;
+    }
+
+    public void displayCheckpointData() {
+        Log.d(TAG,
+                "checkpointIndex=" + checkpointIndex +
+                        ", checkpointId=" + checkpointId +
+                        ", detectionTime=" + detectionTime +
+                        ", carDetected=" + carDetected
+        );
     }
 }

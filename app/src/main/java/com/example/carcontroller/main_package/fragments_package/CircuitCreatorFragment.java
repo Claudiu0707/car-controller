@@ -13,8 +13,11 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.example.carcontroller.R;
+import com.example.carcontroller.api_package.CheckpointRepository;
 import com.example.carcontroller.api_package.CircuitRepository;
 import com.example.carcontroller.api_package.TrackSegmentRepository;
+import com.example.carcontroller.api_package.models_package.CheckpointRequest;
+import com.example.carcontroller.api_package.models_package.CheckpointResponse;
 import com.example.carcontroller.api_package.models_package.CircuitRequest;
 import com.example.carcontroller.api_package.models_package.CircuitResponse;
 import com.example.carcontroller.api_package.models_package.TrackSegmentResponse;
@@ -206,10 +209,7 @@ public class CircuitCreatorFragment extends Fragment {
                         continue;
                     }
 
-                    TrackSegmentRepository.getInstance().createTrackSegment(
-                            currentCircuit.getCircuitId(),
-                            difficulty.ordinal() + 1,
-                            new TrackSegmentRepository.TrackSegmentCallback() {
+                    TrackSegmentRepository.getInstance().createTrackSegment(currentCircuit.getCircuitId(), difficulty.ordinal() + 1, new TrackSegmentRepository.TrackSegmentCallback() {
                                 @Override
                                 public void onSuccess(TrackSegmentResponse segment) {
                                     Log.d(TAG, "Segment created: " + segment.getTrackSegmentId());
@@ -221,6 +221,27 @@ public class CircuitCreatorFragment extends Fragment {
                                 }
                             }
                     );
+                }
+
+                for (int i = 1; i <= DeviceManager.getInstance().getCheckpointsCount(); i++) {
+                    CheckpointRequest request = new CheckpointRequest(
+                        DeviceManager.getInstance().getCheckpointDevice(i).getDeviceName(),
+                        i,
+                        SessionManager.getInstance().getCurrentCircuit().getCircuitId()
+                    );
+                    int finalI = i;
+                    CheckpointRepository.getInstance().saveCheckpoint(request, new CheckpointRepository.CheckpointCallback() {
+                        @Override
+                        public void onSuccess(CheckpointResponse checkpoint) {
+                            DeviceManager.getInstance().getCheckpointDevice(finalI).setCheckpointId(checkpoint.getCheckpointId());
+                            Log.d(TAG, "Checkpoint ID: " + DeviceManager.getInstance().getCheckpointDevice(finalI).getCheckpointId());
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            Log.e(TAG, error);
+                        }
+                    });
                 }
             }
 

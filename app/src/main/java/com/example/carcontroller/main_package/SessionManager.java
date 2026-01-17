@@ -13,7 +13,6 @@ import java.util.Map;
 
 /**
  *  Central manager for creating and managing race sessions, drivers and circuits instances.
- *
  *  Class is a singleton to guarantee at any time only one instance of the manager is created.
  * */
 public class SessionManager {

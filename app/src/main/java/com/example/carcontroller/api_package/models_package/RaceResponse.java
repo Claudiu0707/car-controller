@@ -3,7 +3,7 @@ package com.example.carcontroller.api_package.models_package;
 import com.google.gson.annotations.SerializedName;
 
 public class RaceResponse {
-    @SerializedName("race_id")
+    @SerializedName("race_session_id")
     private int raceId;
     @SerializedName("driver_id")
     private int driverId;
@@ -20,8 +20,6 @@ public class RaceResponse {
     @SerializedName("race_date")
     private String raceDate;
 
-    @SerializedName("total_time")
-    private float totalTime;
 
     public int getRaceId() {
         return raceId;
@@ -47,7 +45,4 @@ public class RaceResponse {
         return raceDate;
     }
 
-    public float getTotalTime() {
-        return totalTime;
-    }
 }

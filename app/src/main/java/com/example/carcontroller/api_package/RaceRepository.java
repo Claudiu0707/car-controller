@@ -2,7 +2,6 @@ package com.example.carcontroller.api_package;
 
 import android.util.Log;
 
-import com.example.carcontroller.api_package.models_package.DriverResponse;
 import com.example.carcontroller.api_package.models_package.RaceRequest;
 import com.example.carcontroller.api_package.models_package.RaceResponse;
 import com.example.carcontroller.devices_package.DeviceManager;
@@ -54,10 +53,6 @@ public class RaceRepository {
                 }
             }
 
-            if (apiService == null) {
-                throw new NullPointerException("apiService is null");
-            }
-
             RaceRequest request = new RaceRequest(
                     driverId,
                     circuitId,
@@ -70,7 +65,11 @@ public class RaceRepository {
             call.enqueue(new Callback<RaceResponse>() {
                 @Override
                 public void onResponse(Call<RaceResponse> call, Response<RaceResponse> response) {
-                    callback.onSuccess(response.body());
+                    if (response.isSuccessful() && response.body() != null) {
+                        callback.onSuccess(response.body());
+                    } else {
+                        callback.onError("HTTP " + response.code());
+                    }
                 }
 
                 @Override
