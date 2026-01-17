@@ -8,7 +8,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class CarConfigurationClient {
-    private static final String BASE_URL = "http://192.168.1.4:8000/car-configurations";
+    private static final String BASE_URL = "http://10.0.2.2:8000/car-configurations";
 
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final OkHttpClient client = new OkHttpClient();
