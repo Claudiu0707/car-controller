@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.example.carcontroller.R;
 import com.example.carcontroller.devices_package.CarDevice;
 import com.example.carcontroller.devices_package.DeviceManager;
+import com.example.carcontroller.main_package.SessionManager;
 
 public class MainFragment extends Fragment {
 
@@ -39,6 +40,9 @@ public class MainFragment extends Fragment {
             if (!DeviceManager.getInstance().hasCarDevice()) {
                 Toast.makeText(requireActivity(), "Please connect a device!", Toast.LENGTH_LONG).show();
             }
+            else if (!SessionManager.getInstance().isDriverLogged()) {
+                Toast.makeText(requireActivity(), "Please log in a driver!", Toast.LENGTH_LONG).show();
+            }
             else {
                 if (DeviceManager.getInstance().getCarDevice().getCurrentMode() == CarDevice.OperationMode.DRIVE)
                     open(new DriveModeFragment());
@@ -55,6 +59,8 @@ public class MainFragment extends Fragment {
 
         return view;
     }
+
+
     private void open (Fragment fragment) {
         requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.main_container_id, fragment).addToBackStack(null).commit();
     }

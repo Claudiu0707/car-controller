@@ -234,6 +234,8 @@ public class CarDevice extends Device {
 
     // =========================== CAR CONFIGURATION ===========================
     public static class CarConfiguration {
+        private Integer configurationId;
+
         /**
          * PID calibration values
          * kp - influences proportional parameter of the PID controller
@@ -299,6 +301,13 @@ public class CarDevice extends Device {
             this.kd = kd;
         }
 
+        public Integer getConfigurationId() {
+            return configurationId;
+        }
+
+        public void setConfigurationId(Integer configurationId) {
+            this.configurationId = configurationId;
+        }
 
         public float getBaseLeftSpeed () {
             return baseLeftSpeed;

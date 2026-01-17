@@ -131,7 +131,7 @@ public class DriverLoginFragment extends Fragment {
             @Override
             public void onSuccess (DriverResponse driver) {
                 sessionManager.getCurrentDriver().setDriverId(driver.getDriverId());                // Set the current driver id with the id from the database
-                Log.d(TAG, "ID: " + driver.getDriverId());
+                Log.d(TAG, "Driver ID: " + driver.getDriverId());
                 Toast.makeText(requireContext(), "Profile saved", Toast.LENGTH_LONG).show();
                 SessionManager.getInstance().getCurrentDriver().logDriverDetails();
             }

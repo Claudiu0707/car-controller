@@ -81,17 +81,20 @@ public class CarSettingsFragment extends Fragment {
         });
     }
     private void createConfiguration() {
-//        configurationRepository.saveConfiguration(carDevice, new ConfigurationRepository.ConfigurationCallback() {
-//            @Override
-//            public void onSuccess(CarConfigurationResponse configuration) {
-//                Toast.makeText(requireContext(), "Configuration saved", Toast.LENGTH_LONG).show();
-//            }
-//
-//            @Override
-//            public void onError(String error) {
-//                Toast.makeText(requireContext(), "Error: " + error, Toast.LENGTH_LONG).show();
-//            }
-//        });
+        configurationRepository.saveConfiguration(carDevice, new ConfigurationRepository.ConfigurationCallback() {
+            @Override
+            public void onSuccess(CarConfigurationResponse configuration) {
+                int configurationId = configuration.getCarConfigurationId();
+                carDevice.getConfiguration().setConfigurationId(configurationId);
+                Log.d(TAG, "Configuration ID: " + carDevice.getConfiguration().getConfigurationId());
+                Toast.makeText(requireContext(), "Configuration saved", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(requireContext(), "Error: " + error, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void calibrateLineFollowerData () {

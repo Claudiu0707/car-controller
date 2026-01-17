@@ -5,6 +5,7 @@ import android.util.Log;
 import com.example.carcontroller.api_package.models_package.DriverResponse;
 import com.example.carcontroller.api_package.models_package.RaceRequest;
 import com.example.carcontroller.api_package.models_package.RaceResponse;
+import com.example.carcontroller.devices_package.DeviceManager;
 import com.example.carcontroller.main_package.SessionManager;
 
 import java.time.Duration;
@@ -26,38 +27,62 @@ public class RaceRepository {
         return instance;
     }
 
-    public void saveRace (SessionManager.RaceSession raceSession, final RaceCallback callback) {
-        // TODO: solve the crash problem when accessing raceSession
-        /*raceSession.getCircuitId(),
-            raceSession.getRaceDate(),
-            raceSession.getFinishTime()*/
-        RaceRequest request = new RaceRequest(
-            "1000-10-10", Duration.ofMinutes(1).plusSeconds(23).toString()
-        );
-        Log.d(TAG, "Crashes here?");
-        Call<RaceResponse> call = apiService.createRace(request);
+    public void saveRace(SessionManager.RaceSession raceSession, final RaceCallback callback) {
+        try {
+            if (raceSession == null) {
+                throw new NullPointerException("raceSession is null");
+            }
 
-        call.enqueue(new Callback<RaceResponse>() {
-            @Override
-            public void onResponse(Call<RaceResponse> call, Response<RaceResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    RaceResponse raceResponse = response.body();
-                    Log.d(TAG, "Race saved successfully wit ID: " + raceResponse.getRaceId());
-                    callback.onSuccess(raceResponse);
-                } else {
-                    String errorMessage = "Failed to save race. Code: " + response.code();
-                    Log.d(TAG, errorMessage);
-                    callback.onError(errorMessage);
+            long millis = raceSession.getTotalTime();
+            String totalTime = Duration.ofMillis(millis).toString();
+
+            Integer configurationId = null;
+            DeviceManager dm = DeviceManager.getInstance();
+            if (dm != null && dm.getCarDevice() != null && dm.getCarDevice().getConfiguration() != null) {
+                configurationId = dm.getCarDevice().getConfiguration().getConfigurationId();
+            }
+
+            Integer driverId = null;
+            Integer circuitId = null;
+            SessionManager sm = SessionManager.getInstance();
+            if (sm != null) {
+                if (sm.getCurrentDriver() != null) {
+                    driverId = sm.getCurrentDriver().getDriverId();
+                }
+                if (sm.getCurrentCircuit() != null) {
+                    circuitId = sm.getCurrentCircuit().getCircuitId();
                 }
             }
 
-            @Override
-            public void onFailure(Call<RaceResponse> call, Throwable t) {
-                String errorMessage = "Network error: " + t.getMessage();
-                Log.e(TAG, errorMessage);
-                callback.onError(errorMessage);
+            if (apiService == null) {
+                throw new NullPointerException("apiService is null");
             }
-        });
+
+            RaceRequest request = new RaceRequest(
+                    driverId,
+                    circuitId,
+                    configurationId,
+                    raceSession.getRaceDate(),
+                    totalTime
+            );
+
+            Call<RaceResponse> call = apiService.createRace(request);
+            call.enqueue(new Callback<RaceResponse>() {
+                @Override
+                public void onResponse(Call<RaceResponse> call, Response<RaceResponse> response) {
+                    callback.onSuccess(response.body());
+                }
+
+                @Override
+                public void onFailure(Call<RaceResponse> call, Throwable t) {
+                    callback.onError(t.getMessage());
+                }
+            });
+
+        } catch (Throwable t) {
+            Log.e(TAG, "CRASH BEFORE NETWORK", t);
+            callback.onError("Crash Before Network: " + t.getMessage());
+        }
     }
 
     public interface RaceCallback {

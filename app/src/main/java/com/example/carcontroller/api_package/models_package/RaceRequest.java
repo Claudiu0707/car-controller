@@ -8,16 +8,13 @@ import java.time.Duration;
 public class RaceRequest {
 
     @SerializedName("driver_id")
-    private int driverId;
+    private Integer driverId;
 
     @SerializedName("circuit_id")
-    private int circuitId;
+    private Integer circuitId;
 
     @SerializedName("car_configuration_id")
-    private int carConfigurationId;
-
-    @SerializedName("race_location_id")
-    private int raceLocationId;
+    private Integer carConfigurationId;
 
     @SerializedName("race_date")
     private String raceDate;
@@ -25,44 +22,36 @@ public class RaceRequest {
     @SerializedName("total_time")
     private String totalTime;
 
-    // TODO: Finish this
-    public RaceRequest(String raceDate, String totalTime ) {
-        if (SessionManager.getInstance().isDriverLogged())
-            this.driverId = SessionManager.getInstance().getCurrentDriver().getDriverId();
+    public RaceRequest(Integer driverId, Integer circuitId, Integer carConfigurationId, String raceDate, String totalTime) {
+        this.driverId = driverId;
+        this.circuitId = circuitId;
+        this.carConfigurationId = carConfigurationId;
         this.raceDate = raceDate;
         this.totalTime = totalTime;
     }
 
-    public int getDriverId() {
+    public Integer getDriverId() {
         return driverId;
     }
 
-    public void setDriverId(int driverId) {
+    public void setDriverId(Integer driverId) {
         this.driverId = driverId;
     }
 
-    public int getCircuitId() {
+    public Integer getCircuitId() {
         return circuitId;
     }
 
-    public void setCircuitId(int circuitId) {
+    public void setCircuitId(Integer circuitId) {
         this.circuitId = circuitId;
     }
 
-    public int getCarConfigurationId() {
+    public Integer getCarConfigurationId() {
         return carConfigurationId;
     }
 
-    public void setCarConfigurationId(int carConfigurationId) {
+    public void setCarConfigurationId(Integer carConfigurationId) {
         this.carConfigurationId = carConfigurationId;
-    }
-
-    public int getRaceLocationId() {
-        return raceLocationId;
-    }
-
-    public void setRaceLocationId(int raceLocationId) {
-        this.raceLocationId = raceLocationId;
     }
 
     public String getRaceDate() {
