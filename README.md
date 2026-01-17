@@ -123,6 +123,6 @@ To keep related data grouped together, `SessionManager` defines inner classes fo
 
 ## Complete Structure
 <p align="center">
-  <img src="images/complete-diagram.png" width="600">
+  <img src="images/full.png" width="600">
 </p>
 <p align="center"><em>Figure 2 – Complete architecture</em></p>
