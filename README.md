@@ -48,7 +48,10 @@ It is very important that these lines are modified accordingly, otherwise the co
 For the car device, follow the instructions provided in the documentation available in the readme.md from the [car project](https://github.com/Claudiu0707/zamfirel-2) to construct and program it. Same thing is valid for the [checkpoint devices](https://github.com/Claudiu0707/checkpoint-example)
 
 ## Main Structure
-
+<p align="center">
+  <img src="images/devicesandmanagers.png" width="600">
+</p>
+<p align="center"><em>Figure 1 – Device and session management architecture</em></p>
 This chapter focuses on the main **Object-Oriented Programming (OOP)**–related classes. It explains the design rationale behind them, how they are structured, and the roles they fulfill within the application.
 
 ### Device (Abstract Class)
@@ -100,3 +103,26 @@ The class is implemented as a singleton to ensure that only one device manager e
 Checkpoint devices are indexed based on their order of connection and placement on the circuit. This index is used as a stable reference throughout a race session, making it easier to associate timing data with the correct checkpoint.
 
 The class also provides helper methods for querying device availability, retrieving specific devices, and checking whether a car or checkpoint device is currently connected. By centralizing these responsibilities, `DeviceManager` simplifies device handling logic across the application and keeps Bluetooth-related state management consistent.
+
+
+
+### SessionManager
+
+The `SessionManager` class acts as the central coordinator for race-related data within the application. It is responsible for managing the current race session, the active driver, and the selected circuit, as well as handling the interaction between these elements during a race.
+
+The class is implemented as a singleton to ensure that session-related state is consistent across the application. Since race sessions, drivers, and circuits are global concepts during runtime, having a single shared instance prevents conflicting or duplicated state.
+
+A race session can be created and controlled through this manager. The session lifecycle is clearly defined: a session is created, started, and eventually finished. When a session starts, all checkpoint devices are reset to ensure that no stale detection data carries over from a previous run. During an active session, checkpoint detection times are recorded relative to the session start time.
+
+Driver management is also handled here. A driver can be set as the current active user, and certain constraints are enforced depending on the car’s operation mode. For example, a driver is required when operating the car in drive mode, while line follower mode allows sessions to run without an active driver.
+
+Circuit creation and storage are centralized in the same manager. Each circuit contains metadata such as location, type, number of segments, and per-segment difficulty, allowing race sessions to be associated with a well-defined track configuration.
+
+To keep related data grouped together, `SessionManager` defines inner classes for `RaceSession`, `Driver`, and `Circuit`. This keeps session-specific models close to the logic that manages them and avoids unnecessary coupling with unrelated parts of the application.
+
+
+## Complete Structure
+<p align="center">
+  <img src="images/complete-diagram.png" width="600">
+</p>
+<p align="center"><em>Figure 2 – Complete architecture</em></p>
