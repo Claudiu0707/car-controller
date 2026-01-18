@@ -24,7 +24,6 @@ public class SettingsFragment extends Fragment {
         Button backButton = view.findViewById(R.id.backButtonID);
         Button bluetoothSettingsButton = view.findViewById(R.id.bluetoothSettingsButtonID);
         Button carSettingsButton = view.findViewById(R.id.carSettingsButtonID);
-        Button databaseSettingsButton = view.findViewById(R.id.databaseSettingsButtonID);
         Button createCircuitButton = view.findViewById(R.id.circuitCreateButtonID);
 
 
@@ -42,9 +41,6 @@ public class SettingsFragment extends Fragment {
         });
         createCircuitButton.setOnClickListener(v -> {
             open(new CircuitCreatorFragment());
-        });
-        databaseSettingsButton.setOnClickListener(v -> {
-            // Sometimes :)))
         });
 
         return view;
