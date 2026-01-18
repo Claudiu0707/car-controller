@@ -1,0 +1,30 @@
+[33mc4daa14[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{0}: rebase (finish): returning to refs/heads/main
+[33mc4daa14[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{1}: rebase (continue): commit before cleanup
+[33m299aa67[m HEAD@{2}: rebase (start): checkout 299aa67ecb38c865defef9549eb4dd6daddaac64
+[33mfb129fe[m HEAD@{3}: commit: commit before cleanup
+[33m8e28eb4[m HEAD@{4}: commit: commit before cleanup
+[33m299aa67[m HEAD@{5}: commit: database connection mostly done
+[33m9cd62ae[m HEAD@{6}: commit: refactored code, added java doc and added data persistence in the db for the track segments
+[33m5d45b61[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{7}: commit: this commit targets mainly the classes in device_package, the session manager, device manager and commands enumerator
+[33mb9bb029[m HEAD@{8}: merge origin/main: Merge made by the 'ort' strategy.
+[33md247459[m HEAD@{9}: commit: created api repository for circuit information, so now i can add circuit info in the database
+[33mf74efb0[m HEAD@{10}: commit: continuing work on data connection to the database
+[33m10f5944[m HEAD@{11}: commit: quick commit before transforming DriverModeActivity in a fragment accessed from MainActivity
+[33m5063cea[m HEAD@{12}: commit: request for server api to process car configuration data implemented (for now just for line follower mode)
+[33m2b98f19[m HEAD@{13}: merge origin/main: Fast-forward
+[33m727d742[m HEAD@{14}: commit (amend): created a manager for all bt operations
+[33m5407369[m HEAD@{15}: commit: created a manager for all bt operations
+[33mecdaaae[m HEAD@{16}: commit: Activity created for bluetooth manager
+[33me3aa754[m HEAD@{17}: commit: Activity created for bluetooth manager
+[33med96eb6[m HEAD@{18}: merge origin/main: Fast-forward
+[33ma56c580[m HEAD@{19}: merge origin/main: Fast-forward
+[33mc137550[m HEAD@{20}: commit: Modified connect thread to handle reflection
+[33m4183977[m HEAD@{21}: commit: Connection to device cannot be made
+[33m3094d5c[m HEAD@{22}: commit: Improved methods and enhanced code structure
+[33m0bc1944[m HEAD@{23}: commit: connection not made
+[33m47fe7c2[m HEAD@{24}: commit: bluetooth connection works
+[33m258d86d[m HEAD@{25}: commit (merge): Merge remote-tracking branch 'origin/main'
+[33m8b0b4ce[m HEAD@{26}: commit (amend): bluetooth connection works
+[33m8113d76[m HEAD@{27}: commit (amend): new connection thread
+[33mcb85372[m HEAD@{28}: commit: new connection thread
+[33m5479ba1[m HEAD@{29}: clone: from https://github.com/Claudiu0707/car-controller.git
