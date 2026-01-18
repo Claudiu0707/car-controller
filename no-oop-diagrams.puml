@@ -1,0 +1,467 @@
+@startuml
+class com.example.carcontroller.main_package.fragments_package.BluetoothManagerFragment {
+- {static} String TAG
+- View view
+- Context context
+~ BluetoothManager mBluetoothManager
+~ BluetoothAdapter mBluetoothAdapter
+~ DeviceListAdapter mDeviceListAdapter
+~ ArrayList<BluetoothDevice> mBTDevicesList
+~ ListView lvNewDevice
+~ ArrayList<ConnectThread> connectThreads
+- ToggleButton bluetoothToggleButton
+- boolean receiver1Registered
+- int selectedDeviceCount
+- BroadcastReceiver mBroadcastReceiver1
+- BroadcastReceiver mBroadcastReceiver2
+- BroadcastReceiver mBroadcastReceiver3
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
++ void onDestroyView()
++ void toggleBluetooth()
+- void startConnectionSequence()
+- void resetConnectionSequence()
+- void refreshPairedDevices()
++ void discoverToggle()
+- void setBluetoothViewStatus()
+- void setDiscoveryViewStatus(Boolean)
+- void disableBluetoothProcessesOnExit()
+- void open(Fragment)
+- void close()
+- void requestAllBluetoothPermissions()
+}
+
+
+class com.example.carcontroller.api_package.models_package.RaceRequest {
+- Integer driverId
+- Integer circuitId
+- Integer carConfigurationId
+- String raceDate
+- String totalTime
++ Integer getDriverId()
++ void setDriverId(Integer)
++ Integer getCircuitId()
++ void setCircuitId(Integer)
++ Integer getCarConfigurationId()
++ void setCarConfigurationId(Integer)
++ String getRaceDate()
++ void setRaceDate(String)
++ String getTotalTime()
++ void setTotalTime(String)
+}
+
+
+class com.example.carcontroller.main_package.fragments_package.CircuitCreatorFragment {
+- {static} String TAG
+- EditText cityNameEditText
+- EditText locationNameEditText
+- EditText circuitNameEditText
+- MaterialAutoCompleteTextView circuitTypeDropdown
+- MaterialAutoCompleteTextView segmentDifficulty1Dropdown
+- MaterialAutoCompleteTextView segmentDifficulty2Dropdown
+- MaterialAutoCompleteTextView segmentDifficulty3Dropdown
+- Button backButton
+- Button saveCircuitButton
+- View rootView
+- SessionManager sessionManager
+- SessionManager.CircuitType circuitType
+- List<SessionManager.SegmentDifficulty> segmentDifficulties
+- int checkpointCount
+- String circuitName
+- String cityName
+- String locationName
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void initializeSegmentDifficultyList()
+- void initializeViews()
+- void initializeButtons()
+- void initializeListeners()
+- void setSegmentDifficulty(int,SessionManager.SegmentDifficulty)
+- void saveCircuit()
+- boolean validateInput()
++ SessionManager.SegmentDifficulty mapDifficulty(String)
+- String convertCircuitTypeToString(SessionManager.CircuitType)
+- void showToast(String)
+- void close()
+}
+
+
+class com.example.carcontroller.api_package.models_package.CheckpointRequest {
+- String checkpointName
+- Integer checkpointOrder
+- Integer circuitId
++ String getCheckpointName()
++ Integer getCheckpointOrder()
++ Integer getCircuitId()
+}
+
+
+class com.example.carcontroller.api_package.models_package.TrackSegmentResponse {
+- Integer trackSegmentId
+- Integer circuitId
+- Integer difficultyId
++ Integer getTrackSegmentId()
++ Integer getCircuitId()
++ Integer getDifficultyId()
+}
+
+
+class com.example.carcontroller.api_package.dto.CarConfigurationDto {
+- int id
+- double kp
+- double ki
+- double kd
+- double leftSpeed
+- double rightSpeed
++ int getId()
++ void setId(int)
++ double getKp()
++ void setKp(double)
++ double getKi()
++ void setKi(double)
++ double getKd()
++ void setKd(double)
++ double getLeftSpeed()
++ void setLeftSpeed(double)
++ double getRightSpeed()
++ void setRightSpeed(double)
++ String getDisplayLabel()
+}
+
+
+class com.example.carcontroller.api_package.models_package.RaceCheckpointResponse {
+- Integer raceCheckpointId
+- Integer raceSessionId
+- Integer checkpointId
+- String passedTime
++ Integer getRaceCheckpointId()
++ Integer getRaceSessionId()
++ Integer getCheckpointId()
++ String getPassedTime()
+}
+
+
+class com.example.carcontroller.api_package.models_package.CarConfigurationRequest {
+- int operationModeId
+- float kp
+- float ki
+- float kd
+- float left_speed
+- float right_speed
+- String creation_date
++ int getOperationModeId()
++ void setOperationModeId(int)
++ float getKp()
++ void setKp(float)
++ float getKi()
++ void setKi(float)
++ float getKd()
++ void setKd(float)
++ float getLeft_speed()
++ void setLeft_speed(float)
++ float getRight_speed()
++ void setRight_speed(float)
++ String getCreation_date()
++ void setCreation_date(String)
+}
+
+
+class com.example.carcontroller.api_package.models_package.DriverRequest {
+- String firstName
+- String lastName
+- String birthdate
+- Integer genderId
++ String getFirstName()
++ void setFirstName(String)
++ String getLastName()
++ void setLastName(String)
++ String getBirthdate()
++ void setBirthdate(String)
++ Integer getGenderId()
++ void setGenderId(Integer)
+}
+
+
+class com.example.carcontroller.main_package.fragments_package.DriverLoginFragment {
+- {static} String TAG
+- SessionManager sessionManager
+- DriverRepository driverRepository
+~ MaterialAutoCompleteTextView dropdownGenderOptions
+- DatePickerDialog datePickerDialog
+- TextView firstNameView
+- SessionManager.Gender selectedGender
+- Button dateButton
+- String selectedBirthdate
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void initializeViews(View)
+- void setupListeners()
+- void initializeDatePicker()
+- Date createDate(int,int,int)
+- String formatDisplayDate(int,int,int)
+- String formatDate(int,int,int)
+- void createProfile()
+- boolean validateInput()
+- void showError(String)
+- void close()
+}
+
+
+class com.example.carcontroller.bluetooth_package.ConnectThread {
+- {static} String TAG
+- BluetoothDevice deviceToConnect
+- BluetoothSocket targetSocket
+- BluetoothAdapter bluetoothAdapter
+- Context context
+~ DeviceManager deviceManager
+~ Device.DeviceType type
+- int checkpointIndex
++ void run()
++ void cancel()
+}
+
+
+class com.example.carcontroller.api_package.models_package.CarConfigurationResponse {
+- int carConfigurationId
+- int operationModeId
+- float kp
+- float ki
+- float kd
+- float left_speed
+- float right_speed
+- String creation_date
++ int getCarConfigurationId()
++ int getOperationModeId()
++ float getKp()
++ float getKi()
++ float getKd()
++ float getLeft_speed()
++ float getRight_speed()
++ String getCreation_date()
+}
+
+
+class com.example.carcontroller.api_package.models_package.CircuitRequest {
+- String circuitName
+- String circuitTypeName
+- String cityName
+- String locationName
+- String creationDate
++ String getCircuitName()
++ String getCircuitTypeName()
++ String getCityName()
++ String getLocationName()
++ String getCreationDate()
+}
+
+
+class com.example.carcontroller.api_package.models_package.RaceCheckpointRequest {
+- Integer raceSessionId
+- Integer checkpointId
+- String passedTime
++ Integer getRaceSessionId()
++ Integer getCheckpointId()
++ String getPassedTime()
+}
+
+
+class com.example.carcontroller.api_package.models_package.TrackSegmentRequest {
+- Integer circuitId
+- Integer difficultyId
++ Integer getCircuitId()
++ Integer getDifficultyId()
+}
+
+
+class com.example.carcontroller.main_package.fragments_package.MainFragment {
+- Button settingsButton
+- Button modeFragmentButton
+- Button driverLoginButton
+- Context context
+- View rootView
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void initializeViews()
+- void initializeListeners()
+- void handleModeNavigation()
+- void open(Fragment)
+}
+
+
+class com.example.carcontroller.bluetooth_package.BluetoothService {
+- {static} String TAG
+- {static} BluetoothService instance
+- Map<String,ConnectedThread> connections
+- Map<String,BluetoothDataListener> listeners
++ {static} BluetoothService getInstance()
++ void registerListener(String,BluetoothDataListener)
++ void initializeStream(String,BluetoothSocket)
++ void write(String,String)
++ void notifyDataReceived(String,byte[])
+}
+
+
+class com.example.carcontroller.bluetooth_package.BluetoothService$ConnectedThread {
+- BluetoothSocket mmSocket
+- InputStream mmInStream
+- OutputStream mmOutStream
+- String deviceAddress
++ void run()
++ void write(byte[])
++ void cancel()
+}
+
+
+class com.example.carcontroller.api_package.models_package.CheckpointResponse {
+- Integer checkpointId
+- String checkpointName
+- Integer checkpointOrder
+- Integer circuitId
++ Integer getCheckpointId()
++ String getCheckpointName()
++ Integer getCheckpointOrder()
++ Integer getCircuitId()
+}
+
+
+class com.example.carcontroller.main_package.fragments_package.CarSettingsFragment {
+- {static} String TAG
+- DeviceManager deviceManager
+- CarDevice carDevice
+- ConfigurationRepository configurationRepository
+- Context context
+- View view
+- Button backButton
+- EditText Kp
+- boolean isLoadedFromDatabase
+- MaterialAutoCompleteTextView dropdownModeOptions
+- MaterialAutoCompleteTextView savedConfigDropdown
+- CarConfigurationDto[] savedConfigurations
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void initializeViews()
+- void initializeOnClickListeners()
+- void loadSavedConfigurations()
+- void populateSavedConfigDropdown(CarConfigurationDto[])
+- void applyConfigurationToFields(CarConfigurationDto)
+- void createConfiguration()
+- void calibrateLineFollowerData()
+- void close()
+}
+
+
+class com.example.carcontroller.main_package.activities_package.MainActivity {
+# void onCreate(Bundle)
+}
+
+class com.example.carcontroller.api_package.models_package.RaceResponse {
+- int raceId
+- int driverId
+- int circuitId
+- int carConfigurationId
+- int raceLocationId
+- String raceDate
++ int getRaceId()
++ int getDriverId()
++ int getCircuitId()
++ int getCarConfigurationId()
++ int getRaceLocationId()
++ String getRaceDate()
+}
+
+
+interface com.example.carcontroller.bluetooth_package.BluetoothDataListener {
+~ void onDataReceived(String,byte[])
+}
+
+class com.example.carcontroller.api_package.models_package.CircuitResponse {
+- int circuitId
+- int circuitLocationId
+- int circuitTypeId
++ int getCircuitId()
++ int getCircuitLocationId()
++ int getCircuitTypeId()
+}
+
+
+class com.example.carcontroller.api_package.models_package.DriverResponse {
+- int driverId
+- String firstName
+- String lastName
+- String birthdate
+- Integer genderId
++ int getDriverId()
++ String getFirstName()
++ String getLastName()
++ String getBirthdate()
++ Integer getGenderId()
+}
+
+
+class com.example.carcontroller.main_package.fragments_package.SettingsFragment {
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void showToast(String)
+- void open(Fragment)
+- void close()
+}
+
+class com.example.carcontroller.bluetooth_package.DeviceListAdapter {
+- LayoutInflater mLayoutInflater
+- ArrayList<BluetoothDevice> mDevices
+- int mViewResourceID
++ View getView(int,View,ViewGroup)
+}
+
+
+class com.example.carcontroller.main_package.fragments_package.DriveModeFragment {
+- {static} String TAG
+- DeviceManager deviceManager
+- SessionManager sessionManager
+- RaceRepository raceRepository
+- Button backButton
+- Button forwardButton
+- Button reverseButton
+- Button steerLeftButton
+- Button steerRightButton
+- Button startSessionButton
+- Button endSessionButton
+- CarDevice carDevice
+- boolean isForward
+- boolean isReverse
+- boolean isLeft
+- boolean isRight
+- View rootView
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
++ void onViewCreated(View,Bundle)
+- void initializeViews()
+- void initializeListeners()
+- View.OnTouchListener createDirectionalTouchListener(Runnable,Runnable)
+- void saveRace()
+- void sendDriveCommand()
+- void close()
+}
+
+
+class com.example.carcontroller.main_package.fragments_package.LineFollowModeFragment {
+- {static} String TAG
+- DeviceManager deviceManager
+- Button backButton
+- View view
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void initializeViews()
+- void setOnClickListeners()
+- void close()
+}
+
+
+
+
+androidx.fragment.app.Fragment <|-- com.example.carcontroller.main_package.fragments_package.BluetoothManagerFragment
+androidx.fragment.app.Fragment <|-- com.example.carcontroller.main_package.fragments_package.CircuitCreatorFragment
+androidx.fragment.app.Fragment <|-- com.example.carcontroller.main_package.fragments_package.DriverLoginFragment
+com.example.carcontroller.bluetooth_package.Thread <|-- com.example.carcontroller.bluetooth_package.ConnectThread
+androidx.fragment.app.Fragment <|-- com.example.carcontroller.main_package.fragments_package.MainFragment
+com.example.carcontroller.bluetooth_package.BluetoothService +.. com.example.carcontroller.bluetooth_package.BluetoothService$ConnectedThread
+com.example.carcontroller.bluetooth_package.Thread <|-- com.example.carcontroller.bluetooth_package.BluetoothService$ConnectedThread
+androidx.fragment.app.Fragment <|-- com.example.carcontroller.main_package.fragments_package.CarSettingsFragment
+androidx.appcompat.app.AppCompatActivity <|-- com.example.carcontroller.main_package.activities_package.MainActivity
+androidx.fragment.app.Fragment <|-- com.example.carcontroller.main_package.fragments_package.SettingsFragment
+android.widget.ArrayAdapter <|-- com.example.carcontroller.bluetooth_package.DeviceListAdapter
+androidx.fragment.app.Fragment <|-- com.example.carcontroller.main_package.fragments_package.DriveModeFragment
+androidx.fragment.app.Fragment <|-- com.example.carcontroller.main_package.fragments_package.LineFollowModeFragment
+@enduml
