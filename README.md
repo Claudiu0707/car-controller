@@ -1,5 +1,37 @@
 # APEX Car Controller
 
+<p align="center">
+  <img src="app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.webp" width="200">
+</p>
+
+## Contents
+
+1. [Introduction](#introduction)
+2. [Installation and Setup](#installation-and-setup)
+   - [Project Setup](#project-setup)
+   - [Database Configuration](#database-configuration)
+   - [Local Database Connection](#local-database-connection)
+   - [Car and Checkpoint Devices](#car-and-checkpoints-devices)
+3. [Main Structure](#main-structure)
+   - [Device (Abstract Class)](#device-abstract-class)
+   - [CheckpointDevice](#checkpointdevice)
+   - [CarDevice](#cardevice)
+   - [DeviceManager](#devicemanager)
+   - [SessionManager](#sessionmanager)
+4. [Supporting Application Structure](#supporting-application-structure)
+   - [Bluetooth Operations](#bluetooth-operations)
+     - [Bluetooth Manager Fragment](#bluetooth-manager-fragment)
+     - [Bluetooth Connection Thread](#bluetooth-connection-thread)
+     - [Bluetooth Service](#bluetooth-service)
+     - [Bluetooth Data Listener](#bluetooth-data-listener)
+   - [Database API Communication](#database-api-communication)
+     - [ApiClient](#apiclient)
+     - [ApiService](#apiservice)
+     - [Request and Response Models](#request-and-response-models)
+     - [Repositories](#repositories)
+5. [Languages Used](#languages-used)
+
+
 ## Introduction
 
 **APEX Car Controller** is an application developed as a submission for the **Object-Oriented Programming Laboratory** project.
@@ -27,14 +59,14 @@ Clone the repository and open it in **Android Studio**:
 ```bash
 git clone https://github.com/Claudiu0707/apex-car-controller
 ```
-**Database Configuration**
+### **Database Configuration**
 
 A PostgreSQL database is required for data persistence. The database schema must match the one described later in this documentation. The Python API must be configured according to the instructions in the repository below:
 ```bash
 git clone https://github.com/Claudiu0707/android-postgres-api
 ```
 
-**Local Database Connection**
+### **Local Database Connection**
 
 The default localhost address must be replaced with the IP address of the device hosting the Python API. Android applications cannot directly access the host machine’s localhost. The following configuration files must be updated with your hosting device ip
 
@@ -44,17 +76,17 @@ The default localhost address must be replaced with the IP address of the device
 > [!IMPORTANT]  
 > It is very important that these lines are modified accordingly, otherwise the connection to the API will fail silently and no data will be saved. Also, the URL must provide 8000 as the port.
 
-**Car and Checkpoints devices**
+### **Car and Checkpoints devices**
 
 For the car device, follow the instructions provided in the documentation available in the readme.md from the [car project](https://github.com/Claudiu0707/zamfirel-2) to construct and program it. Same thing is valid for the [checkpoint devices](https://github.com/Claudiu0707/checkpoint-example)
 
 ## Main Structure
+This chapter focuses on the main **Object-Oriented Programming (OOP)** – related classes. It explains the design rationale behind them, how they are structured, and the roles they fulfill within the application.
+
 <p align="center">
   <img src="images/devicesandmanagers.png" width="600">
 </p>
 <p align="center"><em>Figure 1 – Device and session management architecture</em></p>
-
-This chapter focuses on the main **Object-Oriented Programming (OOP)** – related classes. It explains the design rationale behind them, how they are structured, and the roles they fulfill within the application.
 
 ### Device (Abstract Class)
 
@@ -71,7 +103,6 @@ The class does not implement connection logic directly. Instead, it defines a se
 - `isConnected()` – Checks the current connection state
 
 Overall, this class centralizes common device-related behavior and enforces a clear structure.
-
 
 ### CheckpointDevice
 
@@ -124,13 +155,13 @@ To keep related data grouped together, `SessionManager` defines inner classes fo
 
 
 ## Supporting Application Structure
+This chapter focuses on parts of the application structure that are **not directly related to the main OOP requirements**. These components are nevertheless essential for the overall functionality of the application.
+They include elements such as Bluetooth operations, user interface components that allow navigation through the application, and communication with the database API.
+
 <p align="center">
   <img src="images/no-oop-diagrams.png" width="600">
 </p>
 <p align="center"><em>Figure 2 – Supporting architecture</em></p>
-
-This chapter focuses on parts of the application structure that are **not directly related to the main OOP requirements**. These components are nevertheless essential for the overall functionality of the application.
-They include elements such as Bluetooth operations, user interface components that allow navigation through the application, and communication with the database API.
 
 ---
 
@@ -205,5 +236,16 @@ Each repository is responsible for:
 - Handling asynchronous requests using Retrofit callbacks
 - Processing responses and errors
 - Exposing results through callback interfaces
+
+---
+
+## Languages Used
+
+The main application architecture is implemented using **Java** and the **JDK**. Although newer technologies such as Kotlin and Flutter are increasingly promoted as alternatives for Android development, Java is still widely used in industry, especially in legacy and large-scale projects. For this reason, Java was chosen as the primary development language.
+
+The user interface is built using **XML layouts**. The UI is intentionally simple and functional. While it does not aim to be visually complex or highly polished, it integrates seamlessly with Android Studio and requires no additional setup. The focus was placed on functionality rather than visual design.
+
+Communication between the Android application and the PostgreSQL database is handled through a **Python-based API**. This API provides a straightforward way to transmit data between the application and the database. PostgreSQL is not accessed directly from the Android app, as it is not designed for local storage in the same way as SQLite. Instead, all database interactions are routed through the backend API.
+
 
 
